@@ -1,0 +1,472 @@
+---
+title: "Was ist eine Mehrebenenregression"
+subtitle: "Videoserie Mehrebenenregression Teil 1/6"
+author: "Dr. Uwe Remer"
+date: "Juli 2022"
+output:
+  html_document:
+    toc: yes
+    number_sections: no
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+    df_print: paged
+    highlight: tango
+    theme: spacelab
+---
+
+```{r setup, include=FALSE}
+# Figure size
+w = 5
+h = 3
+s = 2.8
+
+knitr::opts_chunk$set(eval=TRUE, echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.width=w, fig.height=h)
+
+```
+
+```{css, eval=FALSE}
+/* CSS Stil für Formeln unter Scatterplots */
+P.math {
+    text-align: center;
+    font-size: 2vw;
+}
+```
+
+# Das Grundprinzip der Mehrebenenregression
+
+## Varianz auf Ebene 2
+
+```{r erstes_beispiel_daten_vorbereiten}
+library(foreign)
+ess <- read.spss("./Daten/ESS9e02.sav", 
+                 use.value.labels = FALSE,
+                 to.data.frame = TRUE,
+                 reencode = TRUE)
+
+idx_vars <- c("trstprl","trstplt","trstprt")
+ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
+                              na.rm = F)
+
+# Subset an Ländern, da sonst zu viele Daten
+laender <- c("BG","CY","DE","NO","SE","FR")
+ess_c6 <- ess[ess$cntry %in% laender, ]
+
+# Gruppierungsvariable ohne Gruppen (complete pooling)
+ess$no_countries <- "alle Befragte"
+ess_c6$no_countries <- "alle Befragte"
+
+
+# Mittelwert
+grand_mean <- mean(aggregate(ess_c6$pol_vertrauen, by=list(ess_c6$cntry),
+                     FUN=mean, na.rm=T)[,2])
+```
+
+
+```{r}
+library(ggplot2)
+library(ggtext)
+library(grid)
+#devtools::install_github("wilkelab/ungeviz")
+library(ungeviz)
+
+ggplot(ess_c6, aes(x=pol_vertrauen, y=no_countries)) +
+  geom_point() +
+  scale_x_continuous(breaks=seq(0,10, by=2)) +  
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,2,0,2), "cm"))
+
+ggsave("./Grafiken/V1_Scatter1.png", 
+       width = w, height = h,
+       scale = s,       
+       unit = "cm")
+```
+
+```{r}
+ggplot(ess, aes(pol_vertrauen, no_countries)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=.5, alpha =.3, shape=".") +
+  scale_x_continuous(breaks=seq(0,10, by=2)) +  
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,2,0,2), "cm"))
+ggsave("./Grafiken/V1_Scatter2.png", 
+       width = w, height = h,
+       scale = s,       
+       unit = "cm")
+```
+
+
+```{r}
+ess_c6 <- ess_c6[sample(1:length(ess_c6[,1]), 1543),]
+#sd(ess_c6$pol_vertrauen, na.rm=T)/1543
+
+ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1) +
+  scale_x_continuous(breaks=seq(0,10, by=2)) +  
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,2,0,2), "cm"))
+
+ggsave("./Grafiken/V1_Scatter3.png", 
+       width = w, height = h,
+       scale = s,       
+       unit = "cm")
+
+ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1) +
+  stat_summary(fun=mean, geom="vpline", 
+               size=1.2, height = 1, show.legend=FALSE) +  
+  scale_x_continuous(breaks=seq(0,10, by=2)) +    
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,2,0,2), "cm"))
+
+
+ggsave("./Grafiken/V1_Scatter4.png", 
+       width = w, height = h,
+       scale = s,       
+       unit = "cm")
+
+farben <- c("#00966E", "#D57800", "#FFCC00", "#002654","#BA0C2F", "#006AA7")
+ggplot(ess_c6, 
+       aes(pol_vertrauen, no_countries, color=cntry)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha =1) +
+  scale_x_continuous(breaks=seq(0,10, by=2)) +  
+  scale_colour_manual(values = farben) +
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,0,0,2), "cm")) +
+  guides(colour = guide_legend(override.aes = list(size=2)))
+
+
+ggsave("./Grafiken/V1_Scatter5.png", 
+       width = w, height = h,
+       scale = s,       
+       unit = "cm")
+
+flags <- c("<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Bulgaria.svg/320px-Flag_of_Bulgaria.svg.png' alt='Bulgarien', title='Bulgarien'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Flag_of_Cyprus.svg/320px-Flag_of_Cyprus.svg.png'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/en/thumb/b/ba/Flag_of_Germany.svg/320px-Flag_of_Germany.svg.png'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/en/thumb/c/c3/Flag_of_France.svg/320px-Flag_of_France.svg.png'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Norway.svg/320px-Flag_of_Norway.svg.png'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/en/thumb/4/4c/Flag_of_Sweden.svg/320px-Flag_of_Sweden.svg.png'  width='20' /><br>")
+
+
+ggplot(ess_c6, 
+       aes(pol_vertrauen, cntry, color=cntry)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha =1) +
+  scale_x_continuous(breaks=seq(0,10, by=2)) +  
+  scale_y_discrete(labels = flags) +  
+  scale_colour_manual(values = farben) +
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,0,0,2), "cm"),
+        axis.text.x  = element_markdown(color = "black", size = 7)) +
+  guides(colour = guide_legend(override.aes = list(size=2)))
+
+
+ggsave("./Grafiken/V1_Scatter6.png", 
+       width = w, height = h,
+       scale = s,       
+       unit = "cm")
+
+ggplot(ess_c6, 
+       aes(pol_vertrauen, cntry, color=cntry)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha =1) +
+  stat_summary(fun=mean, geom="vpline", 
+               size=1.2, height = 1, show.legend=FALSE) +  
+  scale_x_continuous(breaks=seq(0,10, by=2)) +  
+  scale_y_discrete(labels = flags) +  
+  scale_colour_manual(values = farben) +
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,0,0,2), "cm"),
+        axis.text.x  = element_markdown(color = "black", size = 7)) +
+  guides(colour = guide_legend(override.aes = list(size=2)))
+
+
+ggsave("./Grafiken/V1_Scatter7.png", 
+       width = w, height = h,
+       scale = s,       
+       unit = "cm")
+
+ggplot(ess_c6, 
+       aes(pol_vertrauen, cntry, color=cntry)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha =1) +
+  stat_summary(fun=mean, geom="vpline", 
+               size=1.2, height = 1, show.legend=FALSE) +  
+  geom_vline(xintercept=grand_mean, col="black", size=1) +
+  scale_x_continuous(breaks=seq(0,10, by=2)) +  
+  scale_y_discrete(labels = flags) +  
+  scale_colour_manual(values = farben) +
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,0,0,2), "cm"),
+        axis.text.x  = element_markdown(color = "black", size = 7)) +
+  guides(colour = guide_legend(override.aes = list(size=2)))
+
+
+ggsave("./Grafiken/V1_Scatter8.png", 
+       width = w, height = h,
+       scale = s,       
+       unit = "cm")
+```
+
+
+## Das Mehrebenenmodell
+
+
+```{r synthetische_daten_erstellen}
+# In diesem Codechunk werden 
+set.seed(2)
+library(fabricatr)
+df <- fabricate(
+  N = 30,
+  y = abs(rnorm(N, 4, 1.5)),
+  x = abs(rnorm(N, y/2, 1))
+  )
+```
+
+```{r}
+library(ggplot2)
+ggplot(df, aes(x=x, y=y)) + 
+  geom_point() +
+  scale_y_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$y)))) +
+  scale_x_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$x)))) +
+  coord_cartesian(clip = 'off') +  
+  theme_light() +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm"))   
+ggsave("./Grafiken/V1_0.png", 
+       width = w, height = h,
+       scale = s,
+       unit = "cm")
+```
+
+
+
+
+```{r}
+ggplot(df, aes(x=x, y=y)) + 
+  geom_point() +
+  scale_y_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$y)))) +
+  scale_x_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$x)))) +
+  coord_cartesian(clip = 'off') +
+  geom_smooth(method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  theme_light() +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm")) 
+ggsave("./Grafiken/V1_1.png", 
+       width = w, height = h,
+       scale = s,       
+       unit = "cm")
+```
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=black>$a+bx$</font>
+</p>
+
+```{r}
+fit <- lm(df$y ~ df$x) 
+y_lab1 <- (coef(fit)[1]+coef(fit)[2] + coef(fit)[1]+coef(fit)[2]*2)/2
+
+shape <- data.frame(
+  x = c(1,2,2),
+  y = c(coef(fit)[1]+coef(fit)[2],
+        coef(fit)[1]+coef(fit)[2],
+        coef(fit)[1]+coef(fit)[2]*2)
+)
+
+library(grid)
+ggplot(df, aes(x=x, y=y)) + 
+  geom_point() +
+  scale_y_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$y)))) +
+  scale_x_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$x)))) +
+  geom_smooth(method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  annotate("text", label = "Intercept",
+           y=coef(fit)[1], x=-1,
+           size = 5, colour = "blue") +
+  theme_light()+
+  coord_cartesian(clip = 'off') +
+  annotation_custom(grob = linesGrob(arrow=arrow(type="open", ends="last",
+                                                 length=unit(3,"mm")), 
+                                     gp=gpar(col="blue", lwd=2)), 
+                    xmin = -.45, 
+                    xmax = -.1, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) +
+  annotation_custom(grob = grid::textGrob(label = "Intercept", hjust=0, gp=gpar(col="blue", cex=.91)),
+                    xmin = -1.5, 
+                    xmax = -1.5, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
+  geom_polygon(data=shape, aes(x=x, y=y), 
+               alpha=.3, fill = 'darkorange') +
+  annotation_custom(grob = grid::textGrob(label = "Slope", 
+                                          hjust=0, gp=gpar(col="darkorange", cex=1)),
+                    xmin = 2.1, 
+                    xmax = 2.1, 
+                    ymin = y_lab1,
+                    ymax = y_lab1) 
+
+
+ggsave("./Grafiken/V1_2.png", 
+       width = w, height = h,
+       scale = s,       
+       unit = "cm")
+```
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$a$</font>
+$+$
+<font color=darkorange>$b$</font>
+$x$
+</p>
+
+
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$\beta_0$</font>
+$+$
+<font color=darkorange>$\beta_1$</font>
+$x_1$
+</p>
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$\beta_0$</font>
+$+$
+<font color=darkorange>$\beta_1$</font>
+$x_1 ~+~ ...~ \beta_nx_n$
+</p>
+
+
+
+```{r}
+df$predicted <- predict(fit)   # Save the predicted values
+df$Residuen <- residuals(fit)
+
+ggplot(df, aes(x=x, y=y)) + 
+  geom_point(color="blue") +
+  scale_y_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$y)))) +
+  scale_x_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$x)))) +
+  geom_smooth(method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  annotate("text", label = "Intercept",
+           y=coef(fit)[1], x=-1,
+           size = 5, colour = "black") +
+  theme_light()+
+  coord_cartesian(clip = 'off') +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm")) 
+
+ggsave("./Grafiken/V1_3.png", 
+       width = w, height = h,
+       scale = s,       
+       unit = "cm")
+```
+
+<p class=math> 
+<font color=blue>$y$</font>
+$\ne$
+<font color=red>$\hat{y}$</font>
+</p>
+
+
+```{r}
+ggplot(df, aes(x=x, y=y)) + 
+  geom_point(color="blue") +
+  scale_y_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$y)))) +
+  scale_x_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$x)))) +
+  geom_smooth(method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  geom_segment(aes(xend = x, yend = predicted), col = "darkorange") +
+  annotate("text", label = "Intercept",
+           y=coef(fit)[1], x=-1,
+           size = 5, colour = "black") +
+  theme_light()+
+  coord_cartesian(clip = 'off') +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
+    annotation_custom(grob = grid::textGrob(label = "Residuen e", 
+                                          hjust=0, gp=gpar(col="darkorange", cex=1)),
+                    xmin = 3.4, 
+                    xmax = 3.4, 
+                    ymin = 3.3,
+                    ymax = 3.3) 
+
+ggsave("./Grafiken/V1_4.png", 
+       width = w, height = h,
+       scale = s,       
+       unit = "cm")
+```
+
+<p class=math> 
+<font color=blue>$y$</font>
+$=$
+<font color=red>$\hat{y}$</font>
+$+$
+<font color=darkorange>$e$</font>
+</p>
+
+<p class=math> 
+<font color=blue>$y$</font>
+$=$
+<font color=red>$\beta_0+\beta_1x_1$</font>
+$+~...~\beta_nx_n~+~$
+<font color=darkorange>$e$</font>
+</p>
+
+```{r, eval=F}
+# Why? Don't repeat yourself!
+# 
+#     Code first, plot second
+#         Chunk 1: {r plot-last, fig.show = 'hide'}
+#         Chunk 2: {r ref.label = 'plot-last', echo = FALSE}
+# 
+#     Plot first, code second
+#         Chunk 1: {r plot-first, echo = FALSE}
+#         Chunk 2: {r ref.label = 'plot-first', eval = FALSE}
+```
+
+
+
