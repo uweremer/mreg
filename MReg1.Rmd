@@ -16,22 +16,35 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-# Figure size
+# Figure size in inches
 w = 5
-h = 3
+h = 2.5
 s = 2.8
-
+    
 knitr::opts_chunk$set(eval=TRUE, echo = FALSE, message = FALSE, warning = FALSE,
-                      fig.width=w, fig.height=h)
+                      fig.width=w, fig.height=h, fig.align='center')
+save <-  FALSE
+save_fig <- function(filename, save = TRUE){
+  if(save==TRUE){
+    ggsave(paste0("./Grafiken/", filename), 
+         width = w, height = h,
+         #scale = s,       
+         unit = "in")
+  }
+  else{
+    message("Saving skipped...")
+  }
+}
 
 ```
 
-```{css, eval=FALSE}
+```{css, eval=T}
 /* CSS Stil für Formeln unter Scatterplots */
 P.math {
     text-align: center;
     font-size: 2vw;
 }
+
 ```
 
 # Das Grundprinzip der Mehrebenenregression
@@ -91,10 +104,7 @@ ggplot(ess_c6, aes(x=pol_vertrauen, y=no_countries)) +
   theme(axis.title.x = element_blank(),
         plot.margin=unit(c(0,2,0,2), "cm"))
 
-ggsave("./Grafiken/V1_1_1.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
+save_fig("V1_1_1.png", save)
 ```
 
 ```{r}
@@ -108,10 +118,7 @@ ggplot(ess, aes(pol_vertrauen, no_countries)) +
   theme(axis.title.x = element_blank(),
         plot.margin=unit(c(0,2,0,2), "cm"))
 
-ggsave("./Grafiken/V1_1_2.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
+save_fig("V1_1_2.png", save)
 ```
 
 
@@ -131,10 +138,7 @@ ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
   theme(axis.title.x = element_blank(),
         plot.margin=unit(c(0,2,0,2), "cm"))
 
-ggsave("./Grafiken/V1_1_3.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
+save_fig("V1_1_3.png", save)
 
 ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
   geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
@@ -148,11 +152,8 @@ ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
   theme(axis.title.x = element_blank(),
         plot.margin=unit(c(0,2,0,2), "cm"))
 
+save_fig("V1_1_4.png", save)
 
-ggsave("./Grafiken/V1_1_4.png",  
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
 
 farben <- c("#00966E", "#D57800", "#FFCC00", "#002654","#BA0C2F", "#006AA7")
 ggplot(ess_c6, 
@@ -168,11 +169,8 @@ ggplot(ess_c6,
         plot.margin=unit(c(0,0,0,2), "cm")) +
   guides(colour = guide_legend(override.aes = list(size=2)))
 
+save_fig("V1_1_5.png", save)
 
-ggsave("./Grafiken/V1_1_5.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
 
 flags <- c("<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Bulgaria.svg/320px-Flag_of_Bulgaria.svg.png' alt='Bulgarien', title='Bulgarien'  width='20' /><br>",
            "<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Flag_of_Cyprus.svg/320px-Flag_of_Cyprus.svg.png'  width='20' /><br>",
@@ -197,11 +195,8 @@ ggplot(ess_c6,
         axis.text.x  = element_markdown(color = "black", size = 7)) +
   guides(colour = guide_legend(override.aes = list(size=2)))
 
+save_fig("V1_1_6.png", save)
 
-ggsave("./Grafiken/V1_1_6.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
 
 ggplot(ess_c6, 
        aes(pol_vertrauen, cntry, color=cntry)) +
@@ -220,11 +215,8 @@ ggplot(ess_c6,
         axis.text.x  = element_markdown(color = "black", size = 7)) +
   guides(colour = guide_legend(override.aes = list(size=2)))
 
+save_fig("V1_1_7.png", save)
 
-ggsave("./Grafiken/V1_1_7.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
 
 ggplot(ess_c6, 
        aes(pol_vertrauen, cntry, color=cntry)) +
@@ -244,18 +236,78 @@ ggplot(ess_c6,
         axis.text.x  = element_markdown(color = "black", size = 7)) +
   guides(colour = guide_legend(override.aes = list(size=2)))
 
-
-ggsave("./Grafiken/V1_1_8.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
+save_fig("V1_1_8.png", save)
 ```
+
+
+## Die Mehrebenenregression als Erweiterung der OLS Regression
+
+Um uns die Mehrebenenregression zu erschließen starten wir bei der einfachen linearen Regression, der OLS Regression.
+
+Betrachten wir zum Einstieg den simplen bivariaten Fall:
+
+Die abhängige Variable ist die uns bereits bekannte Variable `politisches Vertrauen`. Als unabhängige Variable nehme ich die Variable `Zufriedenheit mit der Wirtschaftslage` auf. 
+
+Wo die Menschen mit der wirtschaftlichen Lage zufrieden sind, erwarten wir ein höhres Vertrauen in die Politik. Als Theorie für diese Annahme könen wir Wahlweise auf den Rational Choice Ansatz zurückgreifen oder auf das Konzept der Output-Legitimität heranziehen.  
+
+Den Zusammenhang zwischen beiden Variablen kann ich dann in einer Punktewolke visualisieren:
+
+```{r}
+ggplot() +
+  geom_jitter(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft),
+       position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .15) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  theme_light() +
+  theme(plot.margin=unit(c(0,2,0,2), "cm")) +
+  guides(colour = guide_legend(override.aes = list(size=2, alpha=1)))
+
+save_fig("V1_2_1.png", save)
+```
+
+Die Y-Variable politisches Vertrauen finden wir auf der Y-Achse. Die unabhängige Variable auf der X-Achse. 
+
+Wir sehen schon: Wie erwartet ist das politische Verauen größer, wenn die Befragten mit der Wirschaftslage zufrieden sind. 
+
+Dieser Zusammenhang kann nun mit Hilfe einer Regressionsgeraden beschrieben werden:
+
+```{r}
+ggplot(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .15) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  coord_cartesian(clip = 'off') +
+  geom_smooth(method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  theme_light() +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm")) 
+```
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=black>$a+bx$</font>
+</p>
+
 
 ## Variierende Regressionsparameter
 
-```{r}
-ess_c6$zufr_wirtschaft <- scale(ess_c6$zufr_wirtschaft, scale=F)
+### Einfache lineare Regression
 
+
+
+
+```{r}
 fit <- lm(pol_vertrauen ~ zufr_wirtschaft, ess_c6)
 
 b <- round(fit$coefficients, 1) 
@@ -273,10 +325,7 @@ ggplot() +
   theme(plot.margin=unit(c(0,2,0,2), "cm")) +
   guides(colour = guide_legend(override.aes = list(size=2, alpha=1)))
 
-ggsave("./Grafiken/V1_2_1.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
+save_fig("V1_2_1.png", save)
 
 
 ggplot() +
@@ -294,14 +343,38 @@ ggplot() +
   theme_light() +
   theme(plot.margin=unit(c(0,2,0,2), "cm")) +
   guides(colour = guide_legend(override.aes = list(size=2, alpha=1))) +
-  annotate("text", x=1, y=4, hjust=0,
+  annotate("text", x=1, y=1, hjust=0,
            label=bquote(hat(y)==.(b[1])+.(b[2])~x),
-                parse = F, col="magenta", cex=5)
+                parse = F, col="magenta", cex=4)
 
-ggsave("./Grafiken/V1_2_2.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
+save_fig("V1_2_2.png", save)
+
+
+ess_c6$zufr_wirtschaft <- scale(ess_c6$zufr_wirtschaft, scale=F)
+
+fit_cent <- lm(pol_vertrauen ~ zufr_wirtschaft, ess_c6)
+b_cent <- round(fit_cent$coefficients, 1) 
+
+ggplot() +
+  geom_jitter(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft),
+       position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .15) +
+  geom_smooth(data=ess_c6, aes(y=pol_vertrauen, x=zufr_wirtschaft), 
+              method="lm", se=F, fullrange = T,
+              color ="magenta") +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
+  theme_light() +
+  theme(plot.margin=unit(c(0,2,0,2), "cm")) +
+  guides(colour = guide_legend(override.aes = list(size=2, alpha=1))) +
+  annotate("text", x=1, y=3.6, hjust=0,
+           label=bquote(hat(y)==.(b_cent[1])+.(b_cent[2])~x),
+                parse = F, col="magenta", cex=4)
+
+save_fig("V1_2_3.png", save)
 ```
 
 ### Mit variierendem Intercept
@@ -313,10 +386,10 @@ b_cntry <- round(fit_cntry$coefficients, 2)
 #Wert für Schweden etwas verringern, da Linie sonst identisch zu NO
 b_cntry[7] <- b_cntry[7]-0.03 
 
-lm_df <- data.frame(b1 = c(b_cntry[1], b_cntry[1]+c(b_cntry[3:7])),
-                    b2 = b_cntry[2])
-lm_df$cntry <- sort(laender)
-
+lm_df_cntry <- data.frame(cntry = sort(laender),
+                          b1 = c(b_cntry[1], b_cntry[1]+c(b_cntry[3:7])),
+                          b2 = b_cntry[2],
+                          row.names = c())
 
 ggplot() +
   geom_jitter(data=ess_c6,
@@ -327,72 +400,68 @@ ggplot() +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
   scale_y_continuous(breaks=seq(0,10, by=2)) +  
-  labs(x="ZUfriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
   theme_light() +
   theme(plot.margin=unit(c(0,0,0,2), "cm")) +
   guides(colour = guide_legend(override.aes = list(size=2, alpha=1)))
-ggsave("./Grafiken/V1_2_3.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
+
+save_fig("V1_2_4.png", save)
+```
+
+
+```{r}
+kableExtra::kable_paper(knitr::kable(lm_df_cntry, format = "html"), bootstrap_options = "striped", full_width = F)
 
 ggplot() +
   geom_jitter(data=ess_c6,
               aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry),
        position = position_jitter(width=.3, height = .3, seed = 2022), 
               size=1, alpha = .15) +
-  geom_abline(data=lm_df, aes(intercept=b1, slope=b2),
-              color = farben, size=.5) +
+  geom_abline(data=lm_df_cntry, aes(intercept=b1, slope=b2),
+              color = farben, size=.7) +
   scale_colour_manual(values = farben) +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
   scale_y_continuous(breaks=seq(0,10, by=2)) +  
-  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
   theme_light() +
   theme(plot.margin=unit(c(0,0,0,2), "cm")) +
   guides(colour = guide_legend(override.aes = list(size=2, alpha=1)))
 
-ggsave("./Grafiken/V1_2_4.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
+save_fig("V1_2_5.png", save)
 ```
 
 ### Mit variierendem Intercept und variierendem Slope
 
 ```{r}
 fit_slope <- lm(pol_vertrauen ~ zufr_wirtschaft + cntry + cntry:zufr_wirtschaft, ess_c6)
-b_cntry <- round(fit_cntry$coefficients, 2) 
+b_slope <- round(fit_slope$coefficients, 1) 
 
-#Wert für Schweden etwas verringern, da Linie sonst identisch zu NO
-b_cntry[7] <- b_cntry[7]-0.03 
+lm_df_slope <- data.frame(cntry = sort(laender),
+                          b1 = c(b_slope[1], b_slope[1]+c(b_slope[3:7])),
+                          b2 = c(b_slope[2], b_slope[2]+c(b_slope[8:12])),
+                          row.names = c())
 
-lm_df <- data.frame(b1 = c(b_cntry[1], b_cntry[1]+c(b_cntry[3:7])),
-                    b2 = b_cntry[2])
-lm_df$cntry <- sort(laender)
-
-
-ggplot(ess_c6, 
+g <- ggplot(ess_c6, 
        aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry)) +
   geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
               size=1, alpha = .15) +
   geom_smooth(data=ess_c6, aes(y=pol_vertrauen, x=zufr_wirtschaft), 
-              method="lm", se=F, fullrange = T) +
+              method="lm", se=F, fullrange = T, size=.7,
+              show.legend=FALSE) +
   scale_y_continuous(breaks=seq(0,10, by=2)) +  
   scale_colour_manual(values = farben) +
-  labs(y="Pol. Vertrauen", x="zufr_wirtschaft") +
+  labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
   theme_light() +
-  theme(axis.title.x = element_blank(),
-        plot.margin=unit(c(0,0,0,2), "cm"),
+  theme(plot.margin=unit(c(0,0,0,2), "cm"),
         axis.text.x  = element_markdown(color = "black", size = 7)) +
-  guides(colour = guide_legend(override.aes = list(size=2))) +
+  guides(colour = guide_legend(override.aes = list(size=2, alpha = 1))) +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black")
+  
+save_fig("V1_2_6.png", save)
 
-ggsave("./Grafiken/V1_2_5.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
+kableExtra::kable_paper(knitr::kable(lm_df_slope, format = "html"), bootstrap_options = "striped", full_width = F)
 ```
 
 
@@ -414,7 +483,7 @@ ggplot(ess_c6,
              size=1, color=farben) +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
-  geom_abline(data=lm_df, aes(intercept=b1, slope=b2, group=cntry),
+  geom_abline(data=lm_df_cntry, aes(intercept=b1, slope=b2, group=cntry),
               color = farben, size=.5) 
  
 ```
@@ -445,10 +514,8 @@ ggplot(df, aes(x=x, y=y)) +
   coord_cartesian(clip = 'off') +  
   theme_light() +
   theme(plot.margin=unit(c(.12,2,0,2), "cm"))   
-ggsave("./Grafiken/V1_0.png", 
-       width = w, height = h,
-       scale = s,
-       unit = "cm")
+
+save_fig("V1_3_1.png", save)
 ```
 
 
@@ -466,10 +533,8 @@ ggplot(df, aes(x=x, y=y)) +
               col = "red") +
   theme_light() +
   theme(plot.margin=unit(c(.12,2,0,2), "cm")) 
-ggsave("./Grafiken/V1_1.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
+
+save_fig("V1_3_2.png", save)
 ```
 
 <p class=math> 
@@ -526,10 +591,7 @@ ggplot(df, aes(x=x, y=y)) +
                     ymax = y_lab1) 
 
 
-ggsave("./Grafiken/V1_2.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
+save_fig("V1_3_3.png", save)
 ```
 
 <p class=math> 
@@ -582,10 +644,7 @@ ggplot(df, aes(x=x, y=y)) +
   coord_cartesian(clip = 'off') +
   theme(plot.margin=unit(c(.12,2,0,2), "cm")) 
 
-ggsave("./Grafiken/V1_3.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
+save_fig("V1_3_4.png", save)
 ```
 
 <p class=math> 
@@ -618,10 +677,7 @@ ggplot(df, aes(x=x, y=y)) +
                     ymin = 3.3,
                     ymax = 3.3) 
 
-ggsave("./Grafiken/V1_4.png", 
-       width = w, height = h,
-       scale = s,       
-       unit = "cm")
+save_fig("V1_3_5.png", save)
 ```
 
 <p class=math> 
