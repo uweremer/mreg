@@ -38,7 +38,7 @@ save_fig <- function(filename, save = TRUE){
 
 ```
 
-```{css, eval=T}
+```{css, eval=F}
 /* CSS Stil für Formeln unter Scatterplots */
 P.math {
     text-align: center;
@@ -248,9 +248,9 @@ Betrachten wir zum Einstieg den simplen bivariaten Fall:
 
 Die abhängige Variable ist die uns bereits bekannte Variable `politisches Vertrauen`. Als unabhängige Variable nehme ich die Variable `Zufriedenheit mit der Wirtschaftslage` auf. 
 
-Wo die Menschen mit der wirtschaftlichen Lage zufrieden sind, erwarten wir ein höhres Vertrauen in die Politik. Als Theorie für diese Annahme könen wir Wahlweise auf den Rational Choice Ansatz zurückgreifen oder auf das Konzept der Output-Legitimität heranziehen.  
+Wo die Menschen mit der wirtschaftlichen Lage zufrieden sind, erwarten wir ein höheres Vertrauen in die Politik. Als Theorie für diese Annahme können wir Wahlweise auf den Rational Choice Ansatz zurückgreifen oder auf das Konzept der Output-Legitimität heranziehen.  
 
-Den Zusammenhang zwischen beiden Variablen kann ich dann in einer Punktewolke visualisieren:
+Den Zusammenhang zwischen beiden Variablen kann man dann in einer Punktewolke visualisieren:
 
 ```{r}
 ggplot() +
@@ -261,6 +261,7 @@ ggplot() +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
   scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(breaks=seq(0,10, by=2)) +   
   labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
   theme_light() +
   theme(plot.margin=unit(c(0,2,0,2), "cm")) +
@@ -271,7 +272,7 @@ save_fig("V1_2_1.png", save)
 
 Die Y-Variable politisches Vertrauen finden wir auf der Y-Achse. Die unabhängige Variable auf der X-Achse. 
 
-Wir sehen schon: Wie erwartet ist das politische Verauen größer, wenn die Befragten mit der Wirschaftslage zufrieden sind. 
+Wir sehen schon: Wie erwartet ist das politische Vertrauen größer, wenn die Befragten mit der Wirtschaftslage zufrieden sind.  
 
 Dieser Zusammenhang kann nun mit Hilfe einer Regressionsgeraden beschrieben werden:
 
@@ -283,6 +284,7 @@ ggplot(data=ess_c6,
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
   scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(breaks=seq(0,10, by=2)) + 
   labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
   coord_cartesian(clip = 'off') +
   geom_smooth(method="lm", 
@@ -291,6 +293,8 @@ ggplot(data=ess_c6,
               col = "red") +
   theme_light() +
   theme(plot.margin=unit(c(.12,2,0,2), "cm")) 
+
+save_fig("V1_2_2.png", save)
 ```
 
 <p class=math> 
@@ -298,6 +302,250 @@ ggplot(data=ess_c6,
 $=$
 <font color=black>$a+bx$</font>
 </p>
+
+Die dazugehörige Regressionsgleichung drückt diesen Zusammenhang mathematisch aus. 
+$\hat{y}$ ist dabei der Vorhersagewert, der sich aus dem Term $a+bx$ berechnet und über alle Werte von X die Regressionsgerade bildet. 
+
+
+```{r}
+fit <- lm(ess_c6$pol_vertrauen ~ ess_c6$zufr_wirtschaft) 
+y_lab1 <- (coef(fit)[1]+coef(fit)[2] + coef(fit)[1]+coef(fit)[2]*2)/2
+
+# Shape for rectangle to denote slope
+shape <- data.frame(
+  x = c(1,2,2),
+  y = c(coef(fit)[1]+coef(fit)[2],
+        coef(fit)[1]+coef(fit)[2],
+        coef(fit)[1]+coef(fit)[2]*2)
+)
+
+library(grid)
+ggplot(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .15) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(breaks=seq(0,10, by=2)) + 
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  coord_cartesian(clip = 'off') +
+  geom_smooth(method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  theme_light() +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
+  annotation_custom(grob = grid::textGrob(label = "Intercept", 
+                                          hjust=1, 
+                                          gp=gpar(col="blue", cex=.91)),
+                    xmin = -1.5, 
+                    xmax = -1.5, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) +
+  annotation_custom(grob = linesGrob(arrow=arrow(type="open", ends="last",
+                                                 length=unit(3,"mm")), 
+                                     gp=gpar(col="blue", lwd=2)), 
+                    xmin = -1.2, 
+                    xmax = -.2, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) 
+
+save_fig("V1_2_3.png", save)
+
+```
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$a$</font>
+$+bx$
+</p>
+
+Der Regressionsparameter $a$ ist der **Intercept**, bzw. die Konstante. Es ist der Wert für Y bei dem die Regressionsgerade die Y-Achse schneidet. Anders ausgedrückt: Der Intercept ist der Vorhersagewert für Y, wenn alle X-Variablen im Modell den Wert 0 aufweisen. 
+
+Hier: ein Befragter der oder die komplett unzufrieden mit der Wirtschaftslage ist, hat im Schnitt ein politisches Vertrauen von `r round(coef(fit)[1],1)`.
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$`r round(coef(fit)[1],1)`$</font>
+$+bx$
+</p>
+
+Der zweite Regressionsparameter in diesem Beispiel ist der b-Koeffizient. 
+
+```{r}
+ggplot(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .1) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(breaks=seq(0,10, by=2)) + 
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  coord_cartesian(clip = 'off') +
+  geom_smooth(method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  theme_light() +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
+  annotation_custom(grob = grid::textGrob(label = "Intercept", 
+                                          hjust=1, 
+                                          gp=gpar(col="blue", cex=.91)),
+                    xmin = -1.5, 
+                    xmax = -1.5, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) +
+  annotation_custom(grob = linesGrob(arrow=arrow(type="open", ends="last",
+                                                 length=unit(3,"mm")), 
+                                     gp=gpar(col="blue", lwd=2)), 
+                    xmin = -1.2, 
+                    xmax = -.2, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) +
+  geom_polygon(data=shape, aes(x=x, y=y), 
+               alpha=.3, fill = 'darkorange') +
+  annotation_custom(grob = grid::textGrob(label = "Slope", 
+                                          hjust=0, gp=gpar(col="darkorange", cex=1)),
+                    xmin = 2.15, 
+                    xmax = 2.15, 
+                    ymin = y_lab1,
+                    ymax = y_lab1) 
+
+save_fig("V1_3_4.png", save)
+```
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$a$</font>
+$+$
+<font color=darkorange>$b$</font>
+$x$
+</p>
+
+
+Der b-Koeffizient  ist der Steigungsparameter, bzw. der **Slope**. Er gibt an, um wie viele Skalenpunkte die abhängige Variable steigt, wenn die unabhängige Variable um einen Skalenpunkt zunimmt. 
+
+Also wenn wir auf der X-Achse um einen Skalenpunkt nach rechts gehen, um wieviel müssen wir nach oben?
+
+In unserem Beispiel beträgt der Slope `r round(coef(fit)[2],1)`.
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$`r round(coef(fit)[1],1)`$</font>
+$+$
+<font color=darkorange>$`r round(coef(fit)[2],1)`$</font>
+$x$
+</p>
+
+Wenn wir beispielsweise eine Befragte haben, die auf der X-Variable einen Wert von 7 hat, müssen wir vom Intercept ausgehend also 7 Skalenpunkte nach rechts und $7\times b$ nach oben, um den Vorhersagewert für $Y$ zu erhalten. Also von `r round(coef(fit)[1],1)` aus 7 nach rechts und `r 7*round(coef(fit)[2],1)` nach oben. 
+
+
+```{r}
+ggplot(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .1) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(breaks=seq(0,10, by=2)) + 
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  coord_cartesian(clip = 'off') +
+  geom_smooth(method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  theme_light() +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
+  annotation_custom(grob = grid::textGrob(label = "Intercept a", 
+                                          hjust=1, 
+                                          gp=gpar(col="blue", cex=.91)),
+                    xmin = -1.5, 
+                    xmax = -1.5, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) +
+  annotation_custom(grob = linesGrob(arrow=arrow(type="open", ends="last",
+                                                 length=unit(3,"mm")), 
+                                     gp=gpar(col="blue", lwd=2)), 
+                    xmin = -1.2, 
+                    xmax = -.2, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) +
+  geom_polygon(data=shape, aes(x=x, y=y), 
+               alpha=.3, fill = 'darkorange') +
+  annotation_custom(grob = grid::textGrob(label = "Slope b", 
+                                          hjust=0, gp=gpar(col="darkorange", cex=1)),
+                    xmin = 2.15, 
+                    xmax = 2.15, 
+                    ymin = y_lab1,
+                    ymax = y_lab1) +
+  annotation_custom(grob = linesGrob(gp=gpar(col="blue", lwd=2)), 
+                    xmin = 0, 
+                    xmax = 7, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) +
+  annotation_custom(grob = linesGrob(gp=gpar(col="darkorange", lwd=2)), 
+                    xmin = 7, 
+                    xmax = 7, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1] + 7*coef(fit)[2]) +
+  annotation_custom(grob = grid::textGrob(label = "7 x Slope b", 
+                                          hjust=0, gp=gpar(col="darkorange", cex=1)),
+                    xmin = 7.15, 
+                    xmax = 7.15, 
+                    ymin = 3,
+                    ymax = 3) +
+  annotation_custom(grob = grid::textGrob(label = expression(hat(y)==5), 
+                                          hjust=1, gp=gpar(col="red", cex=1)),
+                    xmin = 7, 
+                    xmax = 7, 
+                    ymin = 5.4,
+                    ymax = 5.4) 
+
+save_fig("V1_3_5.png", save)
+```
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$`r round(coef(fit)[1],1)`$</font>
+$+$
+<font color=darkorange>$`r round(coef(fit)[2],1)`$
+$\times 7$</font>
+<font color=red>$=5$</font>
+</p>
+
+
+Dann sind wir bei `r round(coef(fit)[1],1) + 7*round(coef(fit)[2],1)` als Vorhersagewert für Menschen mit einer Wirtschaftszufriedenheit  von 7 Punkten.
+
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$\beta_0$</font>
+$+$
+<font color=darkorange>$\beta_1$</font>
+$x_1$
+</p>
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$\beta_0$</font>
+$+$
+<font color=darkorange>$\beta_1$</font>
+$x_1 ~+~ ...~ \beta_nx_n$
+</p>
+
+
+```{r}
+knitr::opts_chunk$set(eval=F)
+```
 
 
 ## Variierende Regressionsparameter
