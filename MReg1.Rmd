@@ -501,7 +501,7 @@ ggplot(data=ess_c6,
                     xmax = 7.15, 
                     ymin = 3,
                     ymax = 3) +
-  annotation_custom(grob = grid::textGrob(label = expression(hat(y)==5), 
+  annotation_custom(grob = grid::textGrob(label = bquote(hat(y)==.(round(coef(fit)[1] + 7*coef(fit)[2], 1))), 
                                           hjust=1, gp=gpar(col="red", cex=1)),
                     xmin = 7, 
                     xmax = 7, 
@@ -510,18 +510,29 @@ ggplot(data=ess_c6,
 
 save_fig("V1_3_5.png", save)
 ```
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$a$</font>
+$+$
+<font color=darkorange>$b$</font>
+$x$
+</p>
+
+
 <p class=math> 
 <font color=red>$\hat{y}$</font>
 $=$
 <font color=blue>$`r round(coef(fit)[1],1)`$</font>
 $+$
-<font color=darkorange>$`r round(coef(fit)[2],1)`$
-$\times 7$</font>
-<font color=red>$=5$</font>
+<font color=darkorange>$`r round(coef(fit)[2],1)`$</font>
+$\times 7=$
+<font color=red>$`r round(coef(fit)[1] + 7*coef(fit)[2],1)`$</font>
 </p>
 
 
-Dann sind wir bei `r round(coef(fit)[1],1) + 7*round(coef(fit)[2],1)` als Vorhersagewert für Menschen mit einer Wirtschaftszufriedenheit  von 7 Punkten.
+Dann sind wir bei `r round(coef(fit)[1] + 7*coef(fit)[2],1)` als Vorhersagewert für Menschen mit einer Wirtschaftszufriedenheit  von 7 Punkten.
 
 
 <p class=math> 
