@@ -35,7 +35,6 @@ save_fig <- function(filename, save = TRUE){
     message("Saving skipped...")
   }
 }
-
 ```
 
 ```{css, eval=F}
@@ -52,6 +51,7 @@ P.math {
 ## Context Matters
 
 ```{r erstes_beispiel_daten_vorbereiten}
+set.seed(2022)
 library(foreign)
 ess <- read.spss("./Daten/ESS9e02.sav", 
                  use.value.labels = FALSE,
@@ -97,7 +97,7 @@ library(ungeviz)
 
 ggplot(ess_c6, aes(x=pol_vertrauen, y=no_countries)) +
   geom_point() +
-  scale_x_continuous(breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   coord_flip() +
   labs(y="Länder", x="Pol. Vertrauen") +
   theme_light() +
@@ -111,7 +111,7 @@ save_fig("V1_1_1.png", save)
 ggplot(ess, aes(pol_vertrauen, no_countries)) +
   geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
               size=.5, alpha =.3, shape=".") +
-  scale_x_continuous(breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   coord_flip() +
   labs(y="Länder", x="Pol. Vertrauen") +
   theme_light() +
@@ -124,14 +124,13 @@ save_fig("V1_1_2.png", save)
 
 ```{r}
 l <- length(ess_c6[,1])
-set.seed <- 2022
 ess_c6 <- ess_c6[sample(1:l,l*0.15),]
 #sd(ess_c6$pol_vertrauen, na.rm=T)/1543
 
 ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
   geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
               size=1) +
-  scale_x_continuous(breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   coord_flip() +
   labs(y="Länder", x="Pol. Vertrauen") +
   theme_light() +
@@ -145,7 +144,7 @@ ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
               size=1) +
   stat_summary(fun=mean, geom="vpline", 
                size=1.2, height = 1, show.legend=FALSE) +  
-  scale_x_continuous(breaks=seq(0,10, by=2)) +    
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +    
   coord_flip() +
   labs(y="Länder", x="Pol. Vertrauen") +
   theme_light() +
@@ -160,7 +159,7 @@ ggplot(ess_c6,
        aes(pol_vertrauen, no_countries, color=cntry)) +
   geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
               size=1, alpha =1) +
-  scale_x_continuous(breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   scale_colour_manual(values = farben) +
   coord_flip() +
   labs(y="Länder", x="Pol. Vertrauen") +
@@ -184,7 +183,7 @@ ggplot(ess_c6,
        aes(pol_vertrauen, cntry, color=cntry)) +
   geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
               size=1, alpha =1) +
-  scale_x_continuous(breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   scale_y_discrete(labels = flags) +  
   scale_colour_manual(values = farben) +
   coord_flip() +
@@ -204,7 +203,7 @@ ggplot(ess_c6,
               size=1, alpha =1) +
   stat_summary(fun=mean, geom="vpline", 
                size=1.2, height = 1, show.legend=FALSE) +  
-  scale_x_continuous(breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   scale_y_discrete(labels = flags) +  
   scale_colour_manual(values = farben) +
   coord_flip() +
@@ -225,7 +224,7 @@ ggplot(ess_c6,
   stat_summary(fun=mean, geom="vpline", 
                size=1.2, height = 1, show.legend=FALSE) +  
   geom_vline(xintercept=grand_mean, col="black", size=1) +
-  scale_x_continuous(breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   scale_y_discrete(labels = flags) +  
   scale_colour_manual(values = farben) +
   coord_flip() +
@@ -260,8 +259,8 @@ ggplot() +
               size=1, alpha = .15) +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(breaks=seq(0,10, by=2)) +  
-  scale_x_continuous(breaks=seq(0,10, by=2)) +   
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +   
   labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
   theme_light() +
   theme(plot.margin=unit(c(0,2,0,2), "cm")) +
@@ -276,6 +275,8 @@ Wir sehen schon: Wie erwartet ist das politische Vertrauen größer, wenn die Be
 
 Dieser Zusammenhang kann nun mit Hilfe einer Regressionsgeraden beschrieben werden:
 
+### Das Grundmodell der Regression
+
 ```{r}
 ggplot(data=ess_c6,
               aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
@@ -283,8 +284,8 @@ ggplot(data=ess_c6,
               size=1, alpha = .15) +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(breaks=seq(0,10, by=2)) +  
-  scale_x_continuous(breaks=seq(0,10, by=2)) + 
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
   labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
   coord_cartesian(clip = 'off') +
   geom_smooth(method="lm", 
@@ -326,8 +327,8 @@ ggplot(data=ess_c6,
               size=1, alpha = .15) +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(breaks=seq(0,10, by=2)) +  
-  scale_x_continuous(breaks=seq(0,10, by=2)) + 
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
   labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
   coord_cartesian(clip = 'off') +
   geom_smooth(method="lm", 
@@ -382,8 +383,8 @@ ggplot(data=ess_c6,
               size=1, alpha = .1) +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(breaks=seq(0,10, by=2)) +  
-  scale_x_continuous(breaks=seq(0,10, by=2)) + 
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
   labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
   coord_cartesian(clip = 'off') +
   geom_smooth(method="lm", 
@@ -443,96 +444,93 @@ $+$
 $x$
 </p>
 
-Wenn wir beispielsweise eine Befragte haben, die auf der X-Variable einen Wert von 7 hat, müssen wir vom Intercept ausgehend also 7 Skalenpunkte nach rechts und $7\times b$ nach oben, um den Vorhersagewert für $Y$ zu erhalten. Also von `r round(coef(fit)[1],1)` aus 7 nach rechts und `r 7*round(coef(fit)[2],1)` nach oben. 
+
+### Residuen
+
+Die Regressionsgerade die mit $a+bx$ beschrieben wird, gibt uns die geschätzten Vorhersagewerte. Allerdings: Die tatsächlich beobachteten WErte und die Vorhersagewerte sind nicht identtisch...
+
+```{r}
+ess_c6$predicted <- predict(fit)   # Save the predicted values
+ess_c6$Residuen <- residuals(fit)
+
+ess_c6_r <- ess_c6[sample(1:length(ess_c6[,1]), 18),]
+ggplot(data=ess_c6_r,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
+  geom_point(size=1, alpha = 1, col = "blue") +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  coord_cartesian(clip = 'off') +
+  geom_smooth(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft),
+              method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  theme_light() +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm"))
+
+save_fig("V1_3_4.png", save)
+```
+
+<p class=math> 
+<font color=blue>$y$</font>
+$\ne$
+<font color=red>$\hat{y}$</font>
+</p>
 
 
 ```{r}
-ggplot(data=ess_c6,
+ggplot(data=ess_c6_r,
               aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha = .1) +
+  geom_point(size=1, alpha = 1, col = "blue") +
+  geom_segment(aes(xend = zufr_wirtschaft, yend = predicted), col = "darkorange") +  
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(breaks=seq(0,10, by=2)) +  
-  scale_x_continuous(breaks=seq(0,10, by=2)) + 
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
   labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
   coord_cartesian(clip = 'off') +
-  geom_smooth(method="lm", 
+  geom_smooth(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft),
+              method="lm", 
               se=FALSE, 
               fullrange = TRUE,
               col = "red") +
   theme_light() +
   theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
-  annotation_custom(grob = grid::textGrob(label = "Intercept a", 
-                                          hjust=1, 
-                                          gp=gpar(col="blue", cex=.91)),
-                    xmin = -1.5, 
-                    xmax = -1.5, 
-                    ymin = coef(fit)[1], 
-                    ymax = coef(fit)[1]) +
-  annotation_custom(grob = linesGrob(arrow=arrow(type="open", ends="last",
-                                                 length=unit(3,"mm")), 
-                                     gp=gpar(col="blue", lwd=2)), 
-                    xmin = -1.2, 
-                    xmax = -.2, 
-                    ymin = coef(fit)[1], 
-                    ymax = coef(fit)[1]) +
-  geom_polygon(data=shape, aes(x=x, y=y), 
-               alpha=.3, fill = 'darkorange') +
-  annotation_custom(grob = grid::textGrob(label = "Slope b", 
+    annotation_custom(grob = grid::textGrob(label = "Residuen e", 
                                           hjust=0, gp=gpar(col="darkorange", cex=1)),
-                    xmin = 2.15, 
-                    xmax = 2.15, 
-                    ymin = y_lab1,
-                    ymax = y_lab1) +
-  annotation_custom(grob = linesGrob(gp=gpar(col="blue", lwd=2)), 
-                    xmin = 0, 
-                    xmax = 7, 
-                    ymin = coef(fit)[1], 
-                    ymax = coef(fit)[1]) +
-  annotation_custom(grob = linesGrob(gp=gpar(col="darkorange", lwd=2)), 
-                    xmin = 7, 
-                    xmax = 7, 
-                    ymin = coef(fit)[1], 
-                    ymax = coef(fit)[1] + 7*coef(fit)[2]) +
-  annotation_custom(grob = grid::textGrob(label = "7 x Slope b", 
-                                          hjust=0, gp=gpar(col="darkorange", cex=1)),
-                    xmin = 7.15, 
-                    xmax = 7.15, 
-                    ymin = 3,
-                    ymax = 3) +
-  annotation_custom(grob = grid::textGrob(label = bquote(hat(y)==.(round(coef(fit)[1] + 7*coef(fit)[2], 1))), 
-                                          hjust=1, gp=gpar(col="red", cex=1)),
-                    xmin = 7, 
-                    xmax = 7, 
-                    ymin = 5.4,
-                    ymax = 5.4) 
+                    xmin = 5, 
+                    xmax = 5, 
+                    ymin = 2,
+                    ymax = 2) 
+
 
 save_fig("V1_3_5.png", save)
 ```
 
 <p class=math> 
-<font color=red>$\hat{y}$</font>
+<font color=blue>$y$</font>
 $=$
-<font color=blue>$a$</font>
+<font color=red>$\hat{y}$</font>
 $+$
-<font color=darkorange>$b$</font>
-$x$
+<font color=darkorange>$e$</font>
 </p>
-
 
 <p class=math> 
-<font color=red>$\hat{y}$</font>
+<font color=blue>$y$</font>
 $=$
-<font color=blue>$`r round(coef(fit)[1],1)`$</font>
-$+$
-<font color=darkorange>$`r round(coef(fit)[2],1)`$</font>
-$\times 7=$
-<font color=red>$`r round(coef(fit)[1] + 7*coef(fit)[2],1)`$</font>
+<font color=red>$\beta_0+\beta_1x_1$</font>
+$+~...~\beta_nx_n~+~$
+<font color=darkorange>$e$</font>
 </p>
 
 
-Dann sind wir bei `r round(coef(fit)[1] + 7*coef(fit)[2],1)` als Vorhersagewert für Menschen mit einer Wirtschaftszufriedenheit  von 7 Punkten.
+### Und was hat das mit Mehrebenenstruktur zu tun?
+
 
 
 <p class=math> 
@@ -578,7 +576,7 @@ ggplot() +
               size=1, alpha = .15) +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
   theme_light() +
   theme(plot.margin=unit(c(0,2,0,2), "cm")) +
@@ -597,7 +595,7 @@ ggplot() +
               color ="magenta") +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
   theme_light() +
   theme(plot.margin=unit(c(0,2,0,2), "cm")) +
@@ -624,7 +622,7 @@ ggplot() +
               color ="magenta") +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
   theme_light() +
   theme(plot.margin=unit(c(0,2,0,2), "cm")) +
@@ -658,7 +656,7 @@ ggplot() +
   scale_colour_manual(values = farben) +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
   theme_light() +
   theme(plot.margin=unit(c(0,0,0,2), "cm")) +
@@ -681,7 +679,7 @@ ggplot() +
   scale_colour_manual(values = farben) +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
   theme_light() +
   theme(plot.margin=unit(c(0,0,0,2), "cm")) +
@@ -708,7 +706,7 @@ g <- ggplot(ess_c6,
   geom_smooth(data=ess_c6, aes(y=pol_vertrauen, x=zufr_wirtschaft), 
               method="lm", se=F, fullrange = T, size=.7,
               show.legend=FALSE) +
-  scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   scale_colour_manual(values = farben) +
   labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
   theme_light() +
@@ -729,7 +727,7 @@ ggplot(ess_c6,
        aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry)) +
   geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
               size=1, alpha =1) +
-  scale_y_continuous(breaks=seq(0,10, by=2)) +  
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   scale_colour_manual(values = farben) +
   labs(y="Pol. Vertrauen", x="zufr_wirtschaft") +
   theme_light() +
@@ -746,226 +744,5 @@ ggplot(ess_c6,
               color = farben, size=.5) 
  
 ```
-
-
-
-
-## Das Mehrebenenmodell
-
-
-```{r synthetische_daten_erstellen}
-# In diesem Codechunk werden 
-set.seed(2)
-library(fabricatr)
-df <- fabricate(
-  N = 30,
-  y = abs(rnorm(N, 4, 1.5)),
-  x = abs(rnorm(N, y/2, 1))
-  )
-```
-
-```{r}
-library(ggplot2)
-ggplot(df, aes(x=x, y=y)) + 
-  geom_point() +
-  scale_y_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$y)))) +
-  scale_x_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$x)))) +
-  coord_cartesian(clip = 'off') +  
-  theme_light() +
-  theme(plot.margin=unit(c(.12,2,0,2), "cm"))   
-
-save_fig("V1_3_1.png", save)
-```
-
-
-
-
-```{r}
-ggplot(df, aes(x=x, y=y)) + 
-  geom_point() +
-  scale_y_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$y)))) +
-  scale_x_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$x)))) +
-  coord_cartesian(clip = 'off') +
-  geom_smooth(method="lm", 
-              se=FALSE, 
-              fullrange = TRUE,
-              col = "red") +
-  theme_light() +
-  theme(plot.margin=unit(c(.12,2,0,2), "cm")) 
-
-save_fig("V1_3_2.png", save)
-```
-
-<p class=math> 
-<font color=red>$\hat{y}$</font>
-$=$
-<font color=black>$a+bx$</font>
-</p>
-
-```{r}
-fit <- lm(df$y ~ df$x) 
-y_lab1 <- (coef(fit)[1]+coef(fit)[2] + coef(fit)[1]+coef(fit)[2]*2)/2
-
-shape <- data.frame(
-  x = c(1,2,2),
-  y = c(coef(fit)[1]+coef(fit)[2],
-        coef(fit)[1]+coef(fit)[2],
-        coef(fit)[1]+coef(fit)[2]*2)
-)
-
-library(grid)
-ggplot(df, aes(x=x, y=y)) + 
-  geom_point() +
-  scale_y_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$y)))) +
-  scale_x_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$x)))) +
-  geom_smooth(method="lm", 
-              se=FALSE, 
-              fullrange = TRUE,
-              col = "red") +
-  annotate("text", label = "Intercept",
-           y=coef(fit)[1], x=-1,
-           size = 5, colour = "blue") +
-  theme_light()+
-  coord_cartesian(clip = 'off') +
-  annotation_custom(grob = linesGrob(arrow=arrow(type="open", ends="last",
-                                                 length=unit(3,"mm")), 
-                                     gp=gpar(col="blue", lwd=2)), 
-                    xmin = -.45, 
-                    xmax = -.1, 
-                    ymin = coef(fit)[1], 
-                    ymax = coef(fit)[1]) +
-  annotation_custom(grob = grid::textGrob(label = "Intercept", hjust=0, gp=gpar(col="blue", cex=.91)),
-                    xmin = -1.5, 
-                    xmax = -1.5, 
-                    ymin = coef(fit)[1], 
-                    ymax = coef(fit)[1]) +
-  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
-  geom_polygon(data=shape, aes(x=x, y=y), 
-               alpha=.3, fill = 'darkorange') +
-  annotation_custom(grob = grid::textGrob(label = "Slope", 
-                                          hjust=0, gp=gpar(col="darkorange", cex=1)),
-                    xmin = 2.1, 
-                    xmax = 2.1, 
-                    ymin = y_lab1,
-                    ymax = y_lab1) 
-
-
-save_fig("V1_3_3.png", save)
-```
-
-<p class=math> 
-<font color=red>$\hat{y}$</font>
-$=$
-<font color=blue>$a$</font>
-$+$
-<font color=darkorange>$b$</font>
-$x$
-</p>
-
-
-
-<p class=math> 
-<font color=red>$\hat{y}$</font>
-$=$
-<font color=blue>$\beta_0$</font>
-$+$
-<font color=darkorange>$\beta_1$</font>
-$x_1$
-</p>
-
-<p class=math> 
-<font color=red>$\hat{y}$</font>
-$=$
-<font color=blue>$\beta_0$</font>
-$+$
-<font color=darkorange>$\beta_1$</font>
-$x_1 ~+~ ...~ \beta_nx_n$
-</p>
-
-
-
-```{r}
-df$predicted <- predict(fit)   # Save the predicted values
-df$Residuen <- residuals(fit)
-
-ggplot(df, aes(x=x, y=y)) + 
-  geom_point(color="blue") +
-  scale_y_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$y)))) +
-  scale_x_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$x)))) +
-  geom_smooth(method="lm", 
-              se=FALSE, 
-              fullrange = TRUE,
-              col = "red") +
-  annotate("text", label = "Intercept",
-           y=coef(fit)[1], x=-1,
-           size = 5, colour = "black") +
-  theme_light()+
-  coord_cartesian(clip = 'off') +
-  theme(plot.margin=unit(c(.12,2,0,2), "cm")) 
-
-save_fig("V1_3_4.png", save)
-```
-
-<p class=math> 
-<font color=blue>$y$</font>
-$\ne$
-<font color=red>$\hat{y}$</font>
-</p>
-
-
-```{r}
-ggplot(df, aes(x=x, y=y)) + 
-  geom_point(color="blue") +
-  scale_y_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$y)))) +
-  scale_x_continuous(expand = c(0, 0), limits=c(0, ceiling(max(df$x)))) +
-  geom_smooth(method="lm", 
-              se=FALSE, 
-              fullrange = TRUE,
-              col = "red") +
-  geom_segment(aes(xend = x, yend = predicted), col = "darkorange") +
-  annotate("text", label = "Intercept",
-           y=coef(fit)[1], x=-1,
-           size = 5, colour = "black") +
-  theme_light()+
-  coord_cartesian(clip = 'off') +
-  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
-    annotation_custom(grob = grid::textGrob(label = "Residuen e", 
-                                          hjust=0, gp=gpar(col="darkorange", cex=1)),
-                    xmin = 3.4, 
-                    xmax = 3.4, 
-                    ymin = 3.3,
-                    ymax = 3.3) 
-
-save_fig("V1_3_5.png", save)
-```
-
-<p class=math> 
-<font color=blue>$y$</font>
-$=$
-<font color=red>$\hat{y}$</font>
-$+$
-<font color=darkorange>$e$</font>
-</p>
-
-<p class=math> 
-<font color=blue>$y$</font>
-$=$
-<font color=red>$\beta_0+\beta_1x_1$</font>
-$+~...~\beta_nx_n~+~$
-<font color=darkorange>$e$</font>
-</p>
-
-```{r, eval=F}
-# Why? Don't repeat yourself!
-# 
-#     Code first, plot second
-#         Chunk 1: {r plot-last, fig.show = 'hide'}
-#         Chunk 2: {r ref.label = 'plot-last', echo = FALSE}
-# 
-#     Plot first, code second
-#         Chunk 1: {r plot-first, echo = FALSE}
-#         Chunk 2: {r ref.label = 'plot-first', eval = FALSE}
-```
-
 
 
