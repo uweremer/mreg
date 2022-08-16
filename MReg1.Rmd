@@ -37,7 +37,7 @@ save_fig <- function(filename, save = TRUE){
 }
 ```
 
-```{css, eval=T}
+```{css, eval=F}
 /* CSS Stil für Formeln unter Scatterplots */
 P.math {
     text-align: center;
@@ -703,17 +703,18 @@ Wenn Ihre Daten eine Mehrebenenstruktur aufweisen, wenn also Kontextfaktoren fü
 
 Wenn die Mehrebenenstruktur nicht berücksichtigt wird, sind die Residuen der  Beobachtungseinheiten nicht unabhängig voneinander. Man spricht von korrelierten Fehlern oder geclusterten Fehlern. 
 
-In unserem Beispiel: 
+Schauen wir das in unserem Beispiel einmal an. 
 
 ```{r}
-ggplot(data=ess_c6,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
+p1 <- ggplot(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry)) + 
   geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha = .1) +
+              size=1, alpha = 1, show.legend = F) +
   geom_vline(xintercept=0, col="black") +
   geom_hline(yintercept=0, col="black") +
   scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
   scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
+  scale_colour_manual(values = farben) +  
   labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
   coord_cartesian(clip = 'off') +
   geom_smooth(method="lm", 
@@ -721,32 +722,33 @@ ggplot(data=ess_c6,
               fullrange = TRUE,
               col = "red") +
   theme_light() +
-  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
-  annotation_custom(grob = grid::textGrob(label = "Intercept", 
-                                          hjust=1, 
-                                          gp=gpar(col="blue", cex=.91)),
-                    xmin = -1.5, 
-                    xmax = -1.5, 
-                    ymin = coef(fit)[1], 
-                    ymax = coef(fit)[1]) +
-  annotation_custom(grob = linesGrob(arrow=arrow(type="open", ends="last",
-                                                 length=unit(3,"mm")), 
-                                     gp=gpar(col="blue", lwd=2)), 
-                    xmin = -1.2, 
-                    xmax = -.2, 
-                    ymin = coef(fit)[1], 
-                    ymax = coef(fit)[1]) +
-  geom_polygon(data=shape, aes(x=x, y=y), 
-               alpha=.3, fill = 'darkorange') +
-  annotation_custom(grob = grid::textGrob(label = "Slope", 
-                                          hjust=0, gp=gpar(col="darkorange", cex=1)),
-                    xmin = 2.15, 
-                    xmax = 2.15, 
-                    ymin = y_lab1,
-                    ymax = y_lab1) 
+  theme(plot.margin=unit(c(.12,0,0,.8), "cm")) 
 
-save_fig("V1_4_4.png", save)
+
+p2 <- ggplot(data=ess_c6,
+              aes(y=Residuen, x=cntry, color=cntry)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .3, show.legend = F) +
+  stat_summary(fun=mean, geom="hpline", 
+               size=1.2, width = 1, show.legend=FALSE) +  
+  scale_x_discrete(labels = flags) +  
+  scale_colour_manual(values = farben) +
+  theme_light() +
+  coord_cartesian(clip = 'off') +
+  theme(plot.margin=unit(c(.12,0,0,0), "cm")) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x  = element_markdown(color = "black", size = 7))
+
+library(gridExtra)
+grid.arrange(p1, p2, nrow=1)
+save_fig("V1_4_5.png", save)
 ```
+
+Links ist die Regressionsgerade zu sehen. Rechts die Verteilung der Residuen getrennt nach Ländern. Für Bulgarien überschätzt die Regressionsgerade das politische Vertrauen. Die Residuen sind im Schnitt negativ. 
+
+Für Schweden und Norwegen dagegen unterschätzen wir mit der Regressionsgeraden das politische Vertrauen. Die Residuen sind also im Schnitt positiv.
+
+Die Fehler der Individualebene korrelieren also mit einem Kontextmerkmal, nämlich der Länderzugeghörigkeit der Befragten. 
 
 
 In der Folge ist oft die Varianz der Fehler nicht konstant ist, es liegen also heteroskedastische Fehler vor. 
@@ -948,7 +950,7 @@ lm_df_slope <- data.frame(cntry = sort(laender),
                           b2 = c(b_slope[2], b_slope[2]+c(b_slope[8:12])),
                           row.names = c())
 
-g <- ggplot(ess_c6, 
+ggplot(ess_c6, 
        aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry)) +
   geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
               size=1, alpha = .15) +
