@@ -6,8 +6,8 @@ date: "Juli 2022"
 output:
   html_document:
     toc: yes
-    number_sections: no
-    toc_depth: 3
+    number_sections: yes
+    toc_depth: 2
     toc_float:
       collapsed: true
     df_print: paged
@@ -23,7 +23,7 @@ s = 2.8
     
 knitr::opts_chunk$set(eval=TRUE, echo = FALSE, message = FALSE, warning = FALSE,
                       fig.width=w, fig.height=h, fig.align='center')
-save <-  FALSE
+save <-  F
 save_fig <- function(filename, save = TRUE){
   if(save==TRUE){
     ggsave(paste0("./Grafiken/", filename), 
@@ -37,7 +37,7 @@ save_fig <- function(filename, save = TRUE){
 }
 ```
 
-```{css, eval=F}
+```{css, eval=T}
 /* CSS Stil für Formeln unter Scatterplots */
 P.math {
     text-align: center;
@@ -46,9 +46,101 @@ P.math {
 
 ```
 
+#	Begrüßung und Themenüberblick
+
+Hallo und herzlich Willkommen zu dieser Videoserie zum Thema Mehrebenenregression in R. 
+Damit Sie den Inhalten folgen können, sollten Sie Vorkenntnisse zur linearen OLS Regression haben, sowie Grundlagen in R beherrschen. Ideal wäre es, wenn Sie auch schon einen Lehrbuchtext zur Mehrebenenregression gelesen haben. Eine Auswahl an geeigneten Texten finden Sie am Ende des Videos.
+
+Diese Videoserie besteht aus 6 aufeinander aufbauenden Teilen:  
+
+- Teil 1: „Was ist eine Mehrebenenregression“
+- Teil 2: „Wann ist eine Mehrebenenregression angebracht?“ 
+- Teil 3: „Wie schätzt man eine Mehrebenenregression in R?“ 
+- Teil 4: „Wie findet man das passende Modell für die Mehrebenenregression?“ 
+- Teil 5: „Wie erfolgt die Regressionsdiagnostik der Mehrebenenregression?“ 
+- Teil 6: „Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?“
+
+Zu allen Videos gibt es den R Code als Datei zum Download, hier unter dem Video. Außerdem gibt es das ganze Skript zu den Videos auf meiner Github Seite:
+
+https://github.com/uweremer/mreg 
+
+
+Kommen wir nun zum ersten Teil der Videoserie mit dem Thema „Was ist eine Mehrebenenregression“?
+
+Lernziele für dieses Video sind…
+
+- dass Sie die unterschiedlichen Bezeichnungen der Mehrebenenregression kennen.
+- dass Sie das Grundprinzip der Mehrebenenregression erläutern können.
+- dass Sie darlegen können, worin sich eine Mehrebenenregression von einer einfachen linearen Regression unterscheidet.
+- dass Sie aufzählen können, welche Vorteile eine Mehrebenenregression hat.
+- dass Sie wissen, welche unterschiedlichen Varianten der Mehrebenenregression es gibt.
+- dass Sie entscheiden können, für welche Fragestellungen welche Variante der Mehrebenenregression geeignet ist.
+
+
+#	Ein Modell mit vielen Namen
+
+> HLM, MLM und MEA, Mixed Effects, LMM und MLA 
+
+In der Literatur haben sich eine Vielzahl von Bezeichnungen für die Mehrebenenregression etabliert. Der Grund ist, dass die Mehrebenenregression in verschiedene Disziplin genutzt wird und sich dort jeweils bestimmte Bezeichnungen durchgesetzt haben.
+
+In statistischer Terminologie handelt es sich bei Mehrebenenregressionen um sogenannte **Mixed Effects Modelle**.
+
+Wenn die abhängige Variable metrisch ist, nennt man die Modelle ganz allgemein Linear Mixed Effects Models (oder abgekürzt LMM).  Und wenn stattdessen binäre abhängige Variablen vorliegen oder die abhängige Variable anderen Verteilungen folgt (z.B. Poisson-Verteilung für Zählvariablen), dann werden diese Modelle Generalized Linear Mixed Effects Models genannt, oder kurz: GLMM.
+Die Modelle werden deshalb Mixed Effects genannt, weil sie gleichzeitig **fixierte Effekte** und **variierende Effekte** schätzen. Im Englischen heißen diese dann Fixed Effects und Random Effects. 
+Es finden sich in der Literatur daher auch die Bezeichnungen Fixed Effects Modelle (FE Modelle) oder Random-Effects Models (RE-Modelle). Diese Terminologie ist dabei eher in der Statistik oder der Ökonometrie in Gebrauch. 
+
+… was es mit diesen fixierten und variierenden Effekten auf sich hat, sehen wir später.
+
+In der Soziologie und der Politikwissenschaft spricht man meist von **hierarchischen Modellen** (Hierachical Linear Models HLM) oder **Mehrebenenmodelle** (Multilevel Models, MLM), Multilevel Analysis, MLA), Mehrebenenanalyse (MEA), oder eben der **Mehrebenenregression**.
+
+Schon nach wenigen Minuten ist nun Ihr Statistik Wortschatz um einige beeindruckende Abkürzungen und Begriffe reicher. Sie müssen diese Begriffe nicht alle nutzen, aber Sie sollten erkennen, dass sich dahinter immer dasselbe Verfahren verbirgt.
+
+Lassen Sie uns jetzt den Begriff der Mehrebenenregression mit Inhalt füllen.
+
+
 # Das Grundprinzip der Mehrebenenregression
 
+Alle statistischen Verfahren haben im Kern zwei Ziele: Inferenz und Prognose. Es kommt zwar auf die konkrete Fragestellung an, aber in der Regel sind wir als Wissenschaftler:innen  an Inferenz interessiert – denn wir wollen verstehen und erklären. 
+
+In der praktischen Anwendung außerhalb der Forschung – z.B. in Beratung, oder im Unternehmenseinsatz - ist häufig Prognose das Ziel: Was passiert, wenn man das eine oder andere ändert? 
+
+Ob man das Ziel erreicht, also ob Sie Ihrer Inferenz oder Prognose trauen können, hängt davon ab, ob man das richtige Instrument nutzt. In vielen Fällen ist die einfache lineare Regression ausreichend. Aber in vielen Fällen gibt es substantielle Gründe und/oder statistische Gründe, die eine Mehrebenenregression zum korrekten Modell der Wahl machen. Schauen wir als erstes auf die substantiellen Gründe.
+
+
 ## Context Matters
+
+Viele Phänomene, die wir erklären wollen, oder über die wir eine Prognose treffen wollen lassen sich nicht alleine auf der Individualebene, bzw. der Mikroebene modellieren.
+
+Also nicht nur persönliche Eigenschaften, Merkmale und Einstellungen haben einen Einfluss darauf, was Menschen tun, was sie denken, wen Sie wählen oder wie sie konsumieren.
+
+Der soziale Kontext und die institutionellen Strukturen auf Meso- und Makroebene haben einen nicht zu unterschätzenden Einfluss auf die Menschen und ihr handeln. 
+
+> Menschen teilen einen gemeinsamen sozialen Kontext innerhalb von Gruppen. Gleichzeitig unterscheiden diese Kontexte sich aber zwischen den Gruppen. Menschen unterliegen also unterschiedlichen sozialen Kontexten.
+
+Mit den Konzepten des methodologischen Individualismus und dem **Makro-Mikro-Makro-Schema**, das besser bekannt ist als die Coleman’sche Badewanne, wird analytisch klar, dass die Erklärung sozialer Phänomene immer alle Ebenen berücksichtigen muss.
+
+Dieses Argument möchte ich Ihnen auch anhand von konkreten Daten veranschaulichen. 
+In allen Videos nutzen wir dasselbe Beispiel. 
+
+<p style="max-width: 20%; float: right; margin: 2em;"><a href="https://www.europeansocialsurvey.org" target="_blank" rel="external">
+![](./Grafiken/ESS_Logo.jpg "ESS Logo by ESS-ERIC, a European Research Infrastructure Consortium, see https://www.europeansocialsurvey.org")</a>
+</p>
+
+Die Daten stammen aus dem 9. European Social Survey, - kurz ESS - aus dem Jahr 2018.^[ESS Round 9: European Social Survey Round 9 Data (2018). Data file edition 3.1. Sikt - Norwegian Agency for Shared Services in Education and Research, Norway – Data Archive and distributor of ESS data for ESS ERIC. doi:10.21338/NSD-ESS9-2018] Im ESS wurden in 27 Ländern insgesamt 47.086 Personen zu einer Vielzahl an Themen befragt. Um schon Mal vorweg zu greifen: die 27 Länder sind die Ebene 2 und die 47.086 Befragten, sind die Beobachtungseinheiten auf Ebene 1.
+
+
+Sie benötigen die ESS Daten um den R Code aus R-Script-Dateien zu den Videos ausführen zu können. Die Daten können Sie über die Webseite des ESS herunterladen:
+
+https://www.europeansocialsurvey.org/ 
+
+oder direkt über die DOI-Adresse:
+
+https://doi.org/10.21338/NSD-ESS9-2018 
+
+Für unser Beispiel befassen wir uns mit dem Thema Politikverdrossenheit. Was in den Medien oder Alltagssprachlich als Politikverdrossenheit bezeichnet wird, wird in der Forschung mit dem Konzept „Political Support“ untersucht. Eine Komponente davon ist das politische Vertrauen der Bürger. 
+
+Wer mehr darüber wissen möchte, für den gibt es am Ende des Videos noch Literaturhinweise. 
+Also: Schauen wir uns das politische Vertrauen in Europa an: 
 
 ```{r erstes_beispiel_daten_vorbereiten}
 set.seed(2022)
@@ -88,6 +180,14 @@ grand_mean <- mean(means_df[,2])
 ```
 
 
+Es handelt sich um einen Mittelwert-Index aus drei Items. 
+
+>„Bitte […] sagen Sie mir zu jeder öffentlichen Einrichtung oder Personengruppe, die ich Ihnen nenne, wie sehr Sie persönlich jeder einzelnen davon vertrauen. […] 0 bedeutet, dass Sie dieser Einrichtung oder Personengruppe überhaupt nicht vertrauen, und 10 bedeutet, dass Sie ihr voll und ganz vertrauen.“
+
+- den Parteien
+- dem Bundestag (bzw. dem jeweiligen Parlament im Land)
+- den Politikern
+
 ```{r}
 library(ggplot2)
 library(ggtext)
@@ -107,6 +207,9 @@ ggplot(ess_c6, aes(x=pol_vertrauen, y=no_countries)) +
 save_fig("V1_1_1.png", save)
 ```
 
+Aber hier sehen wir relativ wenig, weil hinter jedem Punkt eine Vielzahl von Befragten steckt. Um einen besseren Eindruck bekommen, ziehe ich die Punkte auf der vertikalen und horizontalen Achse etwas auseinander und mache die Punkte kleiner. So erkennen wir alle der knapp 50.000 Punkte.
+
+
 ```{r}
 ggplot(ess, aes(pol_vertrauen, no_countries)) +
   geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
@@ -121,11 +224,12 @@ ggplot(ess, aes(pol_vertrauen, no_countries)) +
 save_fig("V1_1_2.png", save)
 ```
 
+Ganz schön viele Punkte. Damit das Beispiel übersichtlich bleibt, mache ich mit nur sechs der 27 Länder weiter und nutze von diesen auch nur 15 Prozent der Datenpunkte. 
 
 ```{r}
 l <- length(ess_c6[,1])
 ess_c6 <- ess_c6[sample(1:l,l*0.15),]
-#sd(ess_c6$pol_vertrauen, na.rm=T)/1543
+
 
 ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
   geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
@@ -138,7 +242,13 @@ ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
         plot.margin=unit(c(0,2,0,2), "cm"))
 
 save_fig("V1_1_3.png", save)
+```
 
+Immer noch viel, aber etwas übersichtlicher. 
+Lassen Sie uns noch den Mean einzeichnen.
+
+
+```{r}
 ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
   geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
               size=1) +
@@ -152,8 +262,19 @@ ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
         plot.margin=unit(c(0,2,0,2), "cm"))
 
 save_fig("V1_1_4.png", save)
+```
+
+Das Durchschnittliche politische Vertrauen in den sechs Länder liegt bei 4. Es ist also einen Skalenpunkt unterhalb der theoretischen Skalenmitte und somit leicht negativ. 
+Aber was sagt dieser Mittelwert aus? Wir wissen ja, dass hier Befragte aus sechs unterschiedlichen Ländern zusammengefasst werden. 
+
+Und wir sehen ja auch, dass die Streuung recht groß ist - um genau zu sein liegt die Standardabweichung bei `r round(sd(ess_c6$pol_vertrauen, na.rm=T),1)`. 
+
+Man muss kein Politikwissenschaftler sein, um zu ahnen, dass ein Teil der Unterschiede - oder genauer ein Teil der Streuung im politischen Vertrauen - darauf zurückzuführen ist, dass zwischen den Ländern große Unterschiede im politischen Vertrauen bestehen. 
+
+Also färben wir die Befrgaten mal nach Länderzugehörigkeit ein.
 
 
+```{r}
 farben <- c("#00966E", "#D57800", "#FFCC00", "#002654","#BA0C2F", "#006AA7")
 ggplot(ess_c6, 
        aes(pol_vertrauen, no_countries, color=cntry)) +
@@ -169,8 +290,13 @@ ggplot(ess_c6,
   guides(colour = guide_legend(override.aes = list(size=2)))
 
 save_fig("V1_1_5.png", save)
+```
+
+Ja… man ahnt schon etwas… unten mehr grün… oben mehr rot und hellblau.
+Aber machen wir es doch ganz eindeutig und gruppieren die Befragten nach ihren Ländern…
 
 
+```{r}
 flags <- c("<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Bulgaria.svg/320px-Flag_of_Bulgaria.svg.png' alt='Bulgarien', title='Bulgarien'  width='20' /><br>",
            "<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Flag_of_Cyprus.svg/320px-Flag_of_Cyprus.svg.png'  width='20' /><br>",
            "<img src='https://upload.wikimedia.org/wikipedia/en/thumb/b/ba/Flag_of_Germany.svg/320px-Flag_of_Germany.svg.png'  width='20' /><br>",
@@ -195,7 +321,11 @@ ggplot(ess_c6,
   guides(colour = guide_legend(override.aes = list(size=2)))
 
 save_fig("V1_1_6.png", save)
+```
 
+Was wir nun sehen ist, dass ein Teil der Streuung in der Punktewolke auf Varianz zwischen den Ländern zurückzuführen ist. 
+
+```{r}
 
 ggplot(ess_c6, 
        aes(pol_vertrauen, cntry, color=cntry)) +
@@ -215,7 +345,11 @@ ggplot(ess_c6,
   guides(colour = guide_legend(override.aes = list(size=2)))
 
 save_fig("V1_1_7.png", save)
+```
 
+Jedes Land hat ein anderes durchschnittliches Niveau vonj politischem Vertrauen. Wir können für jedes Land den Mittelwert einzeichnen. Und diese Mittelwerte streuen um den Mittelwert der Ländern, den sogenannten Grand Mean.
+
+```{r }
 
 ggplot(ess_c6, 
        aes(pol_vertrauen, cntry, color=cntry)) +
@@ -237,6 +371,15 @@ ggplot(ess_c6,
 
 save_fig("V1_1_8.png", save)
 ```
+
+Was wir jetzt sehen: Es gibt also Varianz innerhalb der Länder: Befragte streuen um den ihren jeweiligen Landesmittelwert. Und es es gibt Varianz zwischen den Ländern. Die Länder streuen um den Grand Mean. 
+
+Also: Menschen haben hohes oder niedriges politisches Vertrauen (Mikroebene). Aber der soziale Kontext - hier das politische System und gesellschaftliche Faktoren auf Ebene der Länder - beeinflussen als Makroebene das politische Vertrauen. Ein Teil der Unterschiede im politischen Vertrauen, geht also alleine auf diese Kontextfaktoren zurück. Und kann also nur durch Variation auf der Kontextebene erklärt werden. 
+
+Und die Mehrebenenregression ist das geeignete Verfahren zur Analyse sozialer Phänomene, bei denen Kontextfaktoren und deren Wechselwirkungen mit der Individualebene explizit modelliert werden sollen. 
+
+Neben diesen substantiellen Grund, gibt es auch statistische Grüne, warum die Mehrebenenregression in bestimmten Fällen die bessere Wahl ist. Dafür schauen wir uns zunächst an, wie sich die Mehrebenenregression von der linearen Regression unterscheidet.
+
 
 
 ## Die Mehrebenenregression als Erweiterung der OLS Regression
@@ -275,7 +418,7 @@ Wir sehen schon: Wie erwartet ist das politische Vertrauen größer, wenn die Be
 
 Dieser Zusammenhang kann nun mit Hilfe einer Regressionsgeraden beschrieben werden:
 
-### Das Grundmodell der Regression
+### Das Grundmodell der Regression {.unnumbered}
 
 ```{r}
 ggplot(data=ess_c6,
@@ -363,7 +506,7 @@ $=$
 $+bx$
 </p>
 
-Der Regressionsparameter $a$ ist der **Intercept**, bzw. die Konstante. Es ist der Wert für Y bei dem die Regressionsgerade die Y-Achse schneidet. Anders ausgedrückt: Der Intercept ist der Vorhersagewert für Y, wenn alle X-Variablen im Modell den Wert 0 aufweisen. 
+Der Regressionsparameter $a$ ist der **Intercept**, bzw. die Konstante. Es ist der Wert für $y$ bei dem die Regressionsgerade die Y-Achse schneidet. Anders ausgedrückt: Der Intercept ist der Vorhersagewert für $y$, wenn alle X-Variablen im Modell den Wert $0$ aufweisen. 
 
 Hier: ein Befragter der oder die komplett unzufrieden mit der Wirtschaftslage ist, hat im Schnitt ein politisches Vertrauen von `r round(coef(fit)[1],1)`.
 
@@ -444,10 +587,9 @@ $+$
 $x$
 </p>
 
+Die Regressionsgerade, welche mit $a+bx$ beschrieben wird, gibt uns die geschätzten Vorhersagewerte $\hat{y}$. Allerdings: Die tatsächlich beobachteten Werte $y$ und die Vorhersagewerte sind nicht identisch. Durch Kenntnis der unabhängigen Variable können wir nicht deterministisch auf den Wert der abhängigen Variable schließen. 
 
-### Residuen
-
-Die Regressionsgerade die mit $a+bx$ beschrieben wird, gibt uns die geschätzten Vorhersagewerte. Allerdings: Die tatsächlich beobachteten WErte und die Vorhersagewerte sind nicht identtisch...
+Schauen wir hier nochmal auf ein reduziertes Bild der Punktewolke:
 
 ```{r}
 ess_c6$predicted <- predict(fit)   # Save the predicted values
@@ -482,6 +624,9 @@ $\ne$
 </p>
 
 
+Die beobachteten Werte $y$ - hier in blau - streuen um die Vorhersagewerte $\hat{y}$ der roten Regressionsgeraden. Mal liegen sie darunter mal liegen sie darüber. 
+
+
 ```{r}
 ggplot(data=ess_c6_r,
               aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
@@ -513,12 +658,117 @@ save_fig("V1_3_5.png", save)
 ```
 
 <p class=math> 
+<font color=darkorange>$e$</font>
+$=$
+<font color=blue>$y$</font>
+$-$
+<font color=red>$\hat{y}$</font>
+</p>
+
+<p class=math> 
 <font color=blue>$y$</font>
 $=$
 <font color=red>$\hat{y}$</font>
 $+$
 <font color=darkorange>$e$</font>
 </p>
+
+
+<p class=math> 
+<font color=blue>$y$</font>
+$=$
+<font color=red>$a+bx$</font>
+$+$
+<font color=darkorange>$e$</font>
+</p>
+
+
+
+Der Differenz zwischen Vorhersagewert und beobachteten Wert, also das, was hier orange dargestellt ist, ist der Fehler, bzw. das Residuum. In Formeln wird das recht uneinheitlich als $r$, $u$, $e$ oder $\epsilon$ (Epsilon) notiert: $r$ für Residuum, $u$ für unerklärte Varianz oder unobserved Variance, und $e$ bzw. $\epsilon$ für Error.  
+
+Diese Residuen haben für die Regression eine sehr große Bedeutung:
+
+1. Über die quadrierte Summe der Fehler lässt sich bestimmen, welche Regressionsgerade den Zusammenhang am besten beschreibt. Das ist sogar namensgebend: **OLS** bedeutet **O**rdinary **L**east **S**qaures und meint den kleinste Quadrate Schätzer. Also: Suche die Regressionsparameter $a$ und $b$ so aus, das die Summe der quadrierten Fehler minimiert wird.
+
+2. Anhand der Summe der quadrierten Fehler lässt sich das sogenannte $R^2$ berechnen. Das ist die Kennzahl die beschreibt, wie groß die **Erklärungskraft** eines Regressionsmodells ist.
+
+3. Anhand der Residuen lässt sich prüfen, ob wir den Ergebnissen unserer Regression trauen können. Dafür betrachten wir im Rahmen der **Regressionsdiagnostik** die Verteilung der Residuen und untersuchen, ob die Regressionsannahmen eingehalten werden. 
+
+
+### Und was hat das mit Mehrebenenregression zu tun? {.unnumbered}
+
+Und an dieser Stelle kommt die Mehrebenenregression ins Spiel: 
+
+Wenn Ihre Daten eine Mehrebenenstruktur aufweisen, wenn also Kontextfaktoren für einen Teil der Varianz in den Daten verantwortlich sind, dann kann es sein, dass eine einfache OLS Regression keine effiziente Schätzung liefert. Was heißt das? 
+
+Wenn die Mehrebenenstruktur nicht berücksichtigt wird, sind die Residuen der  Beobachtungseinheiten nicht unabhängig voneinander. Man spricht von korrelierten Fehlern oder geclusterten Fehlern. 
+
+In unserem Beispiel: 
+
+```{r}
+ggplot(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .1) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  coord_cartesian(clip = 'off') +
+  geom_smooth(method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  theme_light() +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
+  annotation_custom(grob = grid::textGrob(label = "Intercept", 
+                                          hjust=1, 
+                                          gp=gpar(col="blue", cex=.91)),
+                    xmin = -1.5, 
+                    xmax = -1.5, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) +
+  annotation_custom(grob = linesGrob(arrow=arrow(type="open", ends="last",
+                                                 length=unit(3,"mm")), 
+                                     gp=gpar(col="blue", lwd=2)), 
+                    xmin = -1.2, 
+                    xmax = -.2, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) +
+  geom_polygon(data=shape, aes(x=x, y=y), 
+               alpha=.3, fill = 'darkorange') +
+  annotation_custom(grob = grid::textGrob(label = "Slope", 
+                                          hjust=0, gp=gpar(col="darkorange", cex=1)),
+                    xmin = 2.15, 
+                    xmax = 2.15, 
+                    ymin = y_lab1,
+                    ymax = y_lab1) 
+
+save_fig("V1_4_4.png", save)
+```
+
+
+In der Folge ist oft die Varianz der Fehler nicht konstant ist, es liegen also heteroskedastische Fehler vor. 
+Außerdem kann es sein, dass die Residuen nicht unabhängig von den X-Variablen sind, wenn sie mit der übergeordneten Ebene korrelieren.  Sie verstoßen also gegen Regressionsannahmen.
+
+Als Folge werden möglicherweise die Standardfehler unterschätzt. 
+Wenn die Standardfehler aber kleiner sind, als sie sein müssten, wird auch die Irrtumswahrscheinlichkeit beim Signifikanztest unterschätzt. 
+
+Im schlechtesten Fall gehen Sie also von signifikanten Effekten aus, wo in Wahrheit kein Zusammenhang zu finden ist.
+
+
+### Eine naheliegnde Lösung {.unnumbered}
+
+Vielleicht werden Sie jetzt sagen, es gibt doch eine naheliegende Lösung: 
+Können wir nicht zum Beispiel einfach Länderdummies ins Regressionsmodell mit aufnehmen?
+Was wäre die Lösung? 
+
+
+Die OLS Regression liefert unverzerrte und effiziente Schätzungen, wenn d
+
+
+
 
 <p class=math> 
 <font color=blue>$y$</font>
@@ -529,7 +779,6 @@ $+~...~\beta_nx_n~+~$
 </p>
 
 
-### Und was hat das mit Mehrebenenstruktur zu tun?
 
 
 
@@ -746,3 +995,32 @@ ggplot(ess_c6,
 ```
 
 
+#	Lernzielabgleich
+
+Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernziele erreicht haben: 
+
+- Sie kennen die unterschiedlichen Bezeichnungen der Mehrebenenregression.
+- Sie können das Grundprinzip der Mehrebenenregression erläutern.
+- Sie können darlegen, worin sich eine Mehrebenenregression von einer einfachen Linearen Regression unterscheidet.
+- Sie können aufzählen können, Vorteile eine Mehrebenenregression hat.
+- Sie wissen, welche unterschiedlichen Varianten der Mehrebenenregression es gibt.
+- Sie können entscheiden, für welche Fragestellungen welche Variante der Mehrebenenregression geeignet ist.
+
+
+# Literatur
+
+### Mehrebenenregression {.unlisted .unnumbered}
+
+Literatur zum Einstieg in die Mehrebenenregression (in aufsteigender Schwierigkeit sortiert):
+
+- Tausendpfund, Markus (2020): Mehrebenenanalyse. In: ebd. (Hrsg.): Fortgeschrittene Analyseverfahren in den Sozialwissenschaften. Grundwissen Politik. Springer VS, Wiesbaden. https://doi.org/10.1007/978-3-658-30237-5_5 
+- Pötschke, Manuela. (2020). Mehrebenenmodelle. In: Wagemann, Claudius; Goerres, Achim; Siewert, Markus B. (Hrsg.): Handbuch Methoden der Politikwissenschaft. Springer VS, Wiesbaden. https://doi.org/10.1007/978-3-658-16936-7_29 
+- Gellman, Andrew; Hill, Jennifer (2009): Data-Analysis Using regression and Multilevel/Hierachical Models. Cambridge: Cambridge University Press. Kap. 12 & 13. https://doi.org/10.1017/CBO9780511790942 
+
+### Beipiel: Politische Unterstützung {.unlisted .unnumbered}
+
+Literatur zur Beispielfragestellung (nach Aktualität sortiert):
+
+- Dalton, Russell J. (2019): Citizen politics: Public opinion and political parties in advanced industrial democracies. Cq Press.
+- van Ham, Caroline, Thomassen, Jaques. J., Aarts, Kees., & Andeweg, Rudy B. (Hrsg.). (2017). Myth and reality of the legitimacy crisis: Explaining trends and cross-national differences in established democracies. Oxford University Press. https://doi.org/10.1093/oso/9780198793717.001.0001 
+- Arzheimer, Kai (2002): Politikverdrossenheit. Bedeutung, Verwendung und empirische Relevanz eines politikwissenschaftlichen Begriffes. Wiesbaden: Westdeutscher Verlag. Volltext: https://www.kai-arzheimer.com/politikverdrossenheit.pdf 
