@@ -665,6 +665,11 @@ $-$
 <font color=red>$\hat{y}$</font>
 </p>
 
+
+Der Differenz zwischen Vorhersagewert und beobachteten Wert, also das, was hier orange dargestellt ist, ist der Fehler, bzw. das Residuum. In Formeln wird das recht uneinheitlich als $r$, $u$, $e$ oder $\epsilon$ (Epsilon) notiert: $r$ für Residuum, $u$ für unerklärte Varianz oder unobserved Variance, und $e$ bzw. $\epsilon$ für Error.  
+
+Die Gleichung können wir auch umstellen: der Vorhersagewert $\hat{y}$ plus Fehler führt zum beobachteten Wert. 
+
 <p class=math> 
 <font color=blue>$y$</font>
 $=$
@@ -673,6 +678,7 @@ $+$
 <font color=darkorange>$e$</font>
 </p>
 
+Und statt $\hat{y}$ können wir auch $a+bx$ schreiben, dann hat man die klassische Regressionsgleichung: 
 
 <p class=math> 
 <font color=blue>$y$</font>
@@ -684,7 +690,7 @@ $+$
 
 
 
-Der Differenz zwischen Vorhersagewert und beobachteten Wert, also das, was hier orange dargestellt ist, ist der Fehler, bzw. das Residuum. In Formeln wird das recht uneinheitlich als $r$, $u$, $e$ oder $\epsilon$ (Epsilon) notiert: $r$ für Residuum, $u$ für unerklärte Varianz oder unobserved Variance, und $e$ bzw. $\epsilon$ für Error.  
+
 
 Diese Residuen haben für die Regression eine sehr große Bedeutung:
 
@@ -701,7 +707,7 @@ Und an dieser Stelle kommt die Mehrebenenregression ins Spiel:
 
 Wenn Ihre Daten eine Mehrebenenstruktur aufweisen, wenn also Kontextfaktoren für einen Teil der Varianz in den Daten verantwortlich sind, dann kann es sein, dass eine einfache OLS Regression keine effiziente Schätzung liefert. Was heißt das? 
 
-Wenn die Mehrebenenstruktur nicht berücksichtigt wird, sind die Residuen der  Beobachtungseinheiten nicht unabhängig voneinander. Man spricht von korrelierten Fehlern oder geclusterten Fehlern. 
+Wenn die Mehrebenenstruktur nicht berücksichtigt wird, sind die Residuen der Beobachtungseinheiten nicht unabhängig voneinander. Man spricht von korrelierten Fehlern oder geclusterten Fehlern.
 
 Schauen wir das in unserem Beispiel einmal an. 
 
@@ -746,29 +752,187 @@ save_fig("V1_4_5.png", save)
 
 Links ist die Regressionsgerade zu sehen. Rechts die Verteilung der Residuen getrennt nach Ländern. Für Bulgarien überschätzt die Regressionsgerade das politische Vertrauen. Die Residuen sind im Schnitt negativ. 
 
-Für Schweden und Norwegen dagegen unterschätzen wir mit der Regressionsgeraden das politische Vertrauen. Die Residuen sind also im Schnitt positiv.
+Für Norwegen dagegen unterschätzen wir mit der Regressionsgeraden das politische Vertrauen. Die Residuen sind also im Schnitt positiv.
 
 Die Fehler der Individualebene korrelieren also mit einem Kontextmerkmal, nämlich der Länderzugeghörigkeit der Befragten. 
 
-
 In der Folge ist oft die Varianz der Fehler nicht konstant ist, es liegen also heteroskedastische Fehler vor. 
-Außerdem kann es sein, dass die Residuen nicht unabhängig von den X-Variablen sind, wenn sie mit der übergeordneten Ebene korrelieren.  Sie verstoßen also gegen Regressionsannahmen.
+Außerdem kann es sein, dass die Residuen nicht unabhängig von den X-Variablen sind, wenn sie mit der übergeordneten Ebene korrelieren. Sie verstoßen also gegen Regressionsannahmen.
 
-Als Folge werden möglicherweise die Standardfehler unterschätzt. 
+Konkrete Auswirkungen sind, dass möglicherweise die Standardfehler unterschätzt. 
 Wenn die Standardfehler aber kleiner sind, als sie sein müssten, wird auch die Irrtumswahrscheinlichkeit beim Signifikanztest unterschätzt. 
 
 Im schlechtesten Fall gehen Sie also von signifikanten Effekten aus, wo in Wahrheit kein Zusammenhang zu finden ist.
 
-
-### Eine naheliegnde Lösung {.unnumbered}
-
-Vielleicht werden Sie jetzt sagen, es gibt doch eine naheliegende Lösung: 
-Können wir nicht zum Beispiel einfach Länderdummies ins Regressionsmodell mit aufnehmen?
-Was wäre die Lösung? 
+Darüber hinaus kann es auch sein, dass das Modell inhaltlich fehlspezifiziert ist. Unterschiede zwischen den Ländern werden durch die einfache OLS Regression überdeckt.
 
 
-Die OLS Regression liefert unverzerrte und effiziente Schätzungen, wenn d
+### Eine naheliegende Lösung {.unnumbered}
 
+Vielleicht werden Sie jetzt sagen, es gibt doch eine naheliegende Lösung: Können wir nicht zum Beispiel einfach Länderdummies ins Regressionsmodell mit aufnehmen?
+
+Leider nein. 
+
+```{r, eval=F}
+library(foreign)
+ess <- read.spss("./Daten/ESS9e02.sav", 
+                 use.value.labels = FALSE,
+                 to.data.frame = TRUE,
+                 reencode = TRUE)
+idx_vars <- c("trstprl","trstplt","trstprt")
+ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
+                              na.rm = F)
+ess$zufr_wirtschaft <- ess$stfeco
+
+disbalance <- function(df){
+  cntry_n <- aggregate(x = list(cntry_n = df$pol_vertrauen),
+                       by=list(cntry = df$cntry),
+                       FUN=length)
+  # Sampling 10 Fach ungleicher:
+  cntry_n$ratio <- exp(log(cntry_n$cntry_n/max(cntry_n$cntry_n))*5)
+  cntry_n$cntry_n_neu  <- round(cntry_n$ratio * cntry_n$cntry_n/2,0)
+  
+  df_list <-list()
+  for(cntry in unique(df$cntry)){
+    df_list[[cntry]] <- df[df$cntry == cntry,]
+    df_list[[cntry]] <- df_list[[cntry]][sample(1:length(df_list[[cntry]][,1]), 
+                                                         cntry_n$cntry_n_neu[cntry_n$cntry == cntry]),]
+  }
+  df <- do.call("rbind", df_list)
+  return(df)
+}
+
+# Create ESS subset with only few L1 Units
+ess_tiny <- ess[sample(1:47086, 470),]
+# Create ESS subset with very disbalanced numbers of observations on L1
+ess_disbalanced <- disbalance(ess)
+
+
+mlm_ml_comparison <- function(ess){
+  # Create function to compare lm and lmer results 
+  # Returns 4 figures in a list of figures
+
+  library(lmerTest) 
+  mreg0 <-lmer(pol_vertrauen ~ 1 +
+                 (1 | cntry), 
+               data=ess, REML=F)
+  
+  fit_lm <- lm(pol_vertrauen ~ cntry, data=ess)
+
+
+  
+  
+  mreg1 <-lmer(pol_vertrauen ~ 1 + zufr_wirtschaft +
+                 (1 | cntry), 
+               data=ess, REML=F)
+
+  fit_lm_1 <- lm(pol_vertrauen ~ zufr_wirtschaft + cntry, data=ess)
+  fixed_effects <- data.frame(model = c("lm", "lmer"),
+                              b1 =c(coef(fit_lm_1)[2], fixef(mreg1)[2]),
+                              se = c(sqrt(diag(vcov(fit_lm_1)))[2], se.fixef(mreg1)[2]))
+
+  res <- list()
+  res$fixed_effects <- fixed_effects
+  
+  coef(fit_lm)
+  # Diese sind nichts anderes als die Mittelwerte der abhängigen Variable nach Ländern:
+  # Bzw. genauer: die Abweichung dieser Mittelwerte vom Mittelwert des Landes, das die Referenzkategorie 
+  # in der Regression bildet. hier: Österreich (Länderkürzel AT)
+  lm_estimates <- aggregate(x = list(cntry_means = ess$pol_vertrauen), 
+                            by=list(cntry = ess$cntry), 
+                            FUN=mean, na.rm=T)
+
+    # Zieht man Österreich ab, dann sind das exakt die Werte aus der Regression
+  cbind(lm_estimates$cntry_means - lm_estimates$cntry_means[1],
+        coef(fit_lm))
+  
+  # Auf Basis der Ländermittelwerte können wir den Mittelwert der Mittelwerte berechnen: den Grand Mean:
+  mean(lm_estimates$cntry_means)
+  # Und diesen von den Ländermittelwerten abziehen. So erhält man für alle Länder den Ländereffekt, ohne
+  # eine Referenzkategorie nutzen zu müssen.
+  lm_estimates$cntry_effects <- lm_estimates$cntry_means -  mean(lm_estimates$cntry_means)
+  # Schließlich fügen wir noch die Standardfehler aus dem Regressionsmodell hinzu
+  lm_estimates$se <-sqrt(diag(vcov(fit_lm)))
+  
+  lm_estimates$model <- "lm"
+  lm_estimates$n <- aggregate(x = list(n = ess$pol_vertrauen), 
+                            by=list(cntry = ess$cntry), 
+                            FUN=length)[,2]
+  
+
+  # Diese Schätzung können wir nun direkt mit den random effects aus dem Mehrebenemodell vergleichen
+  library(arm) # um se.ranef() nutzen zu können
+  lmer_estimates <- data.frame(cntry = rownames(ranef(mreg0)$cntry),
+                               cntry_effects = ranef(mreg0)$cntry$"(Intercept)",
+                               se = se.ranef(mreg0)$cntry[,1],
+                               model = "lmer")
+  lmer_estimates$n <- aggregate(x = list(n = ess$pol_vertrauen), 
+                                by=list(cntry = ess$cntry), 
+                                FUN=length)[,2]
+  
+  df <- rbind(lm_estimates[,c(1,3,4,5,6)], 
+              lmer_estimates)
+  
+  df$cntry <- forcats::fct_reorder(df$cntry, 
+                                   df$cntry_effects, 
+                                   'min')
+  library(ggplot2)
+  res$fig[[1]] <- ggplot(df, aes(x = cntry, 
+                 y = cntry_effects, 
+                 ymin = cntry_effects-se,
+                 ymax = cntry_effects+se,
+                 color = model)) + 
+    geom_pointrange(position = position_dodge(width = .5)) +
+    coord_flip() +
+    theme_minimal()
+  
+  
+  res$fig[[2]] <- ggplot(df, aes(x = cntry, 
+                 y = cntry_effects, 
+                 ymin = cntry_effects-se,
+                 ymax = cntry_effects+se,
+                 color = model)) + 
+    geom_pointrange(position = position_dodge(width = .5)) +
+      coord_flip() +
+      theme_minimal() +
+      facet_wrap(. ~ model)
+  
+  res$fig[[3]] <- ggplot(df, aes(x = cntry, 
+                 y = cntry_effects, 
+                 ymin = cntry_effects-se,
+                 ymax = cntry_effects+se,
+                 color = model)) + 
+    geom_pointrange(position = position_dodge(width = .5)) +
+    geom_hline(yintercept=-2) +
+      coord_flip() +
+      theme_minimal() +
+      facet_wrap(. ~ model)
+  
+  df$cntry <- forcats::fct_reorder(df$cntry, 
+                                   df$n, 
+                                   'mean')
+  
+  res$fig[[4]] <- ggplot(df, aes(x = cntry, 
+                 y = cntry_effects, 
+                 ymin = cntry_effects-se,
+                 ymax = cntry_effects+se,
+                 color = model)) + 
+    geom_pointrange(position = position_dodge(width = .5)) +
+    coord_flip() +
+    theme_minimal()
+  
+  return(res)
+}
+
+fig_ess <- mlm_ml_comparison(ess)
+fig_ess$fixed_effects
+
+fig_ess_tiny <- mlm_ml_comparison(ess_tiny)
+fig_ess_tiny$fixed_effects
+
+fig_ess_disbalanced <- mlm_ml_comparison(ess_disbalanced)
+fig_ess_disbalanced$fixed_effects
+```
 
 
 

@@ -3089,18 +3089,23 @@ liegen sie darunter mal liegen sie darüber.</p>
 <font color="darkorange"><span class="math inline">\(e\)</span></font>
 <span class="math inline">\(=\)</span> <font color="blue"><span class="math inline">\(y\)</span></font> <span class="math inline">\(-\)</span> <font color="red"><span class="math inline">\(\hat{y}\)</span></font>
 </p>
-<p class="math">
-<font color="blue"><span class="math inline">\(y\)</span></font> <span class="math inline">\(=\)</span> <font color="red"><span class="math inline">\(\hat{y}\)</span></font> <span class="math inline">\(+\)</span> <font color="darkorange"><span class="math inline">\(e\)</span></font>
-</p>
-<p class="math">
-<font color="blue"><span class="math inline">\(y\)</span></font> <span class="math inline">\(=\)</span> <font color="red"><span class="math inline">\(a+bx\)</span></font> <span class="math inline">\(+\)</span> <font color="darkorange"><span class="math inline">\(e\)</span></font>
-</p>
 <p>Der Differenz zwischen Vorhersagewert und beobachteten Wert, also
 das, was hier orange dargestellt ist, ist der Fehler, bzw. das Residuum.
 In Formeln wird das recht uneinheitlich als <span class="math inline">\(r\)</span>, <span class="math inline">\(u\)</span>, <span class="math inline">\(e\)</span>
 oder <span class="math inline">\(\epsilon\)</span> (Epsilon) notiert:
 <span class="math inline">\(r\)</span> für Residuum, <span class="math inline">\(u\)</span> für unerklärte Varianz oder unobserved
 Variance, und <span class="math inline">\(e\)</span> bzw. <span class="math inline">\(\epsilon\)</span> für Error.</p>
+<p>Die Gleichung können wir auch umstellen: der Vorhersagewert <span class="math inline">\(\hat{y}\)</span> plus Fehler führt zum
+beobachteten Wert.</p>
+<p class="math">
+<font color="blue"><span class="math inline">\(y\)</span></font> <span class="math inline">\(=\)</span> <font color="red"><span class="math inline">\(\hat{y}\)</span></font> <span class="math inline">\(+\)</span> <font color="darkorange"><span class="math inline">\(e\)</span></font>
+</p>
+<p>Und statt <span class="math inline">\(\hat{y}\)</span> können wir
+auch <span class="math inline">\(a+bx\)</span> schreiben, dann hat man
+die klassische Regressionsgleichugn: <span class="math inline">\(y=a+bx+e\)</span>.</p>
+<p class="math">
+<font color="blue"><span class="math inline">\(y\)</span></font> <span class="math inline">\(=\)</span> <font color="red"><span class="math inline">\(a+bx\)</span></font> <span class="math inline">\(+\)</span> <font color="darkorange"><span class="math inline">\(e\)</span></font>
+</p>
 <p>Diese Residuen haben für die Regression eine sehr große
 Bedeutung:</p>
 <ol style="list-style-type: decimal">
@@ -3153,8 +3158,8 @@ die Irrtumswahrscheinlichkeit beim Signifikanztest unterschätzt.</p>
 <p>Im schlechtesten Fall gehen Sie also von signifikanten Effekten aus,
 wo in Wahrheit kein Zusammenhang zu finden ist.</p>
 </div>
-<div id="eine-naheliegnde-lösung" class="section level3 unnumbered">
-<h3 class="unnumbered">Eine naheliegnde Lösung</h3>
+<div id="eine-naheliegende-lösung" class="section level3 unnumbered">
+<h3 class="unnumbered">Eine naheliegende Lösung</h3>
 <p>Vielleicht werden Sie jetzt sagen, es gibt doch eine naheliegende
 Lösung: Können wir nicht zum Beispiel einfach Länderdummies ins
 Regressionsmodell mit aufnehmen? Was wäre die Lösung?</p>
