@@ -759,6 +759,10 @@ Die Fehler der Individualebene korrelieren also mit einem Kontextmerkmal, nämli
 In der Folge ist oft die Varianz der Fehler nicht konstant ist, es liegen also heteroskedastische Fehler vor. 
 Außerdem kann es sein, dass die Residuen nicht unabhängig von den X-Variablen sind, wenn sie mit der übergeordneten Ebene korrelieren. Sie verstoßen also gegen Regressionsannahmen.
 
+
+
+** Wir tun also als ob ...Thus the complete pooling model, by ignoring correlations of y-values within clusters, assumes that all individuals are independent. In so doing, it estimates a standard error consistent with such an assumption. The partial_pooling model is designed for this problem and such, appropriately adjusts the standard error estimate by differentially weighting the sample size. I will try to come back and put in the different standard errors calculations for the three models.**
+
 Konkrete Auswirkungen sind, dass möglicherweise die Standardfehler unterschätzt. 
 Wenn die Standardfehler aber kleiner sind, als sie sein müssten, wird auch die Irrtumswahrscheinlichkeit beim Signifikanztest unterschätzt. 
 
@@ -771,7 +775,15 @@ Darüber hinaus kann es auch sein, dass das Modell inhaltlich fehlspezifiziert i
 
 Vielleicht werden Sie jetzt sagen, es gibt doch eine naheliegende Lösung: Können wir nicht zum Beispiel einfach Länderdummies ins Regressionsmodell mit aufnehmen?
 
-Leider nein. 
+Leider nein. Weil variablität der Effekte überschätzt wird. Und auch die SE sind größer, da die L2 Einheiten unabhängig voneinsander betrachtet werde und die Informationen aus dem Rest des Samples ingnoriert werden.
+
+DIe Mehrebenenregression ist ein Kompromiss. Schätzt die SE in dem es ** The partial_pooling model is designed for this problem and such, appropriately adjusts the standard error estimate by differentially weighting the sample size. I will try to come back and put in the different standard errors calculations for the three models.** 
+
+$$\widehat{SE}(\hat{\beta}^{OLS}) \approx \sqrt{\dfrac{\hat\psi + \hat\theta}{Jn}}$$
+
+
+$$\widehat{SE}(\hat{\beta}^{Mixed}) = \sqrt{\dfrac{\hat\psi + \dfrac{\hat\theta}{n}}{J}}$$
+$$\widehat{SE}(\hat{\beta}^{NoPool}) = \sqrt{\dfrac{\hat\theta}{Jn}}$$
 
 ```{r, eval=F}
 library(foreign)
@@ -808,11 +820,12 @@ ess_tiny <- ess[sample(1:47086, 470),]
 ess_disbalanced <- disbalance(ess)
 
 
-mlm_ml_comparison <- function(ess){
+mlm_ml_comparison <- function(ess, label){
   # Create function to compare lm and lmer results 
   # Returns 4 figures in a list of figures
 
   library(lmerTest) 
+  library(arm)
   mreg0 <-lmer(pol_vertrauen ~ 1 +
                  (1 | cntry), 
                data=ess, REML=F)
@@ -820,16 +833,22 @@ mlm_ml_comparison <- function(ess){
   fit_lm <- lm(pol_vertrauen ~ cntry, data=ess)
 
 
-  
-  
-  mreg1 <-lmer(pol_vertrauen ~ 1 + zufr_wirtschaft +
+  full_pooling <- lm(pol_vertrauen ~ zufr_wirtschaft, data=ess)
+  no_pooling <- lm(pol_vertrauen ~ zufr_wirtschaft + cntry, data=ess)
+  mreg <-lmer(pol_vertrauen ~ 1 + zufr_wirtschaft +
                  (1 | cntry), 
-               data=ess, REML=F)
-
-  fit_lm_1 <- lm(pol_vertrauen ~ zufr_wirtschaft + cntry, data=ess)
-  fixed_effects <- data.frame(model = c("lm", "lmer"),
-                              b1 =c(coef(fit_lm_1)[2], fixef(mreg1)[2]),
-                              se = c(sqrt(diag(vcov(fit_lm_1)))[2], se.fixef(mreg1)[2]))
+               data=ess, REML=T)  
+  
+  fixed_effects <- data.frame(label = rep(label, 3),
+                              model = c("lm full pooling", "lm no pooling", "lmer"),
+                              b1 =c(coef(full_pooling)[1], coef(no_pooling)[1], fixef(mreg)[1]),
+                              se = c(sqrt(diag(vcov(full_pooling)))[1], 
+                                     sqrt(diag(vcov(no_pooling)))[1],
+                                     se.fixef(mreg)[1]),
+                              b2 =c(coef(full_pooling)[2], coef(no_pooling)[2], fixef(mreg)[2]),
+                              b2se = c(sqrt(diag(vcov(full_pooling)))[2], 
+                                     sqrt(diag(vcov(no_pooling)))[2],
+                                     se.fixef(mreg)[2]))
 
   res <- list()
   res$fixed_effects <- fixed_effects
@@ -924,14 +943,36 @@ mlm_ml_comparison <- function(ess){
   return(res)
 }
 
-fig_ess <- mlm_ml_comparison(ess)
+fig_ess <- mlm_ml_comparison(ess, "large")
 fig_ess$fixed_effects
+fig_ess$fig[[1]]
 
-fig_ess_tiny <- mlm_ml_comparison(ess_tiny)
+
+fig_ess_tiny <- mlm_ml_comparison(ess_tiny, "tiny")
 fig_ess_tiny$fixed_effects
+fig_ess_tiny$fig[[1]]
 
-fig_ess_disbalanced <- mlm_ml_comparison(ess_disbalanced)
+fig_ess_disbalanced <- mlm_ml_comparison(ess_disbalanced, "disbalanced")
 fig_ess_disbalanced$fixed_effects
+fig_ess_disbalanced$fig[[1]]
+
+
+comparison_df <- rbind(fig_ess$fixed_effects,
+                       fig_ess_tiny$fixed_effects,
+                       fig_ess_disbalanced$fixed_effects)
+
+ggplot(comparison_df, aes(x=label, y=b1,
+                          color=model, 
+                          ymin=b1-1.92*se, ymax=b1+1.92*se)) +
+  geom_pointrange(position = position_dodge(width = .5)) +
+  coord_flip()
+
+
+
+ggplot(comparison_df, aes(x=label, y=b2se,
+                          fill=model)) +
+  geom_bar(stat="identity", position="dodge") +
+  theme_minimal()
 ```
 
 
