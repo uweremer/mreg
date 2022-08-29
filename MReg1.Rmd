@@ -50,7 +50,7 @@ table {
 
 ```
 
-#	Begrüßung und Themenüberblick
+#	Begrüßung und Themenüberblick 2:10
 
 Hallo und herzlich Willkommen zu dieser Videoserie zum Thema Mehrebenenregression in R. 
 Damit Sie den Inhalten folgen können, sollten Sie Vorkenntnisse zur linearen OLS Regression haben, sowie Grundlagen in R beherrschen. Ideal wäre es, wenn Sie auch schon einen Lehrbuchtext zur Mehrebenenregression gelesen haben. Eine Auswahl an geeigneten Texten finden Sie am Ende des Videos.
@@ -76,14 +76,14 @@ Lernziele für dieses Video sind…
 - dass Sie die unterschiedlichen Bezeichnungen der Mehrebenenregression kennen.
 - dass Sie das Grundprinzip der Mehrebenenregression erläutern können.
 - dass Sie wissen, welche unterschiedlichen Varianten der Mehrebenenregression es gibt.
-- dass Sie entscheiden können, für welche Fragestellungen welche Variante der Mehrebenenregression geeignet ist.
+- dass Sie entscheiden können, für welche Fragestellung welche Variante der Mehrebenenregression geeignet ist.
 
 
-#	Ein Modell mit vielen Namen
+#	Ein Modell mit vielen Namen 02:27 / 04:37
 
 > HLM, MLM und MEA, Mixed Effects, LMM und MLA 
 
-In der Literatur haben sich eine Vielzahl von Bezeichnungen für die Mehrebenenregression etabliert. Der Grund ist, dass die Mehrebenenregression in verschiedene Disziplin genutzt wird und sich dort jeweils bestimmte Bezeichnungen durchgesetzt haben.
+In der Literatur haben sich eine Vielzahl von Bezeichnungen für die Mehrebenenregression etabliert. Der Grund ist, dass die Mehrebenenregression in verschiedenen Disziplinen genutzt wird und sich dort jeweils bestimmte Bezeichnungen durchgesetzt haben.
 
 In statistischer Terminologie handelt es sich bei Mehrebenenregressionen um sogenannte **Mixed Effects Modelle**.
 
@@ -100,11 +100,11 @@ Schon nach wenigen Minuten ist nun Ihr Statistik Wortschatz um einige beeindruck
 Lassen Sie uns jetzt den Begriff der Mehrebenenregression mit Inhalt füllen.
 
 
-# Warum und wozu eine Mehrebenenregression
+# Warum und wozu eine Mehrebenenregression 02:34 / 07:11
 
 ## Prolog
 
-In der empirisch-analytischen Wissenschaft haben wir die vereinfachende Vorstellung, dass es eine Art datengenerierenden Prozess gibt (im Englischen: data generating process, oder kurz DGP). Das ist die Vorstellung, dass die Phänomene, oder besser gesagt, die Daten, die wir messen (also z.B. das Einkommen einer Person, oder ihr politisches Vertrauen usw.) das Ende oder Resultat einer komplexen Kette an Ursache/Wirkungszusammenhängen sind. 
+In der empirisch-analytischen Wissenschaft haben wir die vereinfachende Vorstellung, dass es eine Art datengenerierenden Prozess gibt (im Englischen: data generating process, oder kurz DGP). Das ist die Vorstellung, dass die Phänomene, oder besser gesagt, die Daten, die wir zu diesen Phänomenen messen (also z.B. das Einkommen einer Person, oder ihr politisches Vertrauen usw.) das Ende oder Resultat einer komplexen Kette an Ursache/Wirkungszusammenhängen sind. 
 
 Hier ein sehr simples Beispiel: 
 
@@ -123,13 +123,13 @@ Sie liefern Annahmen darüber, warum eine Befragte den ein oder anderen Wert auf
 Mit dem statistischen Modell versuchen wir dann diese Theorie über den datengenerierenden Prozess mathematisch/statistisch auszudrücken. 
 
 
-## Kontext und hierarchische Daten
+## Kontext und hierarchische Daten 03:19 / 10:30
 
-In aller Regel laufen solche datengenerierende Prozesse aber Kontextabhängig ab. Die Mechanismen die wirken, können je nach Kontext einen stärkeren oder schwächeren Effekt haben, keinen Effekt haben, oder sogar einen umgekehrten Effekt aufweisen. 
+In aller Regel laufen solche datengenerierende Prozesse aber kontextabhängig ab. Die Mechanismen die wirken, können je nach Kontext einen stärkeren oder schwächeren Effekt haben, keinen Effekt haben, oder sogar einen umgekehrten Effekt aufweisen. 
 
 Der Kontext, das sind alle möglichen Einbettungen, in denen Menschen sich bewegen: Menschen sind Teil von Gruppen, Klassen, Parteien, Orten, Stadtteilen, Ländern und vielem mehr.
 
-Unsere datengenerierenden Prozesse führen also zu einer verschachtelten Struktur der Daten (nested data). Man spricht auch von hierarchischen Daten, oder von einer Mehrebenenstruktur.
+Unsere datengenerierenden Prozesse führen also zu einer verschachtelten Struktur der Daten (wir nennen das nested data). Man spricht auch von hierarchischen Daten, oder von einer Mehrebenenstruktur.
 
 Solche Ebenen können neben sozialen Gruppen und Organisationszugehörigkeiten auch räumliche Einheiten sein, oder Erhebungszeitpunkte, oder sogar Experimentalgruppen. 
 
@@ -138,10 +138,10 @@ Immer wenn solche hierarchischen Daten vorliegen, ist die Mehrebenenregression d
 Technisch spricht man davon, dass es mehrere Ebenen gibt, im englischen *levels*.
 Jede Ebene hat eine bestimmte Anzahl an Fällen (*Units*).
 
-Wir beschäftigen uns hier mit dem einfachen Fall von zwei Ebenen.
+Wir beschäftigen uns in der Videoserie mit dem einfachen Fall von zwei Ebenen.
 
 - die erste Ebene ist die Individualebene, hier finden wir unsere Befragten. Es ist die unterste Ebene, kurz: L1 für Level 1. Als Index nutzen wir das $i$.
-- die Kontextebene ist die obere Ebene oder L2. Diese Ebene sind die Länder oder Klassen. Als Index nutzen wir das $j$.
+- die Kontextebene ist die obere Ebene oder L2. Diese Ebene sind die Länder oder allegeminerKlassen bzw. Gruppen. Als Index nutzen wir das $j$.
 
 Wir haben $n$ Individuen $i_{1, ...n}$ auf Ebene 1 geclustert in $j$ Klassen/Gruppen
 $j_{1,...m}$ auf Ebene 2.
@@ -189,19 +189,18 @@ ggplot(ess, aes(x=cntry, color=region)) +
 save_fig("V1_0_2.png", save)
 ```
 
-Hier sind die Befragten in Regionen (z.B. Bundesländern) geclustert, die dann wiederum Teil von Ländern (also Nationalstaaten) sind. 
+Hier sind die Befragten in Regionen (z.B. Bundesländern oder Kantonen) geclustert, die dann wiederum Teil von Ländern (also den Nationalstaaten) sind. 
 
 Für die Videoserie bleiben wir aber beim einfachen Beispiel mit zwei Ebenen.
 
 
-## Varianz auf Ebene 2
+## Varianz auf Ebene 2 1:25 / 11:55
 
 Hier kommt ein wichtiger Punkt: 
 
-Dass ihre Daten durch das Vorhandensein Gruppierungsvariablen eine Mehrebenenstruktur aufweisen, ist zwar eine notwendige, aber keine hinreichende Bedingung für eine Mehrebenenregression.
+Dass ihre Daten durch das Vorhandensein einer Gruppierungsvariable eine Mehrebenenstruktur aufweist, ist zwar eine notwendige, aber keine hinreichende Bedingung für eine Mehrebenenregression.
 
-Denn es ist ja nicht zwingend so, dass diese Struktur auch empirisch in zu Unterschieden zwischen den Kontexteinheiten führt.   
-
+Denn es ist ja nicht zwingend so, dass diese Struktur auch empirisch zu Unterschieden zwischen den Kontexteinheiten führt.   
 Oder anders gesagt: es genügt nicht, dass strukturell mehrere Ebenen vorhanden sind. Darüber hinaus muss in der abhängigen Variable auch tatsächlich Variation zwischen den Kontexteinheiten bestehen. Nur dann ist eine Mehrebenenregression sinnvoll.
 
 Man sagt auch: Es muss ausreichend Varianz auf Ebene 2 vorhanden sein.
@@ -212,20 +211,20 @@ Wie man das macht, sehen wir im zweiten Teil der Videoserie.
 
 Wenn also ausreichend Varianz auf Ebene 2 vorliegt, können wir die Mehrebenenregression nutzen. Vorteil ist, dass wir bessere Schätzungen für die Regressionsparameter erhalten (was das genau heißt sehen wir noch).
 
-Weiterer Vorteil ist, dass wir die Wechselwirkungen zwischen den Ebenen explizit im Modell berücksichtigen können und in wenigen Maßzahlen auch kompakt beschreiben können. 
+Ein weiterer Vorteil ist, dass wir die Wechselwirkungen zwischen den Ebenen explizit im Modell berücksichtigen können und in wenigen Maßzahlen auch kompakt beschreiben können. 
 
 Was heißt das genau?
 
 
-## Grundidee und Varianten der Mehrebenenregression
+## Grundidee und Varianten der Mehrebenenregression 4:51 / 16:46
 
 Nun, die Grundidee der Mehrebenenregression ist folgende: 
 
-Das was wir in den Daten an Variation haben, und das ist ja das, was wir erklären wollen setzt sich (für den Moment verinfacht) aus zwei Quellen zusammen.
+Das was wir in den Daten an Variation haben, und das ist ja das, was wir erklären wollen, setzt sich (für den Moment verinfacht) aus zwei Quellen zusammen.
 
 Einmal die Variation die durch Eigenschaften und Merkmale der Individuen entsteht. 
 
-Und einmal die Variation, die aus Eigenschaften des Kontextes entsteht, die auf alle Individuen gleich wirken, die zum gleichen Kontext gehören. Wir haben also zunächst zwei Varianzkomponenten. 
+Und zum anderen die Variation, die aus Eigenschaften des Kontextes entsteht, die auf alle Individuen gleich wirken, die zum gleichen Kontext gehören. Wir haben also zunächst zwei Varianzkomponenten. 
 
 Mit Hilfe der Mehrebenenregression lässt sich ein Modell spezifizieren, dass diese Varianzkomponenten korrekt berücksichtigt.
 
@@ -241,11 +240,13 @@ Aber: Wir berücksichtigen *keine* Mehrebenenstruktur:
 
 Und hier ein einfaches Mehrebenenmodell:
 
-- Wir können den Intercept zwischen den Kontexteinheiten variieren lassen! Wir können also berücksichtigen, dass es unterschiedliche Durchschnittswerte der abhängigen Variable in den verschiedenen Kontexteinheiten gibt. *Varying Intercept Model*
+- Wir können den Intercept zwischen den Kontexteinheiten variieren lassen! Wir können also berücksichtigen, dass es unterschiedliche Durchschnittswerte der abhängigen Variable in den verschiedenen Kontexteinheiten gibt. *Varying Intercept Model* - weil der Intercept variiert.
 
-- darüber hinaus, können wir auch den Steigungsparameter variieren lassen. Also, erlauben, dass der Zusammenhang zwischen abhängiger Variable und unabhängiger Variable in den Ländern unterschiedlich stark sein kann. *Varying Intercept, Varying Slope Model*
+- darüber hinaus, können wir auch den Steigungsparameter variieren lassen. Das sehen Sie hier:
 
-Und wir können tatsächlich auch prüfen, ob und wie stark Merkmale auf der Kontextebene dafür verantwortlich sind, dass diese Unterschiede auftreten. Das wäre dann das Modell mit einer *Cross-Level Interaction*
+Wir können also, erlauben, dass der Zusammenhang zwischen abhängiger Variable und unabhängiger Variable in den Ländern unterschiedlich stark sein kann. Das ennt sich dann *Varying Intercept, Varying Slope Model*.
+
+Und wir können tatsächlich auch prüfen, ob und wie stark Merkmale auf der Kontextebene dafür verantwortlich sind, dass diese Unterschiede auftreten. Das wäre dann das Modell mit einer *Cross-Level Interaction*.
 
 Man könnte es auch so formulieren:
 
@@ -255,20 +256,17 @@ Analog für die variierenden Steigungsparameter: Auch diese Variation ist erklä
 
 Also vereinfacht dargestellt:
 
-Die Mehrebenenregression schätzt ein Modell für die Individualebene, aber im Unterschied zur einfachen OLS dürfen aber bestimmte Parameter zwischen den Kontexteinheiten variieren. Die Mehrebenenregression schätzt aber gleichzeitig ein Modell auf Kontextebene, dass es erlaubt, diese Variation auch systematisch erfassen und ggf. zu erklären.
+Die Mehrebenenregression schätzt ein Modell für die Individualebene, aber im Unterschied zur einfachen OLS dürfen aber bestimmte Parameter zwischen den Kontexteinheiten variieren. 
+
+Die Mehrebenenregression schätzt aber gleichzeitig ein Modell auf Kontextebene, dass es erlaubt, diese Variation auch systematisch erfassen und ggf. zu erklären.
 
 Jetzt kennen Sie die unterschiedlichen Varianten, wie man Mehrebenenregression spezifizieren kann:
 
 - Varying Intercept Modell 
-- (Varying Slope Modell)
+- (Varying Slope Modell) Was in der Praxis nur selten ohne varyong intgercept gemacht wird
 - Varying Intercept, Varying Slope Modell 
 - Varying Intercept, Varying Slope Modell mit Cross-Level Interaktion
 
-
-- Varying Intercept Modell (mit oder ohne Prädiktoren auf L1 und L2)
-- (Varying Slope Modell, mit oder ohne Prädiktoren auf L2)
-- Varying Intercept, Varying Slope Modell (mit oder ohne Prädiktoren auf L2)
-- Varying Intercept, Varying Slope Modell mit Cross-Level Interaktion
 
 Wir können also folgende Fragestellungen beantworten:
 
@@ -279,10 +277,17 @@ Wir können also folgende Fragestellungen beantworten:
 
 Diese Modelle schauen wir uns in Teil 3 der Videoserie noch einmal genauer an und werden sie mit R selbst umsetzen und interpretieren.
 
+Damit wären wir am Ende des ersten Videos anfgelangt. 
+
+
+Im folgenden finden Sie noch eine Aufgabe zur Wiederholung, sowie nochmal eine Übersicht über die Lernziele. Ganz am Ende, noch ein paar Literaturhinweise.
+
+
+
 
 # Aufgabe zur Wiederholung
 
-- Überlegen Sie sich theoretisches ein Beispiel, bei dem der durchschnittliche Wert einer Variable auf Ebene 1 zwischen den Kontexteinheiten variiert. 
+- Überlegen Sie sich ein theoretisches ein Beispiel, bei dem der durchschnittliche Wert einer Variable auf Ebene 1 zwischen den Kontexteinheiten variiert. 
 - Überlegen Sie, welche Determinanten auf der Kontextebene für diese Variation des Mittelwertes verantwortlich sein könnte.
 - Überlegen Sie, ob es vielleicht auf Individualebene eine erklärende Variable gibt, deren Wirkung zwischen den Kontexten variiert, die also in den unterschiedlichen Kontexten stärker oder schwächer oder vielleicht gar nicht wirkt?
 

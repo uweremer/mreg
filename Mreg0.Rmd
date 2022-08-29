@@ -43,7 +43,7 @@ save_fig <- function(filename, save = TRUE){
 - dass Sie die unterschiedlichen Bezeichnungen der Mehrebenenregression kennen.
 - dass Sie das Grundprinzip der Mehrebenenregression erläutern können.
 - dass Sie wissen, welche unterschiedlichen Varianten der Mehrebenenregression es gibt.
-- dass Sie entscheiden können, für welche Fragestellungen welche Variante der Mehrebenenregression geeignet ist.
+- dass Sie entscheiden können, für welche Fragestellungen welche Variante der Mehrebenenregression geeignet sind.
 
 - dass Sie erläutern können, worin sich eine Mehrebenenregression von einer einfachen linearen Regression unterscheidet.
 - dass Sie aufzählen können, welche Vorteile eine Mehrebenenregression hat.
