@@ -1,0 +1,74 @@
+---
+title: "Wie schätzt man eine Mehrebenenregression in R?"
+subtitle: "Videoserie Mehrebenenregression Teil 6/6"
+author: "Dr. Uwe Remer"
+date: "Juli 2022"
+output:
+  html_document:
+    toc: yes
+    number_sections: yes
+    toc_depth: 2
+    toc_float:
+      collapsed: true
+    df_print: paged
+    highlight: tango
+    theme: spacelab
+---
+
+```{r setup, include=FALSE}
+# Figure size in inches
+w = 5
+h = 2.5
+s = 2.8
+    
+knitr::opts_chunk$set(eval=TRUE, echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.width=w, fig.height=h, fig.align='center')
+save <-  F
+save_fig <- function(filename, save = TRUE){
+  if(save==TRUE){
+    ggsave(paste0("./Grafiken/", filename), 
+         width = w, height = h,
+         #scale = s,       
+         unit = "in")
+  }
+  else{
+    message("Saving skipped...")
+  }
+}
+```
+
+```{css, eval=T}
+/* CSS Stil für Formeln unter Scatterplots */
+P.math {
+    text-align: center;
+    font-size: 2vw;
+}
+
+table {
+  width: 50%;
+}
+
+```
+
+
+# Themenüberblick
+
+Hallo und herzlich Willkommen zum sechsten und letzten Teil der Videoserie zum Thema Mehrebenenregression in R. 
+
+
+
+# Fazit
+
+Vorteile der MLM
+
+Wenn Prognose:
+Deutlich bessere Vorhersage: 
+-	Bessere Prognose als wenn ML Struktur unberücksichtigt (höhere Erklärungskraft)
+-	Ehrlichere Unsicherheit als wenn unberücksichtigt
+-	Weniger Unsicherheit als bei einzelnen Ländern
+-	Geringere Variabilität der Schätzung als bei einzelnen Ländern 
+Wenn Inferenz: explizite Modellierung
+Welchen Einfluss haben Prädiktoren auf Ebene 1 an der Varianz auf Ebene 1
+Welchen Einfluss haben Prädiktoren auf Ebene 2 an der Varianz auf Ebene 2
+Unterscheiden sich die Effekte eines Prädiktors der Ebene 1 zwischen Einheiten der Ebene 2
+Können Prädiktoren der Ebene 2 erklären, warum sich Effekte von Prädiktoren der Ebene 1 zwischen den Ebene 2 Einheiten unterscheiden?

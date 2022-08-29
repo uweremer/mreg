@@ -1,0 +1,471 @@
+---
+title: "Wann ist eine Mehrebenenregression angebracht?"
+subtitle: "Videoserie Mehrebenenregression Teil 2/6"
+author: "Dr. Uwe Remer"
+date: "Juli 2022"
+output:
+  html_document:
+    toc: yes
+    number_sections: yes
+    toc_depth: 2
+    toc_float:
+      collapsed: true
+    df_print: paged
+    highlight: tango
+    theme: spacelab
+---
+
+```{r setup, include=FALSE}
+# Figure size in inches
+w = 5
+h = 2.5
+s = 2.8
+    
+knitr::opts_chunk$set(eval=TRUE, echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.width=w, fig.height=h, fig.align='center')
+save <-  F
+save_fig <- function(filename, save = TRUE){
+  if(save==TRUE){
+    ggsave(paste0("./Grafiken/", filename), 
+         width = w, height = h,
+         #scale = s,       
+         unit = "in")
+  }
+  else{
+    message("Saving skipped...")
+  }
+}
+```
+
+```{css, eval=T}
+/* CSS Stil für Formeln unter Scatterplots */
+P.math {
+    text-align: center;
+    font-size: 2vw;
+}
+```
+
+# Themenüberblick
+
+Hallo und herzlich Willkommen zum zweiten Teil der Videoserie zum Thema Mehrebenenregression in R. 
+
+Im ersten Video haben Sie das Grundprinzip der Mehrebenenregression kennengelernt. Wir hatten gesagt, dass eine Mehrebenenregression das geeignete statistische Verfahren ist, wenn Ihre Daten eine hiererchische Struktur aufweisen.
+
+In diesem zweiten Video vertiefen wir diesen Aspekt. 
+
+In der ersten Hälfte möchte ich an einem Beispiel verdeutlichen, was es eigentlich heißt, dass Daten eine Mehrebenenstruktur aufweisen und wie sich das in der Gleichung des Mehrebenenmodells wiederspiegelt.
+
+In der zewiten Hälfte schauen wir dann, wie mit Hilfe des Intraklassenkorrelationskoeffizienten ICC und mit dem Design Effekt bestimmt werden kann, ob eine Mehrebenenregression angemessen ist. 
+Dann heißt auch Hands-on und wir berechnen diese beiden Maßzahlen mit R. 
+
+
+Die konkreten Lernziele sind, dass Sie...
+
+- theretisch begründen können wie und warum der Kontext einen Einfluss auf Ihre Datenstruktur hat
+- erläutern können, was ein Nullmodell ist.
+ und wo dort was Varianzkomponenten sind und wo diese in der Regrgressionsgleichung zu finden sind
+- wissen was der ICC ist und was der Design Effekt ausdrückt
+  - wie man den ICC und den Design Effekt mit R berechnet
+  - wie der ICC und der Design Effekt im hinblick auf die Merhebenenregression interpretiert wird 
+
+
+
+```{r}
+library(foreign)
+ess <- read.spss("./Daten/ESS9e02.sav", 
+                 use.value.labels = FALSE,
+                 to.data.frame = TRUE,
+                 reencode = TRUE)
+```
+
+# Context Matters
+
+Viele Phänomene, die wir erklären wollen, oder über die wir eine Prognose treffen wollen lassen sich nicht alleine auf der Individualebene, bzw. der Mikroebene modellieren.
+
+Also nicht nur persönliche Eigenschaften, Merkmale und Einstellungen haben einen Einfluss darauf, was Menschen tun, was sie denken, wen Sie wählen oder wie sie konsumieren.
+
+Der soziale Kontext und die institutionellen Strukturen auf Meso- und Makroebene haben einen nicht zu unterschätzenden Einfluss auf die Menschen und ihr handeln. 
+
+> Menschen teilen einen gemeinsamen sozialen Kontext innerhalb von Gruppen. Gleichzeitig unterscheiden diese Kontexte sich aber zwischen den Gruppen. Menschen unterliegen also unterschiedlichen sozialen Kontexten.
+
+Mit den Konzepten des methodologischen Individualismus und dem Makro-Mikro-Makro-Schema, das besser bekannt ist als die Coleman’sche Badewanne, wird analytisch klar, dass die Erklärung sozialer Phänomene immer alle Ebenen berücksichtigen muss.
+
+Dieses Argument möchte ich Ihnen auch anhand von konkreten Daten veranschaulichen. 
+In allen Videos nutzen wir dasselbe Beispiel. 
+
+<p style="max-width: 20%; float: right; margin: 2em;"><a href="https://www.europeansocialsurvey.org" target="_blank" rel="external">
+![](./Grafiken/ESS_Logo.jpg "ESS Logo by ESS-ERIC, a European Research Infrastructure Consortium, see https://www.europeansocialsurvey.org")</a>
+</p>
+
+Die Daten stammen aus dem 9. European Social Survey, - kurz ESS - aus dem Jahr 2018.^[ESS Round 9: European Social Survey Round 9 Data (2018). Data file edition 3.1. Sikt - Norwegian Agency for Shared Services in Education and Research, Norway – Data Archive and distributor of ESS data for ESS ERIC. doi:10.21338/NSD-ESS9-2018] Im ESS wurden in 27 Ländern insgesamt 47.086 Personen zu einer Vielzahl an Themen befragt. Um schon Mal vorweg zu greifen: die 27 Länder sind die Ebene 2 und die 47.086 Befragten, sind die Beobachtungseinheiten auf Ebene 1.
+
+
+Sie benötigen die ESS Daten um den R Code aus R-Script-Dateien zu den Videos ausführen zu können. Die Daten können Sie über die Webseite des ESS herunterladen:
+
+https://www.europeansocialsurvey.org/ 
+
+oder direkt über die DOI-Adresse:
+
+https://doi.org/10.21338/NSD-ESS9-2018 
+
+Für unser Beispiel befassen wir uns mit dem Thema Politikverdrossenheit. Was in den Medien oder Alltagssprachlich als Politikverdrossenheit bezeichnet wird, wird in der Forschung mit dem Konzept „Political Support“ untersucht. Eine Komponente davon ist das politische Vertrauen der Bürger. 
+
+Wer mehr darüber wissen möchte, für den gibt es am Ende des Videos noch Literaturhinweise. 
+Also: Schauen wir uns das politische Vertrauen in Europa an: 
+
+```{r erstes_beispiel_daten_vorbereiten}
+set.seed(2022)
+library(foreign)
+ess <- read.spss("./Daten/ESS9e02.sav", 
+                 use.value.labels = FALSE,
+                 to.data.frame = TRUE,
+                 reencode = TRUE)
+
+idx_vars <- c("trstprl","trstplt","trstprt")
+ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
+                              na.rm = F)
+ess$zufr_wirtschaft <- ess$stfeco
+
+
+# Subset an Ländern, da sonst zu viele Daten
+laender <- c("BG","CY","DE","NO","SE","FR")
+ess_c6 <- ess[ess$cntry %in% laender, ]
+
+
+
+# Gruppierungsvariable ohne Gruppen (complete pooling)
+ess$no_countries <- "alle Befragte"
+ess_c6$no_countries <- "alle Befragte"
+
+# Nur Gültige
+ess_c6 <- na.omit(ess_c6[,c("pol_vertrauen",
+                            "zufr_wirtschaft",
+                            "cntry", 
+                            "no_countries")])
+
+# Mittelwert
+means_df <- aggregate(list(pol_vertrauen = ess_c6$pol_vertrauen),
+                           by=list(cntry = ess_c6$cntry),
+                           FUN=mean, na.rm=T)
+grand_mean <- mean(means_df[,2])
+```
+
+
+Es handelt sich um einen Mittelwert-Index aus drei Items. 
+
+>„Bitte […] sagen Sie mir zu jeder öffentlichen Einrichtung oder Personengruppe, die ich Ihnen nenne, wie sehr Sie persönlich jeder einzelnen davon vertrauen. […] 0 bedeutet, dass Sie dieser Einrichtung oder Personengruppe überhaupt nicht vertrauen, und 10 bedeutet, dass Sie ihr voll und ganz vertrauen.“
+
+- den Parteien
+- dem Bundestag (bzw. dem jeweiligen Parlament im Land)
+- den Politikern
+
+```{r}
+library(ggplot2)
+library(ggtext)
+library(grid)
+#devtools::install_github("wilkelab/ungeviz")
+library(ungeviz)
+
+ggplot(ess_c6, aes(x=pol_vertrauen, y=no_countries)) +
+  geom_point() +
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,2,0,2), "cm"))
+
+save_fig("V1_1_1.png", save)
+```
+
+Aber hier sehen wir relativ wenig, weil hinter jedem Punkt eine Vielzahl von Befragten steckt. Um einen besseren Eindruck bekommen, ziehe ich die Punkte auf der vertikalen und horizontalen Achse etwas auseinander und mache die Punkte kleiner. So erkennen wir alle der knapp 50.000 Punkte.
+
+
+```{r}
+ggplot(ess, aes(pol_vertrauen, no_countries)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=.5, alpha =.3, shape=".") +
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,2,0,2), "cm"))
+
+save_fig("V1_1_2.png", save)
+```
+
+Ganz schön viele Punkte. Damit das Beispiel übersichtlich bleibt, mache ich mit nur sechs der 27 Länder weiter und nutze von diesen auch nur 15 Prozent der Datenpunkte. 
+
+```{r}
+l <- length(ess_c6[,1])
+ess_c6 <- ess_c6[sample(1:l,l*0.15),]
+
+
+ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1) +
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,2,0,2), "cm"))
+
+save_fig("V1_1_3.png", save)
+```
+
+Immer noch viel, aber etwas übersichtlicher. 
+Lassen Sie uns noch den Mean einzeichnen.
+
+
+```{r}
+ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1) +
+  stat_summary(fun=mean, geom="vpline", 
+               size=1.2, height = 1, show.legend=FALSE) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +    
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,2,0,2), "cm"))
+
+save_fig("V1_1_4.png", save)
+```
+
+Das Durchschnittliche politische Vertrauen in den sechs Länder liegt bei 4. Es ist also einen Skalenpunkt unterhalb der theoretischen Skalenmitte und somit leicht negativ. 
+Aber was sagt dieser Mittelwert aus? Wir wissen ja, dass hier Befragte aus sechs unterschiedlichen Ländern zusammengefasst werden. 
+
+Und wir sehen ja auch, dass die Streuung recht groß ist - um genau zu sein liegt die Standardabweichung bei `r round(sd(ess_c6$pol_vertrauen, na.rm=T),1)`. 
+
+Man muss kein Politikwissenschaftler sein, um zu ahnen, dass ein Teil der Unterschiede - oder genauer ein Teil der Streuung im politischen Vertrauen - darauf zurückzuführen ist, dass zwischen den Ländern große Unterschiede im politischen Vertrauen bestehen. 
+
+Also färben wir die Befrgaten mal nach Länderzugehörigkeit ein.
+
+
+```{r}
+farben <- c("#00966E", "#D57800", "#FFCC00", "#002654","#BA0C2F", "#006AA7")
+ggplot(ess_c6, 
+       aes(pol_vertrauen, no_countries, color=cntry)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha =1) +
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_colour_manual(values = farben) +
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,0,0,2), "cm")) +
+  guides(colour = guide_legend(override.aes = list(size=2)))
+
+save_fig("V1_1_5.png", save)
+```
+
+Ja… man ahnt schon etwas… unten mehr grün… oben mehr rot und hellblau.
+Aber machen wir es doch ganz eindeutig und gruppieren die Befragten nach ihren Ländern…
+
+
+```{r}
+flags <- c("<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Bulgaria.svg/320px-Flag_of_Bulgaria.svg.png' alt='Bulgarien', title='Bulgarien'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Flag_of_Cyprus.svg/320px-Flag_of_Cyprus.svg.png'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/en/thumb/b/ba/Flag_of_Germany.svg/320px-Flag_of_Germany.svg.png'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/en/thumb/c/c3/Flag_of_France.svg/320px-Flag_of_France.svg.png'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Norway.svg/320px-Flag_of_Norway.svg.png'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/en/thumb/4/4c/Flag_of_Sweden.svg/320px-Flag_of_Sweden.svg.png'  width='20' /><br>")
+
+
+ggplot(ess_c6, 
+       aes(pol_vertrauen, cntry, color=cntry)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha =1) +
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_y_discrete(labels = flags) +  
+  scale_colour_manual(values = farben) +
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,0,0,2), "cm"),
+        axis.text.x  = element_markdown(color = "black", size = 7)) +
+  guides(colour = guide_legend(override.aes = list(size=2)))
+
+save_fig("V1_1_6.png", save)
+```
+
+Was wir nun sehen ist, dass ein Teil der Streuung in der Punktewolke auf Varianz zwischen den Ländern zurückzuführen ist. 
+
+```{r}
+
+ggplot(ess_c6, 
+       aes(pol_vertrauen, cntry, color=cntry)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha =1) +
+  stat_summary(fun=mean, geom="vpline", 
+               size=1.2, height = 1, show.legend=FALSE) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_y_discrete(labels = flags) +  
+  scale_colour_manual(values = farben) +
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,0,0,2), "cm"),
+        axis.text.x  = element_markdown(color = "black", size = 7)) +
+  guides(colour = guide_legend(override.aes = list(size=2)))
+
+save_fig("V1_1_7.png", save)
+```
+
+Jedes Land hat ein anderes durchschnittliches Niveau von politischem Vertrauen. Wir können für jedes Land den Mittelwert einzeichnen. Und diese Mittelwerte streuen um den Mittelwert der Ländern, den sogenannten Grand Mean.
+
+```{r }
+
+ggplot(ess_c6, 
+       aes(pol_vertrauen, cntry, color=cntry)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha =1) +
+  stat_summary(fun=mean, geom="vpline", 
+               size=1.2, height = 1, show.legend=FALSE) +  
+  geom_vline(xintercept=grand_mean, col="black", size=1) +
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_y_discrete(labels = flags) +  
+  scale_colour_manual(values = farben) +
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,0,0,2), "cm"),
+        axis.text.x  = element_markdown(color = "black", size = 7)) +
+  guides(colour = guide_legend(override.aes = list(size=2)))
+
+save_fig("V1_1_8.png", save)
+```
+
+Was wir jetzt sehen: Es gibt also Varianz innerhalb der Länder: Befragte streuen um den ihren jeweiligen Landesmittelwert. Und es es gibt Varianz zwischen den Ländern. Die Länder streuen um den Grand Mean. 
+
+
+## Regressionsgleichung
+
+Schauen wir an dieser Stelle noch einmal auf die Regressionsgleichung.
+
+So kennen wir die einfache OLS Regression.
+
+<p class=math> 
+$y_i=a+bx_i+e_i$
+</p>
+
+Wir könnten aber es genau so auch folgendermaßen notieren, ohne dass sich irgendetwas ändert:
+
+<p class=math> 
+$y_i=\beta_{0}+\beta_1x_i+e_ij$
+</p>
+
+Das verdeutlicht aber, dass der Intercept $\beta_0$ dabei genau so ein Regressionskoeffizient ist wie die b-Koeffizienten. 
+
+Und wenn man es ganz genau nehmen wöllte, könnte man auch schreiben:
+
+<p class=math> 
+$y_i=\beta_{0}x_0+\beta_1x_i+e_ij$
+</p>
+
+Jetzt werden Sie sagen, aber wir haben ja gar keine Variable $x_0$.
+
+Naja, nicht ganz. Nur: Diese Variable stammt nicht aus den Daten und genau genommen ist es keine Variable, sondern eine Konstante, die Sie in die Regressionsgleichung mit aufnehmnem:
+
+$x_0$ ist für alle Befragten konstant 1, also: $x_0 = 1$. Warum: weil der Intercept geht für alle Befragten mit gleichem Wert in die Rgeressionsgleichung ein.
+
+<p class=math> 
+$y_i=\beta_{0}1+\beta_1x_i+e_ij$
+</p>
+
+Dann können wir die Gleichung aber gleich so schreiben...
+
+<p class=math> 
+$y_i=\beta_{0}+\beta_1x_i+e_ij$
+</p>
+
+
+
+wurde das Grundmodell der Mehrebenenregression, bei der 
+
+<p class=math> 
+$y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + r_{ij}$
+</p>
+
+mit 
+
+<p class=math> 
+$\beta_{0j} = \gamma_{00} + u_{0j}$
+</p>
+
+
+
+
+
+<p class=math> 
+<font color=blue>$y_{ij}$</font>
+$=$
+<font color=red>$\beta_0j+\beta_1x_ij$</font>
+$+~...~\beta_nx_n~+~$
+<font color=darkorange>$e$</font>
+</p>
+
+
+
+
+
+## Zischenfazit
+
+
+Also: Menschen haben hohes oder niedriges politisches Vertrauen (Mikroebene). Aber der soziale Kontext - hier das politische System und gesellschaftliche Faktoren auf Ebene der Länder - beeinflussen als Makroebene das politische Vertrauen. Ein Teil der Unterschiede im politischen Vertrauen, geht also alleine auf diese Kontextfaktoren zurück. Und kann also nur durch Variation auf der Kontextebene erklärt werden. 
+
+Wie wir bereits gesehen haben ist die Mehrebenenregression das geeignete Verfahren zur Analyse sozialer Phänomene, bei denen Kontextfaktoren und deren Wechselwirkungen mit der Individualebene explizit modelliert werden sollen. 
+
+Eine Bedingung, dass das funktioniert ist aber, dass die Daten auch tatsächlich eine hierarchische Struktur aufweisen.
+
+Und das heißt nicht nur, dass die Ebenen strukturell vorhanden sind, sondern darüber hinaus, dass auch  tatsächlich eine emprische Variation zwischen den Einheiten auf der Ebene in unserem Beispiel den Ländern vorhanden ist.
+
+Und zwar für die jeweilige Y-Variable, die für Sie in Ihrer Forschungsfrage relevant ist! Das heißt ob und wie stark die Mehrebenenstruktur ausgeprägt ist, ist kein Merkmal des gesamten Datensatzes, sondern ein spezifisches Merkmal einre Variable in abhängigkeit der Gruppierungsvariable.
+
+
+Ok, wir wissen nun also, dass wir zuerst schauen müssen, ob unsere Abhängige Variable ausreichend Variation zwischen den Gruppen aufweist, damit eine Mehrebeneregression Sinn macht. Denn: und das haben wir schon im ersten Video gehört: wenn die Daten keine Mehrebenenstruktur aufweisen, dann unterscheiden sich die Egrebnisse iner MLM nicht von denen einer OLS Regression. Da aber die MLM deutlich afuwändiger ist, rechnet man sie nur, wenn es die Daten erfordern.
+
+
+# ICC
+
+# Design Effect
+
+# Fazit 
+
+Die Frage die sich nun stellt ist: Wie lässt sich nun bestimmen, ob und wie große eine solche Varianz zwicshen den Gruppen ist und ob eine Mehrebenenrergression also notwendig ist.
+
+Dafür gibt es zwei Maßzahlen, die wir berechnen können:
+
+Den ICC und den Design Effekt.
+
+Beide Maßzahlen schauen wir uns im folgenden an berechnen sie für unser Beipsiel.
+
+
+
+
+
+ETWAS ZU MINDESTFALLZAHLEN
+
+
+
+
+
+#	Lernzielabgleich
+
+Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernziele erreicht haben: 
+
+- Sie kennen die unterschiedlichen Bezeichnungen der Mehrebenenregression.
+- Sie können das Grundprinzip der Mehrebenenregression erläutern.
+- Sie können darlegen, worin sich eine Mehrebenenregression von einer einfachen Linearen Regression unterscheidet.
+- Sie können aufzählen können, Vorteile eine Mehrebenenregression hat.
+- Sie wissen, welche unterschiedlichen Varianten der Mehrebenenregression es gibt.
+- Sie können entscheiden, für welche Fragestellungen welche Variante der Mehrebenenregression geeignet ist.
+
+

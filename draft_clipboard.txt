@@ -1,0 +1,61 @@
+
+Zusätzlich bekommt man Mehrere R^2 für variierende Parameter
+
+
+
+## Und wie sieht das technisch aus?
+
+Die MLM erweitert die einfache OLS Regression
+Aus y=a+bx wird im einfachsten Fall
+yij = _0j + b1+ rij
+mit _0j = 00 + u0j
+ERLÄUTERN
+
+
+## Vorteile 
+
+Wenn also ausreichend Varianz auf Ebene 2 vorliegt, können Sie die Vorteile der Mehrebenenregression nutzen.
+
+Die Vorteile betreffen dabei zwei Aspekte: 
+  
+  - zunächst den Aspekt der Prognose: das heißt, wie gut können wir mit dem Modell Aussagen über die abhängige Variable treffen? 
+  - und zum zweiten die kausale Inferenz: wie gut können wir Aussagen über Zusammenhänge zwischen der abhängigen und den unabhängigen Variablen treffen?
+  
+  Gut heißt dabei: unverzerrt und effizient. Das kennen Sie vielleicht aus der Regressionstheorie, wir meinen damit dass die Schätzung der Regressionsparameter nah dran am unbekannten wahren Wert liegt und möglichst geringe Unsicherheit aufweist.
+
+Wenn Daten also eine Mehrebenenstruktur aufweist, ist die Mehrebenenregression das Modell, dass bessere Vorhersagen ermöglicht, aber auch die Zusammenhänge zwischen den Variablen besser modellieren kann.
+
+
+Wir fassen die Vorteile am Ende des Videos noch einmal konkreter Zusammen. 
+
+
+Um das zu verstehen, müssen wir uns das Mehrebenenmodell aber erst im Detail kennenlernen. 
+
+
+Wenn also ausreichend Varianz auf Ebene 2 vorliegt, können wir die Mehrebenenregression nutzen. Vorteil ist, dass wir bessere Schätzungen für die Regressionsparameter erhalten (was das genau heißt sehen wir noch), und das wir die Wehcslewirkungen zwischen den Ebenen explizit im Modell berücksichtigen können und in wenigen Maßazahlen auch kompat beschrieben können. 
+
+
+Wenn Prognose:
+  Deutlich bessere Vorhersage: 
+  -	Bessere Prognose als wenn ML Struktur unberücksichtigt (höhere Erklärungskraft)
+-	Ehrlichere Unsicherheit als wenn unberücksichtigt
+-	Weniger Unsicherheit als bei einzelnen Ländern
+-	Geringere Variabilität der Schätzung als bei einzelnen Ländern 
+
+Wenn Inferenz: explizite Modellierung
+Welchen Einfluss haben Prädiktoren auf Ebene 1 an der Varianz auf Ebene 1
+Welchen Einfluss haben Prädiktoren auf Ebene 2 an der Varianz auf Ebene 2
+Unterscheiden sich die Effekte eines Prädiktors der Ebene 1 zwischen Einheiten der Ebene 2
+Können Prädiktoren der Ebene 2 erklären, warum sich Effekte von Prädiktoren der Ebene 1 zwischen den Ebene 2 Einheiten unterscheiden?
+  
+  
+  
+  
+  
+  # Das Grundprinzip der Mehrebenenregression
+  
+  Alle statistischen Verfahren haben im Kern zwei Ziele: Inferenz und Prognose. Es kommt zwar auf die konkrete Fragestellung an, aber in der Regel sind wir als Wissenschaftler:innen  an Inferenz interessiert – denn wir wollen verstehen und erklären. 
+
+In der praktischen Anwendung außerhalb der Forschung – z.B. in Beratung, oder im Unternehmenseinsatz - ist häufig Prognose das Ziel: Was passiert, wenn man das eine oder andere ändert? 
+  
+  Ob man das Ziel erreicht, also ob Sie Ihrer Inferenz oder Prognose trauen können, hängt davon ab, ob man das richtige Instrument nutzt. In vielen Fällen ist die einfache lineare Regression ausreichend. Aber in vielen Fällen gibt es substantielle Gründe und/oder statistische Gründe, die eine Mehrebenenregression zum korrekten Modell der Wahl machen. Schauen wir als erstes auf die substantiellen Gründe.

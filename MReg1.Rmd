@@ -81,96 +81,6 @@ Lernziele für dieses Video sind…
 - dass Sie entscheiden können, für welche Fragestellungen welche Variante der Mehrebenenregression geeignet ist.
 
 
-# Die Kurzfassung
-
-Auf der einen Seite gibt es die Wirklichkeit, auf der anderen Seite, das statistische Modell, mit dem wir diese Wirklichkeit möglichst gut abbilden wollen.
-
-In der empirisch-analytischen Wissenschaft sagen wir, im der Wirklichkeit gibt es einen datengenerierenden Prozesses (DGP datagenerating process).  Das ist einen Kette an Ursache/Wirkungszusammenhängen, an deren Ende das Phänomen steht, das wir erklären wollen. Also eine Ablauf an Mechansimen, der dazu führt, dass z.B. unsere Befragten den einen oder anderen Wert auf der Y-Variable - der abhängigen Variable erhalten.
-
-Unsere Theorien versuchen diesen DGP zu beschreiben - zumindest einen für uns relevanten Ausschnitt davon. Die Theorie liefert uns die unabhängigen Variablen, die dafür verwantwortlich sein sollen, warum eine Befragte den ein oder anderen Wert auf der Y-Variable aufweist.
-
-Mit dem statistischen Modell versuchen wir dann diese Theorie über den datengenerierenden Prozess mathematisch/statistisch auszudrücken. 
-
-In aller Regel laufen solche datengenerierende Prozesse aber Kontextabhängig ab. Die Mechanismen die wirken, können je nach Kontext einen stärkeren oder schwächeren Effekt haben, keinen Effekt haben, oder sogar einen umgekehrten Effekt aufweisen. 
-
-Der Kontext, das sind alle Möglichen Einbettungen, in denen Menschen sich bewegen: Menschen sind Teil von Gruppen, Klassen, Parteien, Orten, Stadtteilen, Ländern und vielem mehr.
-
-Unsere datengenerierenden Prozesse führen also zu einer verschachtelten Struktur der Daten (nested data). Man spricht auch von hierarchischen Daten, oder von einer Mehrebenenstruktur.
-
-Solche Ebenen können neben sozialen Gruppen und Organisationszugehörigkeiten auch räumliche Einheiten sein, oder Erhebungszeitpunkte, oder sogar Experimentalgruppen. 
-
-Immer wenn solche hierarschichen Daten vorliegen, ist die Mehrebenenregression das passende statistische Modell, dass den datengenerierenden Prozess am besten abbilden kann. 
-
-Technisch spricht man davon, dass es mehrere Ebenen gibt, im englischen *levels*.
-Jede Ebene hat eine bestimmte Anzahl an Fällen (*Units*).
-
-Wir besschäftigen uns hier mit dem einfachen Fall von zwei Ebenen.
-
-- die erste Ebene ist die Individualebene, hier finden wir unsere Befragten. Es ist die untereste Ebene, kurz: L1 für Level 1. Als Index nutzen wir das $i$.
-- die Kontextebene ist die obere Ebene oder L2. Diese Ebene sind die Länder oder Klassen. Als Index nutzen wir das $j$.
-
-Wir haben $n$ Individuen $i_{1, ...n}$ auf Ebene 1 geclustert in $j$ Klassen/Gruppen
-$j_{1,...m}$ auf Ebene 2.
-
-Nehmen wir beispielsweise den ESS Datensatz, dann haben wir: 
-
-```{r}
-library(foreign)
-ess <- read.spss("./Daten/ESS9e02.sav", 
-                 use.value.labels = FALSE,
-                 to.data.frame = TRUE,
-                 reencode = TRUE)
-library(ggplot2)
-ggplot(ess, aes(x=cntry)) +
-  geom_bar() +
-  geom_text(stat='count', aes(label=..count..), 
-            col="white",
-            hjust=1,
-            angle=90) +
-  theme_minimal()
-```
-
-Wir haben $`r length(ess[,1])`$ Individuen $i_{1,\dots`r length(ess[,1])`}$ auf Ebene 1 geclustert in $`r length(unique(ess[,'cntry']))`$ Klassen/Gruppen
-$j_{1,\dots `r length(unique(ess[,'cntry']))`}$ auf Ebene 2.
-
-
-
-Die MLM Ist notwendig wenn ausreichend Varianz auf L2 vorhanden. ICC Design Effect 
-Wenn nicht, ist die MLM Identisch mit der OLS
-Wenn vorhanden aber nicht MLM sondern OLS: Verstoß gegen Regressionsannahmen, Unterschätzte Standardfehler
-
-
-Vorteile
-Wenn Prognose:
-Deutlich bessere Vorhersage: 
--	Bessere Prognose als wenn ML Struktur unberücksichtigt (höhere Erklärungskraft)
--	Ehrlichere Unsicherheit als wenn unberücksichtigt
--	Weniger Unsicherheit als bei einzelnen Ländern
--	Geringere Variabilität der Schätzung als bei einzelnen Ländern 
-Wenn Inferenz: explizite Modellierung
-Welchen Einfluss haben Prädiktoren auf Ebene 1 an der Varianz auf Ebene 1
-Welchen Einfluss haben Prädiktoren auf Ebene 2 an der Varianz auf Ebene 2
-Unterscheiden sich die Effekte eines Prädiktors der Ebene 1 zwischen Einheiten der Ebene 2
-Können Prädiktoren der Ebene 2 erklären, warum sich Effekte von Prädiktoren der Ebene 1 zwischen den Ebene 2 Einheiten unterscheiden?
-
-Dafür stehen unterschiedliche Varianten zur Verfügung, wie man das Modell spezifiziert:
-Bild Gelman
-
-Zusätzlich bekommt man Mehrere R^2 für variierende Parameter
-
-
-
-
-Und wie sieht das technisch aus?
-	
-Die MLM erweitert die einfache OLS Regression
-Aus y=a+bx wird im einfachsten Fall
-yij = _0j + b1+ rij
-mit _0j = 00 + u0j
-ERLÄUTERN
-
-
-
 
 #	Ein Modell mit vielen Namen
 
@@ -193,13 +103,155 @@ Schon nach wenigen Minuten ist nun Ihr Statistik Wortschatz um einige beeindruck
 Lassen Sie uns jetzt den Begriff der Mehrebenenregression mit Inhalt füllen.
 
 
-# Das Grundprinzip der Mehrebenenregression
+# Die Kurzfassung
 
-Alle statistischen Verfahren haben im Kern zwei Ziele: Inferenz und Prognose. Es kommt zwar auf die konkrete Fragestellung an, aber in der Regel sind wir als Wissenschaftler:innen  an Inferenz interessiert – denn wir wollen verstehen und erklären. 
+In der empirisch-analytischen Wissenschaft haben wir die vereinfachende Vorstellung, dass es eine Art datengenerierenden Prozess gibt (im Englischen: data generating process, oder kurz DGP). Das ist die Vorstellung, dass die Phänomene, also die Daten, die wir messen (also z.B. das Einkommen einer Person, oder ihr politisches Vertrauen usw.) das Ende oder Resultat einer komplexen Kette an Ursache/Wirkungszusammenhängen sind. 
 
-In der praktischen Anwendung außerhalb der Forschung – z.B. in Beratung, oder im Unternehmenseinsatz - ist häufig Prognose das Ziel: Was passiert, wenn man das eine oder andere ändert? 
+Ein sehr simples Beispiel: Die Geburt in einem reichen demokratischen Industrieland als Kind wohlhabender Eltern führt zu guter Bildung führt höherem Einkommen führt größerer Zufriedenheit mit der Wirtschaftslage und führt zu einem höheren politischen Vertrauen. Und man könnte sich noch viele Abzweigungen, Kreuzungen und bedingte Effekte in dieser Kette vorstellen.
 
-Ob man das Ziel erreicht, also ob Sie Ihrer Inferenz oder Prognose trauen können, hängt davon ab, ob man das richtige Instrument nutzt. In vielen Fällen ist die einfache lineare Regression ausreichend. Aber in vielen Fällen gibt es substantielle Gründe und/oder statistische Gründe, die eine Mehrebenenregression zum korrekten Modell der Wahl machen. Schauen wir als erstes auf die substantiellen Gründe.
+Praktisch kann man gar nicht alles berücksichtigen - darum geht es auch in der Forschung nicht. Aber dieses Bild des DGP hilft uns, die Komplixtät der Wirklichkeit handhabbar zu machen
+
+Wir glauben also an einen Ablauf an Mechanismen, der dazu führt, dass unsere Befragten den einen oder anderen Wert auf der Y-Variable - der abhängigen Variable erhalten.
+
+Und unsere Theorien versuchen diesen Ablauf, diesen DGP zu beschreiben. Nicht alles, aber den für eine spezifische Forschungsfrage relevanten Ausschnitt. Die Theorie liefert uns nämlich die Annahmen über die unabhängigen Variablen und die Mechanismen, die sie verbinden. Sie liefern Annahmen darüberm, warum eine Befragte den ein oder anderen Wert auf der Y-Variable aufweist.
+
+Mit dem statistischen Modell versuchen wir dann diese Theorie über den datengenerierenden Prozess mathematisch/statistisch auszudrücken. 
+
+In aller Regel laufen solche datengenerierende Prozesse aber Kontextabhängig ab. Die Mechanismen die wirken, können je nach Kontext einen stärkeren oder schwächeren Effekt haben, keinen Effekt haben, oder sogar einen umgekehrten Effekt aufweisen. 
+
+Der Kontext, das sind alle möglichen Einbettungen, in denen Menschen sich bewegen: Menschen sind Teil von Gruppen, Klassen, Parteien, Orten, Stadtteilen, Ländern und vielem mehr.
+
+Unsere datengenerierenden Prozesse führen also zu einer verschachtelten Struktur der Daten (nested data). Man spricht auch von hierarchischen Daten, oder von einer Mehrebenenstruktur.
+
+Solche Ebenen können neben sozialen Gruppen und Organisationszugehörigkeiten auch räumliche Einheiten sein, oder Erhebungszeitpunkte, oder sogar Experimentalgruppen. 
+
+Immer wenn solche hierarchischen Daten vorliegen, ist die Mehrebenenregression das passende statistische Modell, dass den datengenerierenden Prozess am besten abbilden kann. 
+
+Technisch spricht man davon, dass es mehrere Ebenen gibt, im englischen *levels*.
+Jede Ebene hat eine bestimmte Anzahl an Fällen (*Units*).
+
+Wir beschäftigen uns hier mit dem einfachen Fall von zwei Ebenen.
+
+- die erste Ebene ist die Individualebene, hier finden wir unsere Befragten. Es ist die unterste Ebene, kurz: L1 für Level 1. Als Index nutzen wir das $i$.
+- die Kontextebene ist die obere Ebene oder L2. Diese Ebene sind die Länder oder Klassen. Als Index nutzen wir das $j$.
+
+Wir haben $n$ Individuen $i_{1, ...n}$ auf Ebene 1 geclustert in $j$ Klassen/Gruppen
+$j_{1,...m}$ auf Ebene 2.
+
+Hier ein konkretes Beispiel anhand der Daten des European Social Survey, kurz ESS:
+
+```{r}
+library(foreign)
+ess <- read.spss("./Daten/ESS9e02.sav", 
+                 use.value.labels = FALSE,
+                 to.data.frame = TRUE,
+                 reencode = TRUE)
+library(ggplot2)
+ggplot(ess, aes(x=cntry)) +
+  geom_bar() +
+  geom_text(stat='count', aes(label=..count..), 
+            col="white",
+            hjust=1,
+            angle=90) +
+  theme_minimal() + 
+  scale_x_discrete("Länder") +
+  theme(axis.text=element_text(size=6))
+
+
+save_fig("V1_0_1.png", save)
+```
+
+Die Grafik zeigt die Anzahl der Befragten in den 28 teilnehmenden Ländern.
+
+Die Mehrebenenstruktur in den Daten lässt sich folgendermaßen ausdrücken:
+
+Wir haben $`r length(ess[,1])`$ Individuen $i_{1,\dots`r length(ess[,1])`}$ auf Ebene 1 geclustert in $`r length(unique(ess[,'cntry']))`$ Ländern
+$j_{1,\dots `r length(unique(ess[,'cntry']))`}$ auf Ebene 2.
+
+
+Die Ländervariable ist also die Gruppierungsvariable, in denen die Einheiten der unteren Ebene geclustert sein müssen.
+
+Theoretisch lassen sich noch weitere Ebenen einfügen. Zum Beispiel könnten die Befragten auch in Bundesländer oder Regionen geclustert sein, und diese Länder wiederum in Nationalstaaten. Für die Videoserie bleiben wir aber beim einfachen Beispiel mit zwei Ebenen.
+
+
+Hier kommt ein wichtiger Punkt: 
+
+Dass ihre Daten durch das vorhandensein Gruppierungsvariablen eine Mehrebenenstruktur aufweisen, ist zwar eine notwendige, aber keine hinreichende Bedingung für eine Mehrebenenregression.
+
+Denn es ist ja nicht zwingend so, dass diese Struktur auch empirisch in zu Unterschieden zwischen den Kontexteinheiten führt.   
+
+Oder anders gesagt: es genügt nicht, dass strukturell mehrere Ebenen vorhanden sind. Darüber hinaus muss in der abhängigen Variable auch tatsächlich Variation  zwischen den Kontexteinheiten bestehen. Nur dann ist eine Mehrebenenregression sinnvoll.
+
+Man sagt auch: Es muss ausreichend Varianz auf Ebene 2 vorhanden sein.
+
+Ob das der Fall ist, lässt sich mit Hilfe der sogenannten Intraklassenkorrelation, kurz $ICC$ bestimmen. 
+
+Wie man das macht, sehen wir im zweiten Teil der Videoserie.
+
+Wenn also ausreichend Varianz auf Ebene 2 vorliegt, können wir die Mehrebenenregression nutzen. Vorteil ist, dass wir bessere Schätzungen für die Regressionsparameter erhalten (was das genau heißt sehen wir noch).
+
+Weiter Vortiel istm das wir die Wechselwirkungen zwischen den Ebenen explizit im Modell berücksichtigen können und in wenigen Maßzahlen auch kompakt beschreiben können. 
+
+Was heißt das genau?
+
+## Grundidee 
+
+Nun, die Grundidee der Mehrebenenregression ist folgende: 
+
+Das was wir in den Daten an Variation haben, und das ist ja das, was wir erklären wollen setzt sich aus zwei Quellen zusammen. 
+
+Oder bildlich gesprochen: diese Unordnung in der Punktewolke setzt sich aus zwei Quellen zusammen:
+
+Einmal die Variation die durch Eigenschaften und Merkmale der Individuen entsteht. Und einmal die Variation, die aus Eigenschaften des Kontextes entsteht, die auf alle Individuen gleich wirken, die zum gleichen Kontext gehören. Wir haben also zunächst zwei Varianzkomponente.
+
+Mit Hilfe der Mehrebenenregression lässt sich ein Modell spezifizieren, dass Varianzkomponenten korrekt berücksichtig.
+
+Starten wir bei einem klassischen OLS Regressionsmodell, hier ein einfaches bivariates Beispiel: Wir berücksichtigen *keine* Mehrebenenstruktur:
+
+**HIER Bild Gelman entwickeln**
+
+Es gibt ein Intercept und ein Steigungsparameter b
+
+Und Hier das das einfache Mehrebenenmodell:
+
+- Wir können den Intercept zwischen den Kontexteinheiten variieren lassen! Wir können also berücksichtigen, dass es unterschiedliche Durchschnittswerte der abhängigen Variable in den verschiedenen Kontexteinheiten gibt. *Varying Intercept Model*
+
+- darüber hinaus, können wir auch den Steigungsparameter variieren lassen. Also, erlauben, dass der Zusammenhang zwischen abhängiger Variable und unabhängiger Variable in den Ländern unterschiedlich stark sein kann. *Varying Intercept, Varying Slope Model*
+
+Und wir können tatsächlich auch prüfen, ob und wie stark Merkmale auf der Kontextebene dafür verantwortlich sind, das diese Unterschiede auftreten. Das wäre dann das Modell mit einer *Cross-Level Interaction*
+
+Man könnte es auch so formulieren:
+
+Der Intercept variiert zwischen den Kontexteinheiten, nimmt also unterschiedliche Werte an. Und diese Varianz können wir versuchen mit den Prädiktoren auf Ebene 2 zu erklären.
+
+Analog für die variierenden Steigungsparameter: Auch diese Variation ist erklärungsbedürftig. Und wir können ein Modell erstellen, dass versucht diese Variation auf Kontextebene zu erklären.
+
+Also Vereinfacht dargestellt:
+
+Die Mehrebenenregression schätzt einmal ein Modell für die Individualebene. Im Unterschied zur einfachen OLS dürfen aber bestimmte Parameter zwischen den Kontexteinheiten variieren. Und dann schätzt die Mehrebenenregression gleichzeitig ein Modell auf Kontextebene, um diese Variation auch erfassen und ggf. zu erklären.
+
+Wir können also prüfen: 
+
+- Welchen Einfluss haben Prädiktoren auf Ebene 1 an der Varianz auf Ebene 1
+- Welchen Einfluss haben Prädiktoren auf Ebene 2 an der Varianz auf Ebene 2
+- Unterscheiden sich die Effekte eines Prädiktors der Ebene 1 zwischen Einheiten der Ebene 2
+- Können Prädiktoren der Ebene 2 erklären, warum sich Effekte von Prädiktoren der Ebene 1 zwischen den Ebene 2 Einheiten unterscheiden?
+
+Jetzt kennen Sie die unterschiedlichen Varianten, wie man Mehrebenenregression spezifizieren kann:
+
+- Varying Intercept Modell
+- (Varying Slope Modell)
+- Varying Intercept, Varying Slope Modell
+- Varying Intercept, Varying Slope Modell mit Cross-Level Interaktion
+
+
+
+
+
+
+
+
+
 
 
 ## Context Matters
@@ -709,7 +761,7 @@ ggplot(data=ess_c6_r,
   theme_light() +
   theme(plot.margin=unit(c(.12,2,0,2), "cm"))
 
-save_fig("V1_3_4.png", save)
+save_fig("V1_3_5.png", save)
 ```
 
 <p class=math> 
@@ -749,7 +801,7 @@ ggplot(data=ess_c6_r,
                     ymax = 2) 
 
 
-save_fig("V1_3_5.png", save)
+save_fig("V1_3_6.png", save)
 ```
 
 <p class=math> 
@@ -806,6 +858,10 @@ Wenn die Mehrebenenstruktur nicht berücksichtigt wird, sind die Residuen der Be
 
 Schauen wir das in unserem Beispiel einmal an. 
 
+
+Wir rechnen eine OLS Regression, bei der alle Befragten unabhängig vom Land gleichzeitig berücksichtigt werden. Wir betrachten also die Fälle als eine einzige große Stichprobe. In der Literatur findet man dafür manchmal die Bezeichnung *full  pooling*, weil alle Ebene 2 Einheiten zusammengepoolt werden.
+
+
 ```{r}
 p1 <- ggplot(data=ess_c6,
               aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry)) + 
@@ -845,15 +901,13 @@ grid.arrange(p1, p2, nrow=1)
 save_fig("V1_4_5.png", save)
 ```
 
-Wir rechnen eine OLS Regression, bei der alle Befragten unabhängig vom Land gleichzeitig berücksichtigt werden. Wir betrachten also die Fälle als eine einzige große Stichprobe. In der Literatur findet man dafür manchmal die Bezeichnung *full  pooling*, weil alle Ebene 2 Einheiten zusammengepoolt werden.
-
-Links ist die Regressionsgerade zu sehen. Rechts die Verteilung der Residuen getrennt nach Ländern. Für Bulgarien überschätzt die Regressionsgerade das politische Vertrauen. Die Residuen sind im Schnitt negativ. 
+Links ist die Regressionsgerade zu sehen. Rechts die Verteilung der Residuen getrennt nach Ländern. Wie wir an den Residuen sehen: Für Bulgarien überschätzt die Regressionsgerade das politische Vertrauen. Die Residuen sind im Schnitt negativ. 
 
 Für Norwegen dagegen unterschätzen wir mit der Regressionsgeraden das politische Vertrauen. Die Residuen sind also im Schnitt positiv.
 
 Die Fehler der Individualebene korrelieren also mit einem Kontextmerkmal, nämlich der Länderzugehörigkeit der Befragten. Wir nehmen an, die Befragten wären unabhängig voneinander, was sie in Wahrheit nicht sind. 
 
-In der Folge ist oft die Varianz der Fehler nicht konstant ist, es liegen also heteroskedastische Fehler vor.  Außerdem kann es sein, dass die Residuen nicht unabhängig von den X-Variablen sind, wenn sie mit der übergeordneten Ebene korrelieren. Sie verstoßen also gegen Regressionsannahmen.
+In der Folge ist oft die Varianz der Fehler nicht konstant ist, es liegen also heteroskedastische Fehler vor. Außerdem kann es sein, dass die Residuen nicht unabhängig von den X-Variablen sind, wenn sie mit der übergeordneten Ebene korrelieren. Sie verstoßen also gegen Regressionsannahmen.
 
 Auch die Standardfehler die für die Regressionskoeffizienten im einfachen OLS Modell berechnet werden, werden auf Basis der gesamten Stichprobe berechnet. Es wird nicht berücksichtigt, dass die Varianzen und Fallzahlen in den Gruppen unterschiedlich sind. Als Folge werden die Standardfehler unterschätzt. 
 
@@ -881,9 +935,9 @@ Wenn für ein Land besonders wenige Fälle vorliegen (wenn wir also eine große 
 
 Da so die Informationen aus der gesamten Stichprobe berücksichtigt werden, haben wir kleinere Standardfehler als wenn wir jedes Land für sich alleine betrachten. Und die Standardfehler berücksichtigen trotzdem, dass für jedes Land eine andere Varianz und andere Fallzahl auf Ebene 1 vorliegt. So haben wir eine präzisere Schätzung und kleinere Konfidenzbänder, also weniger Unsicherheit.
 
+### Vergleich der LM und LMER
 
-
-```{r, eval=F}
+```{r, eval=T}
 library(foreign)
 ess <- read.spss("./Daten/ESS9e02.sav", 
                  use.value.labels = FALSE,
@@ -1073,6 +1127,8 @@ ggplot(comparison_df, aes(x=label, y=b2se,
   theme_minimal()
 ```
 
+
+## Erweiterung der Regressionsgleichung
 
 
 <p class=math> 

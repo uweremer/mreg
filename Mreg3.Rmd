@@ -1,0 +1,119 @@
+---
+title: "Wie schätzt man eine Mehrebenenregression in R?"
+subtitle: "Videoserie Mehrebenenregression Teil 3/6"
+author: "Dr. Uwe Remer"
+date: "Juli 2022"
+output:
+  html_document:
+    toc: yes
+    number_sections: yes
+    toc_depth: 2
+    toc_float:
+      collapsed: true
+    df_print: paged
+    highlight: tango
+    theme: spacelab
+---
+
+```{r setup, include=FALSE}
+# Figure size in inches
+w = 5
+h = 2.5
+s = 2.8
+    
+knitr::opts_chunk$set(eval=TRUE, echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.width=w, fig.height=h, fig.align='center')
+save <-  F
+save_fig <- function(filename, save = TRUE){
+  if(save==TRUE){
+    ggsave(paste0("./Grafiken/", filename), 
+         width = w, height = h,
+         #scale = s,       
+         unit = "in")
+  }
+  else{
+    message("Saving skipped...")
+  }
+}
+```
+
+```{css, eval=T}
+/* CSS Stil für Formeln unter Scatterplots */
+P.math {
+    text-align: center;
+    font-size: 2vw;
+}
+
+table {
+  width: 50%;
+}
+
+```
+
+
+# Themenüberblick
+
+Hallo und herzlich Willkommen zum dritten Teil der Videoserie zum Thema Mehrebenenregression in R. 
+
+
+
+Im vorigen Video haben wir gesehehn, wie man mit Hilfe des sogenannten Nullmodells berechnet, ob eine Mehrebenenregression überhaupt notwendig ist.
+Nur wenn dies der Fall ist, werden die eigentlich interessierenden Mehrebenenregressionsmodelle geschätzt.
+
+Und genau darum geht es in diesem ditten Video: Wie schätzt man eine Mehrebenenregression in R? 
+Und natürlich: wie interpretiert man die Ergebnisse?
+
+
+Sie sollen dabei lernen...
+
+- notwendigkeit des Zentrierens
+- Wie man die theoretischen Überlegungen zu variirenden Intercepts und variierenden Slopes und Cross-Level Interaktionen mit R modelliert
+- welche quantities of interest wichtig sind und wie sie interpretiert werden
+
+
+```{r}
+library(foreign)
+ess <- read.spss("./Daten/ESS9e02.sav", 
+                 use.value.labels = FALSE,
+                 to.data.frame = TRUE,
+                 reencode = TRUE)
+
+
+
+idx_vars <- c("trstprl","trstplt","trstprt")
+ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
+                              na.rm = F)
+ess$zufr_wirtschaft <- ess$stfeco
+
+```
+
+
+
+
+## Missing Values ausschließen
+
+Um einen Datensatz zu erhalten, der in über alle Modelle die gleiche Fallzahl aufweist, werden diejenigen Fälle ausgeschlossen, die auf mindestens einer der für die Analysen genutzten variablen fehlende Werte aufweist ("Listenweise Fallausschluss").
+
+```{r Missing_values_ausschließen}
+# Missing Values ausschließen
+variablen_im_modell <- c("pol_vertrauen",
+                         "zufr_wirtschaft",
+                         "responsivitaet",
+                         "soz_vertrauen", 
+                         "bildung", 
+                         "cntry",
+                         "c_ticpi_2018")
+ess <- na.omit(ess[,variablen_im_modell])
+```
+
+
+## Zentrieren
+
+In Mehrebenenmodellen ist es erforderlich, dass die unabhängigen Variablen auf Ebene 1 Mittelwertzentriert werden. Das sog. *Grand-Mean-Centering* sorgt dafür, dass die Referenzkategorie für den Intercept (alle X-Var bei 0) der Grand Mean der abhängien Variable ist.
+
+```{r zentrieren_L!_X-Vars}
+# Z_Transformation der Ebene 1 x-Variablen
+# Diese sind an 2. bis 5. Stelle im Datensatz
+ess_centered <- as.data.frame(scale(ess[,c(2:5,7)]))
+ess[,c(2:5,7)] <- ess_centered
+```
