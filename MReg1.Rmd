@@ -37,7 +37,7 @@ save_fig <- function(filename, save = TRUE){
 }
 ```
 
-```{css, eval=T}
+```{css, eval=F}
 /* CSS Stil für Formeln unter Scatterplots */
 P.math {
     text-align: center;
@@ -75,11 +75,8 @@ Lernziele für dieses Video sind…
 
 - dass Sie die unterschiedlichen Bezeichnungen der Mehrebenenregression kennen.
 - dass Sie das Grundprinzip der Mehrebenenregression erläutern können.
-- dass Sie darlegen können, worin sich eine Mehrebenenregression von einer einfachen linearen Regression unterscheidet.
-- dass Sie aufzählen können, welche Vorteile eine Mehrebenenregression hat.
 - dass Sie wissen, welche unterschiedlichen Varianten der Mehrebenenregression es gibt.
 - dass Sie entscheiden können, für welche Fragestellungen welche Variante der Mehrebenenregression geeignet ist.
-
 
 
 #	Ein Modell mit vielen Namen
@@ -103,19 +100,30 @@ Schon nach wenigen Minuten ist nun Ihr Statistik Wortschatz um einige beeindruck
 Lassen Sie uns jetzt den Begriff der Mehrebenenregression mit Inhalt füllen.
 
 
-# Die Kurzfassung
+# Warum und wozu eine Mehrebenenregression
 
-In der empirisch-analytischen Wissenschaft haben wir die vereinfachende Vorstellung, dass es eine Art datengenerierenden Prozess gibt (im Englischen: data generating process, oder kurz DGP). Das ist die Vorstellung, dass die Phänomene, also die Daten, die wir messen (also z.B. das Einkommen einer Person, oder ihr politisches Vertrauen usw.) das Ende oder Resultat einer komplexen Kette an Ursache/Wirkungszusammenhängen sind. 
+## Prolog
 
-Ein sehr simples Beispiel: Die Geburt in einem reichen demokratischen Industrieland als Kind wohlhabender Eltern führt zu guter Bildung führt höherem Einkommen führt größerer Zufriedenheit mit der Wirtschaftslage und führt zu einem höheren politischen Vertrauen. Und man könnte sich noch viele Abzweigungen, Kreuzungen und bedingte Effekte in dieser Kette vorstellen.
+In der empirisch-analytischen Wissenschaft haben wir die vereinfachende Vorstellung, dass es eine Art datengenerierenden Prozess gibt (im Englischen: data generating process, oder kurz DGP). Das ist die Vorstellung, dass die Phänomene, oder besser gesagt, die Daten, die wir messen (also z.B. das Einkommen einer Person, oder ihr politisches Vertrauen usw.) das Ende oder Resultat einer komplexen Kette an Ursache/Wirkungszusammenhängen sind. 
 
-Praktisch kann man gar nicht alles berücksichtigen - darum geht es auch in der Forschung nicht. Aber dieses Bild des DGP hilft uns, die Komplixtät der Wirklichkeit handhabbar zu machen
+Hier ein sehr simples Beispiel: 
+
+Die Geburt in einem reichen demokratischen Industrieland als Kind wohlhabender Eltern führt zu guter Bildung führt höherem Einkommen führt größerer Zufriedenheit mit der Wirtschaftslage und führt zu einem höheren politischen Vertrauen. 
+
+Und man könnte sich noch viele Abzweigungen, Kreuzungen und bedingte Effekte in dieser Kette vorstellen.
+
+Es ist natürlich nur eine Vorstellung und man ist niemals in der Lage diesen DGP tatsächlich vollständig korrekt zu beschreiben. Aber darum geht es nicht. Aber dieses Bild des DGP hilft uns, die Komplixtät der Wirklichkeit handhabbar zu machen
 
 Wir glauben also an einen Ablauf an Mechanismen, der dazu führt, dass unsere Befragten den einen oder anderen Wert auf der Y-Variable - der abhängigen Variable erhalten.
 
-Und unsere Theorien versuchen diesen Ablauf, diesen DGP zu beschreiben. Nicht alles, aber den für eine spezifische Forschungsfrage relevanten Ausschnitt. Die Theorie liefert uns nämlich die Annahmen über die unabhängigen Variablen und die Mechanismen, die sie verbinden. Sie liefern Annahmen darüberm, warum eine Befragte den ein oder anderen Wert auf der Y-Variable aufweist.
+Und unsere Theorien versuchen diesen Ablauf, diesen DGP zu beschreiben. Nicht alles, aber den für eine spezifische Forschungsfrage relevanten Ausschnitt. Die Theorie liefert uns nämlich die Annahmen über die unabhängigen Variablen und die Mechanismen, die sie verbinden. 
+
+Sie liefern Annahmen darüber, warum eine Befragte den ein oder anderen Wert auf der Y-Variable aufweist.
 
 Mit dem statistischen Modell versuchen wir dann diese Theorie über den datengenerierenden Prozess mathematisch/statistisch auszudrücken. 
+
+
+## Kontext und hierarchische Daten
 
 In aller Regel laufen solche datengenerierende Prozesse aber Kontextabhängig ab. Die Mechanismen die wirken, können je nach Kontext einen stärkeren oder schwächeren Effekt haben, keinen Effekt haben, oder sogar einen umgekehrten Effekt aufweisen. 
 
@@ -156,9 +164,8 @@ ggplot(ess, aes(x=cntry)) +
   theme_minimal() + 
   scale_x_discrete("Länder") +
   theme(axis.text=element_text(size=6))
-
-
 save_fig("V1_0_1.png", save)
+
 ```
 
 Die Grafik zeigt die Anzahl der Befragten in den 28 teilnehmenden Ländern.
@@ -169,18 +176,33 @@ Wir haben $`r length(ess[,1])`$ Individuen $i_{1,\dots`r length(ess[,1])`}$ auf 
 $j_{1,\dots `r length(unique(ess[,'cntry']))`}$ auf Ebene 2.
 
 
-Die Ländervariable ist also die Gruppierungsvariable, in denen die Einheiten der unteren Ebene geclustert sein müssen.
+Die Ländervariable ist also die Gruppierungsvariable, in denen die Einheiten der unteren Ebene geclustert sind.
+Theoretisch lassen sich noch weitere Ebenen einfügen. Das würde dann so aussehen...
 
-Theoretisch lassen sich noch weitere Ebenen einfügen. Zum Beispiel könnten die Befragten auch in Bundesländer oder Regionen geclustert sein, und diese Länder wiederum in Nationalstaaten. Für die Videoserie bleiben wir aber beim einfachen Beispiel mit zwei Ebenen.
+```{r}
+ggplot(ess, aes(x=cntry, color=region)) +
+  geom_bar(position = "stack", show.legend = F) +
+  theme_minimal() + 
+  scale_x_discrete("Länder mit Regionen") +
+  theme(axis.text=element_text(size=6))
 
+save_fig("V1_0_2.png", save)
+```
+
+Hier sind die Befragten in Regionen (z.B. Bundesländern) geclustert, die dann wiederum Teil von Ländern (also Nationalstaaten) sind. 
+
+Für die Videoserie bleiben wir aber beim einfachen Beispiel mit zwei Ebenen.
+
+
+## Varianz auf Ebene 2
 
 Hier kommt ein wichtiger Punkt: 
 
-Dass ihre Daten durch das vorhandensein Gruppierungsvariablen eine Mehrebenenstruktur aufweisen, ist zwar eine notwendige, aber keine hinreichende Bedingung für eine Mehrebenenregression.
+Dass ihre Daten durch das Vorhandensein Gruppierungsvariablen eine Mehrebenenstruktur aufweisen, ist zwar eine notwendige, aber keine hinreichende Bedingung für eine Mehrebenenregression.
 
 Denn es ist ja nicht zwingend so, dass diese Struktur auch empirisch in zu Unterschieden zwischen den Kontexteinheiten führt.   
 
-Oder anders gesagt: es genügt nicht, dass strukturell mehrere Ebenen vorhanden sind. Darüber hinaus muss in der abhängigen Variable auch tatsächlich Variation  zwischen den Kontexteinheiten bestehen. Nur dann ist eine Mehrebenenregression sinnvoll.
+Oder anders gesagt: es genügt nicht, dass strukturell mehrere Ebenen vorhanden sind. Darüber hinaus muss in der abhängigen Variable auch tatsächlich Variation zwischen den Kontexteinheiten bestehen. Nur dann ist eine Mehrebenenregression sinnvoll.
 
 Man sagt auch: Es muss ausreichend Varianz auf Ebene 2 vorhanden sein.
 
@@ -190,35 +212,40 @@ Wie man das macht, sehen wir im zweiten Teil der Videoserie.
 
 Wenn also ausreichend Varianz auf Ebene 2 vorliegt, können wir die Mehrebenenregression nutzen. Vorteil ist, dass wir bessere Schätzungen für die Regressionsparameter erhalten (was das genau heißt sehen wir noch).
 
-Weiter Vortiel istm das wir die Wechselwirkungen zwischen den Ebenen explizit im Modell berücksichtigen können und in wenigen Maßzahlen auch kompakt beschreiben können. 
+Weiterer Vorteil ist, dass wir die Wechselwirkungen zwischen den Ebenen explizit im Modell berücksichtigen können und in wenigen Maßzahlen auch kompakt beschreiben können. 
 
 Was heißt das genau?
 
-## Grundidee 
+
+## Grundidee und Varianten der Mehrebenenregression
 
 Nun, die Grundidee der Mehrebenenregression ist folgende: 
 
-Das was wir in den Daten an Variation haben, und das ist ja das, was wir erklären wollen setzt sich aus zwei Quellen zusammen. 
+Das was wir in den Daten an Variation haben, und das ist ja das, was wir erklären wollen setzt sich (für den Moment verinfacht) aus zwei Quellen zusammen.
 
-Oder bildlich gesprochen: diese Unordnung in der Punktewolke setzt sich aus zwei Quellen zusammen:
+Einmal die Variation die durch Eigenschaften und Merkmale der Individuen entsteht. 
 
-Einmal die Variation die durch Eigenschaften und Merkmale der Individuen entsteht. Und einmal die Variation, die aus Eigenschaften des Kontextes entsteht, die auf alle Individuen gleich wirken, die zum gleichen Kontext gehören. Wir haben also zunächst zwei Varianzkomponente.
+Und einmal die Variation, die aus Eigenschaften des Kontextes entsteht, die auf alle Individuen gleich wirken, die zum gleichen Kontext gehören. Wir haben also zunächst zwei Varianzkomponenten. 
 
-Mit Hilfe der Mehrebenenregression lässt sich ein Modell spezifizieren, dass Varianzkomponenten korrekt berücksichtig.
+Mit Hilfe der Mehrebenenregression lässt sich ein Modell spezifizieren, dass diese Varianzkomponenten korrekt berücksichtigt.
 
-Starten wir bei einem klassischen OLS Regressionsmodell, hier ein einfaches bivariates Beispiel: Wir berücksichtigen *keine* Mehrebenenstruktur:
+
+
+Starten wir bei einem klassischen OLS Regressionsmodell, hier ein einfaches bivariates Beispiel. Das kennen Sie. A
 
 **HIER Bild Gelman entwickeln**
 
-Es gibt ein Intercept und ein Steigungsparameter b
+Es gibt ein Intercept und ein Steigungsparameter b.
 
-Und Hier das das einfache Mehrebenenmodell:
+Aber: Wir berücksichtigen *keine* Mehrebenenstruktur:
+
+Und hier ein einfaches Mehrebenenmodell:
 
 - Wir können den Intercept zwischen den Kontexteinheiten variieren lassen! Wir können also berücksichtigen, dass es unterschiedliche Durchschnittswerte der abhängigen Variable in den verschiedenen Kontexteinheiten gibt. *Varying Intercept Model*
 
 - darüber hinaus, können wir auch den Steigungsparameter variieren lassen. Also, erlauben, dass der Zusammenhang zwischen abhängiger Variable und unabhängiger Variable in den Ländern unterschiedlich stark sein kann. *Varying Intercept, Varying Slope Model*
 
-Und wir können tatsächlich auch prüfen, ob und wie stark Merkmale auf der Kontextebene dafür verantwortlich sind, das diese Unterschiede auftreten. Das wäre dann das Modell mit einer *Cross-Level Interaction*
+Und wir können tatsächlich auch prüfen, ob und wie stark Merkmale auf der Kontextebene dafür verantwortlich sind, dass diese Unterschiede auftreten. Das wäre dann das Modell mit einer *Cross-Level Interaction*
 
 Man könnte es auch so formulieren:
 
@@ -226,1134 +253,40 @@ Der Intercept variiert zwischen den Kontexteinheiten, nimmt also unterschiedlich
 
 Analog für die variierenden Steigungsparameter: Auch diese Variation ist erklärungsbedürftig. Und wir können ein Modell erstellen, dass versucht diese Variation auf Kontextebene zu erklären.
 
-Also Vereinfacht dargestellt:
+Also vereinfacht dargestellt:
 
-Die Mehrebenenregression schätzt einmal ein Modell für die Individualebene. Im Unterschied zur einfachen OLS dürfen aber bestimmte Parameter zwischen den Kontexteinheiten variieren. Und dann schätzt die Mehrebenenregression gleichzeitig ein Modell auf Kontextebene, um diese Variation auch erfassen und ggf. zu erklären.
+Die Mehrebenenregression schätzt ein Modell für die Individualebene, aber im Unterschied zur einfachen OLS dürfen aber bestimmte Parameter zwischen den Kontexteinheiten variieren. Die Mehrebenenregression schätzt aber gleichzeitig ein Modell auf Kontextebene, dass es erlaubt, diese Variation auch systematisch erfassen und ggf. zu erklären.
 
-Wir können also prüfen: 
+Jetzt kennen Sie die unterschiedlichen Varianten, wie man Mehrebenenregression spezifizieren kann:
+
+- Varying Intercept Modell 
+- (Varying Slope Modell)
+- Varying Intercept, Varying Slope Modell 
+- Varying Intercept, Varying Slope Modell mit Cross-Level Interaktion
+
+
+- Varying Intercept Modell (mit oder ohne Prädiktoren auf L1 und L2)
+- (Varying Slope Modell, mit oder ohne Prädiktoren auf L2)
+- Varying Intercept, Varying Slope Modell (mit oder ohne Prädiktoren auf L2)
+- Varying Intercept, Varying Slope Modell mit Cross-Level Interaktion
+
+Wir können also folgende Fragestellungen beantworten:
 
 - Welchen Einfluss haben Prädiktoren auf Ebene 1 an der Varianz auf Ebene 1
 - Welchen Einfluss haben Prädiktoren auf Ebene 2 an der Varianz auf Ebene 2
 - Unterscheiden sich die Effekte eines Prädiktors der Ebene 1 zwischen Einheiten der Ebene 2
 - Können Prädiktoren der Ebene 2 erklären, warum sich Effekte von Prädiktoren der Ebene 1 zwischen den Ebene 2 Einheiten unterscheiden?
 
-Jetzt kennen Sie die unterschiedlichen Varianten, wie man Mehrebenenregression spezifizieren kann:
+Diese Modelle schauen wir uns in Teil 3 der Videoserie noch einmal genauer an und werden sie mit R selbst umsetzen und interpretieren.
 
-- Varying Intercept Modell
-- (Varying Slope Modell)
-- Varying Intercept, Varying Slope Modell
-- Varying Intercept, Varying Slope Modell mit Cross-Level Interaktion
 
+# Aufgabe zur Wiederholung
 
+- Überlegen Sie sich theoretisches ein Beispiel, bei dem der durchschnittliche Wert einer Variable auf Ebene 1 zwischen den Kontexteinheiten variiert. 
+- Überlegen Sie, welche Determinanten auf der Kontextebene für diese Variation des Mittelwertes verantwortlich sein könnte.
+- Überlegen Sie, ob es vielleicht auf Individualebene eine erklärende Variable gibt, deren Wirkung zwischen den Kontexten variiert, die also in den unterschiedlichen Kontexten stärker oder schwächer oder vielleicht gar nicht wirkt?
 
 
-
-
-
-
-
-
-
-## Context Matters
-
-Viele Phänomene, die wir erklären wollen, oder über die wir eine Prognose treffen wollen lassen sich nicht alleine auf der Individualebene, bzw. der Mikroebene modellieren.
-
-Also nicht nur persönliche Eigenschaften, Merkmale und Einstellungen haben einen Einfluss darauf, was Menschen tun, was sie denken, wen Sie wählen oder wie sie konsumieren.
-
-Der soziale Kontext und die institutionellen Strukturen auf Meso- und Makroebene haben einen nicht zu unterschätzenden Einfluss auf die Menschen und ihr handeln. 
-
-> Menschen teilen einen gemeinsamen sozialen Kontext innerhalb von Gruppen. Gleichzeitig unterscheiden diese Kontexte sich aber zwischen den Gruppen. Menschen unterliegen also unterschiedlichen sozialen Kontexten.
-
-Mit den Konzepten des methodologischen Individualismus und dem **Makro-Mikro-Makro-Schema**, das besser bekannt ist als die Coleman’sche Badewanne, wird analytisch klar, dass die Erklärung sozialer Phänomene immer alle Ebenen berücksichtigen muss.
-
-Dieses Argument möchte ich Ihnen auch anhand von konkreten Daten veranschaulichen. 
-In allen Videos nutzen wir dasselbe Beispiel. 
-
-<p style="max-width: 20%; float: right; margin: 2em;"><a href="https://www.europeansocialsurvey.org" target="_blank" rel="external">
-![](./Grafiken/ESS_Logo.jpg "ESS Logo by ESS-ERIC, a European Research Infrastructure Consortium, see https://www.europeansocialsurvey.org")</a>
-</p>
-
-Die Daten stammen aus dem 9. European Social Survey, - kurz ESS - aus dem Jahr 2018.^[ESS Round 9: European Social Survey Round 9 Data (2018). Data file edition 3.1. Sikt - Norwegian Agency for Shared Services in Education and Research, Norway – Data Archive and distributor of ESS data for ESS ERIC. doi:10.21338/NSD-ESS9-2018] Im ESS wurden in 27 Ländern insgesamt 47.086 Personen zu einer Vielzahl an Themen befragt. Um schon Mal vorweg zu greifen: die 27 Länder sind die Ebene 2 und die 47.086 Befragten, sind die Beobachtungseinheiten auf Ebene 1.
-
-
-Sie benötigen die ESS Daten um den R Code aus R-Script-Dateien zu den Videos ausführen zu können. Die Daten können Sie über die Webseite des ESS herunterladen:
-
-https://www.europeansocialsurvey.org/ 
-
-oder direkt über die DOI-Adresse:
-
-https://doi.org/10.21338/NSD-ESS9-2018 
-
-Für unser Beispiel befassen wir uns mit dem Thema Politikverdrossenheit. Was in den Medien oder Alltagssprachlich als Politikverdrossenheit bezeichnet wird, wird in der Forschung mit dem Konzept „Political Support“ untersucht. Eine Komponente davon ist das politische Vertrauen der Bürger. 
-
-Wer mehr darüber wissen möchte, für den gibt es am Ende des Videos noch Literaturhinweise. 
-Also: Schauen wir uns das politische Vertrauen in Europa an: 
-
-```{r erstes_beispiel_daten_vorbereiten}
-set.seed(2022)
-library(foreign)
-ess <- read.spss("./Daten/ESS9e02.sav", 
-                 use.value.labels = FALSE,
-                 to.data.frame = TRUE,
-                 reencode = TRUE)
-
-idx_vars <- c("trstprl","trstplt","trstprt")
-ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
-                              na.rm = F)
-ess$zufr_wirtschaft <- ess$stfeco
-
-
-# Subset an Ländern, da sonst zu viele Daten
-laender <- c("BG","CY","DE","NO","SE","FR")
-ess_c6 <- ess[ess$cntry %in% laender, ]
-
-
-
-# Gruppierungsvariable ohne Gruppen (complete pooling)
-ess$no_countries <- "alle Befragte"
-ess_c6$no_countries <- "alle Befragte"
-
-# Nur Gültige
-ess_c6 <- na.omit(ess_c6[,c("pol_vertrauen",
-                            "zufr_wirtschaft",
-                            "cntry", 
-                            "no_countries")])
-
-# Mittelwert
-means_df <- aggregate(list(pol_vertrauen = ess_c6$pol_vertrauen),
-                           by=list(cntry = ess_c6$cntry),
-                           FUN=mean, na.rm=T)
-grand_mean <- mean(means_df[,2])
-```
-
-
-Es handelt sich um einen Mittelwert-Index aus drei Items. 
-
->„Bitte […] sagen Sie mir zu jeder öffentlichen Einrichtung oder Personengruppe, die ich Ihnen nenne, wie sehr Sie persönlich jeder einzelnen davon vertrauen. […] 0 bedeutet, dass Sie dieser Einrichtung oder Personengruppe überhaupt nicht vertrauen, und 10 bedeutet, dass Sie ihr voll und ganz vertrauen.“
-
-- den Parteien
-- dem Bundestag (bzw. dem jeweiligen Parlament im Land)
-- den Politikern
-
-```{r}
-library(ggplot2)
-library(ggtext)
-library(grid)
-#devtools::install_github("wilkelab/ungeviz")
-library(ungeviz)
-
-ggplot(ess_c6, aes(x=pol_vertrauen, y=no_countries)) +
-  geom_point() +
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  coord_flip() +
-  labs(y="Länder", x="Pol. Vertrauen") +
-  theme_light() +
-  theme(axis.title.x = element_blank(),
-        plot.margin=unit(c(0,2,0,2), "cm"))
-
-save_fig("V1_1_1.png", save)
-```
-
-Aber hier sehen wir relativ wenig, weil hinter jedem Punkt eine Vielzahl von Befragten steckt. Um einen besseren Eindruck bekommen, ziehe ich die Punkte auf der vertikalen und horizontalen Achse etwas auseinander und mache die Punkte kleiner. So erkennen wir alle der knapp 50.000 Punkte.
-
-
-```{r}
-ggplot(ess, aes(pol_vertrauen, no_countries)) +
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=.5, alpha =.3, shape=".") +
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  coord_flip() +
-  labs(y="Länder", x="Pol. Vertrauen") +
-  theme_light() +
-  theme(axis.title.x = element_blank(),
-        plot.margin=unit(c(0,2,0,2), "cm"))
-
-save_fig("V1_1_2.png", save)
-```
-
-Ganz schön viele Punkte. Damit das Beispiel übersichtlich bleibt, mache ich mit nur sechs der 27 Länder weiter und nutze von diesen auch nur 15 Prozent der Datenpunkte. 
-
-```{r}
-l <- length(ess_c6[,1])
-ess_c6 <- ess_c6[sample(1:l,l*0.15),]
-
-
-ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1) +
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  coord_flip() +
-  labs(y="Länder", x="Pol. Vertrauen") +
-  theme_light() +
-  theme(axis.title.x = element_blank(),
-        plot.margin=unit(c(0,2,0,2), "cm"))
-
-save_fig("V1_1_3.png", save)
-```
-
-Immer noch viel, aber etwas übersichtlicher. 
-Lassen Sie uns noch den Mean einzeichnen.
-
-
-```{r}
-ggplot(ess_c6, aes(pol_vertrauen, no_countries)) +
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1) +
-  stat_summary(fun=mean, geom="vpline", 
-               size=1.2, height = 1, show.legend=FALSE) +  
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +    
-  coord_flip() +
-  labs(y="Länder", x="Pol. Vertrauen") +
-  theme_light() +
-  theme(axis.title.x = element_blank(),
-        plot.margin=unit(c(0,2,0,2), "cm"))
-
-save_fig("V1_1_4.png", save)
-```
-
-Das Durchschnittliche politische Vertrauen in den sechs Länder liegt bei 4. Es ist also einen Skalenpunkt unterhalb der theoretischen Skalenmitte und somit leicht negativ. 
-Aber was sagt dieser Mittelwert aus? Wir wissen ja, dass hier Befragte aus sechs unterschiedlichen Ländern zusammengefasst werden. 
-
-Und wir sehen ja auch, dass die Streuung recht groß ist - um genau zu sein liegt die Standardabweichung bei `r round(sd(ess_c6$pol_vertrauen, na.rm=T),1)`. 
-
-Man muss kein Politikwissenschaftler sein, um zu ahnen, dass ein Teil der Unterschiede - oder genauer ein Teil der Streuung im politischen Vertrauen - darauf zurückzuführen ist, dass zwischen den Ländern große Unterschiede im politischen Vertrauen bestehen. 
-
-Also färben wir die Befrgaten mal nach Länderzugehörigkeit ein.
-
-
-```{r}
-farben <- c("#00966E", "#D57800", "#FFCC00", "#002654","#BA0C2F", "#006AA7")
-ggplot(ess_c6, 
-       aes(pol_vertrauen, no_countries, color=cntry)) +
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha =1) +
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  scale_colour_manual(values = farben) +
-  coord_flip() +
-  labs(y="Länder", x="Pol. Vertrauen") +
-  theme_light() +
-  theme(axis.title.x = element_blank(),
-        plot.margin=unit(c(0,0,0,2), "cm")) +
-  guides(colour = guide_legend(override.aes = list(size=2)))
-
-save_fig("V1_1_5.png", save)
-```
-
-Ja… man ahnt schon etwas… unten mehr grün… oben mehr rot und hellblau.
-Aber machen wir es doch ganz eindeutig und gruppieren die Befragten nach ihren Ländern…
-
-
-```{r}
-flags <- c("<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Bulgaria.svg/320px-Flag_of_Bulgaria.svg.png' alt='Bulgarien', title='Bulgarien'  width='20' /><br>",
-           "<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Flag_of_Cyprus.svg/320px-Flag_of_Cyprus.svg.png'  width='20' /><br>",
-           "<img src='https://upload.wikimedia.org/wikipedia/en/thumb/b/ba/Flag_of_Germany.svg/320px-Flag_of_Germany.svg.png'  width='20' /><br>",
-           "<img src='https://upload.wikimedia.org/wikipedia/en/thumb/c/c3/Flag_of_France.svg/320px-Flag_of_France.svg.png'  width='20' /><br>",
-           "<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Norway.svg/320px-Flag_of_Norway.svg.png'  width='20' /><br>",
-           "<img src='https://upload.wikimedia.org/wikipedia/en/thumb/4/4c/Flag_of_Sweden.svg/320px-Flag_of_Sweden.svg.png'  width='20' /><br>")
-
-
-ggplot(ess_c6, 
-       aes(pol_vertrauen, cntry, color=cntry)) +
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha =1) +
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  scale_y_discrete(labels = flags) +  
-  scale_colour_manual(values = farben) +
-  coord_flip() +
-  labs(y="Länder", x="Pol. Vertrauen") +
-  theme_light() +
-  theme(axis.title.x = element_blank(),
-        plot.margin=unit(c(0,0,0,2), "cm"),
-        axis.text.x  = element_markdown(color = "black", size = 7)) +
-  guides(colour = guide_legend(override.aes = list(size=2)))
-
-save_fig("V1_1_6.png", save)
-```
-
-Was wir nun sehen ist, dass ein Teil der Streuung in der Punktewolke auf Varianz zwischen den Ländern zurückzuführen ist. 
-
-```{r}
-
-ggplot(ess_c6, 
-       aes(pol_vertrauen, cntry, color=cntry)) +
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha =1) +
-  stat_summary(fun=mean, geom="vpline", 
-               size=1.2, height = 1, show.legend=FALSE) +  
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  scale_y_discrete(labels = flags) +  
-  scale_colour_manual(values = farben) +
-  coord_flip() +
-  labs(y="Länder", x="Pol. Vertrauen") +
-  theme_light() +
-  theme(axis.title.x = element_blank(),
-        plot.margin=unit(c(0,0,0,2), "cm"),
-        axis.text.x  = element_markdown(color = "black", size = 7)) +
-  guides(colour = guide_legend(override.aes = list(size=2)))
-
-save_fig("V1_1_7.png", save)
-```
-
-Jedes Land hat ein anderes durchschnittliches Niveau vonj politischem Vertrauen. Wir können für jedes Land den Mittelwert einzeichnen. Und diese Mittelwerte streuen um den Mittelwert der Ländern, den sogenannten Grand Mean.
-
-```{r }
-
-ggplot(ess_c6, 
-       aes(pol_vertrauen, cntry, color=cntry)) +
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha =1) +
-  stat_summary(fun=mean, geom="vpline", 
-               size=1.2, height = 1, show.legend=FALSE) +  
-  geom_vline(xintercept=grand_mean, col="black", size=1) +
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  scale_y_discrete(labels = flags) +  
-  scale_colour_manual(values = farben) +
-  coord_flip() +
-  labs(y="Länder", x="Pol. Vertrauen") +
-  theme_light() +
-  theme(axis.title.x = element_blank(),
-        plot.margin=unit(c(0,0,0,2), "cm"),
-        axis.text.x  = element_markdown(color = "black", size = 7)) +
-  guides(colour = guide_legend(override.aes = list(size=2)))
-
-save_fig("V1_1_8.png", save)
-```
-
-Was wir jetzt sehen: Es gibt also Varianz innerhalb der Länder: Befragte streuen um den ihren jeweiligen Landesmittelwert. Und es es gibt Varianz zwischen den Ländern. Die Länder streuen um den Grand Mean. 
-
-Also: Menschen haben hohes oder niedriges politisches Vertrauen (Mikroebene). Aber der soziale Kontext - hier das politische System und gesellschaftliche Faktoren auf Ebene der Länder - beeinflussen als Makroebene das politische Vertrauen. Ein Teil der Unterschiede im politischen Vertrauen, geht also alleine auf diese Kontextfaktoren zurück. Und kann also nur durch Variation auf der Kontextebene erklärt werden. 
-
-Und die Mehrebenenregression ist das geeignete Verfahren zur Analyse sozialer Phänomene, bei denen Kontextfaktoren und deren Wechselwirkungen mit der Individualebene explizit modelliert werden sollen. 
-
-Neben diesen substantiellen Grund, gibt es auch statistische Grüne, warum die Mehrebenenregression in bestimmten Fällen die bessere Wahl ist. Dafür schauen wir uns zunächst an, wie sich die Mehrebenenregression von der linearen Regression unterscheidet.
-
-
-
-## Die Mehrebenenregression als Erweiterung der OLS Regression
-
-Um uns die Mehrebenenregression zu erschließen starten wir bei der einfachen linearen Regression, der OLS Regression.
-
-Betrachten wir zum Einstieg den simplen bivariaten Fall:
-
-Die abhängige Variable ist die uns bereits bekannte Variable `politisches Vertrauen`. Als unabhängige Variable nehme ich die Variable `Zufriedenheit mit der Wirtschaftslage` auf. 
-
-Wo die Menschen mit der wirtschaftlichen Lage zufrieden sind, erwarten wir ein höheres Vertrauen in die Politik. Als Theorie für diese Annahme können wir Wahlweise auf den Rational Choice Ansatz zurückgreifen oder auf das Konzept der Output-Legitimität heranziehen.  
-
-Den Zusammenhang zwischen beiden Variablen kann man dann in einer Punktewolke visualisieren:
-
-```{r}
-ggplot() +
-  geom_jitter(data=ess_c6,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft),
-       position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha = .15) +
-  geom_vline(xintercept=0, col="black") +
-  geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +   
-  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
-  theme_light() +
-  theme(plot.margin=unit(c(0,2,0,2), "cm")) +
-  guides(colour = guide_legend(override.aes = list(size=2, alpha=1)))
-
-save_fig("V1_2_1.png", save)
-```
-
-Die Y-Variable politisches Vertrauen finden wir auf der Y-Achse. Die unabhängige Variable auf der X-Achse. 
-
-Wir sehen schon: Wie erwartet ist das politische Vertrauen größer, wenn die Befragten mit der Wirtschaftslage zufrieden sind.  
-
-Dieser Zusammenhang kann nun mit Hilfe einer Regressionsgeraden beschrieben werden:
-
-### Das Grundmodell der Regression {.unnumbered}
-
-```{r}
-ggplot(data=ess_c6,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha = .15) +
-  geom_vline(xintercept=0, col="black") +
-  geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
-  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
-  coord_cartesian(clip = 'off') +
-  geom_smooth(method="lm", 
-              se=FALSE, 
-              fullrange = TRUE,
-              col = "red") +
-  theme_light() +
-  theme(plot.margin=unit(c(.12,2,0,2), "cm")) 
-
-save_fig("V1_2_2.png", save)
-```
-
-<p class=math> 
-<font color=red>$\hat{y}$</font>
-$=$
-<font color=black>$a+bx$</font>
-</p>
-
-Die dazugehörige Regressionsgleichung drückt diesen Zusammenhang mathematisch aus. 
-$\hat{y}$ ist dabei der Vorhersagewert, der sich aus dem Term $a+bx$ berechnet und über alle Werte von X die Regressionsgerade bildet. 
-
-
-```{r}
-fit <- lm(ess_c6$pol_vertrauen ~ ess_c6$zufr_wirtschaft) 
-y_lab1 <- (coef(fit)[1]+coef(fit)[2] + coef(fit)[1]+coef(fit)[2]*2)/2
-
-# Shape for rectangle to denote slope
-shape <- data.frame(
-  x = c(1,2,2),
-  y = c(coef(fit)[1]+coef(fit)[2],
-        coef(fit)[1]+coef(fit)[2],
-        coef(fit)[1]+coef(fit)[2]*2)
-)
-
-library(grid)
-ggplot(data=ess_c6,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha = .15) +
-  geom_vline(xintercept=0, col="black") +
-  geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
-  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
-  coord_cartesian(clip = 'off') +
-  geom_smooth(method="lm", 
-              se=FALSE, 
-              fullrange = TRUE,
-              col = "red") +
-  theme_light() +
-  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
-  annotation_custom(grob = grid::textGrob(label = "Intercept", 
-                                          hjust=1, 
-                                          gp=gpar(col="blue", cex=.91)),
-                    xmin = -1.5, 
-                    xmax = -1.5, 
-                    ymin = coef(fit)[1], 
-                    ymax = coef(fit)[1]) +
-  annotation_custom(grob = linesGrob(arrow=arrow(type="open", ends="last",
-                                                 length=unit(3,"mm")), 
-                                     gp=gpar(col="blue", lwd=2)), 
-                    xmin = -1.2, 
-                    xmax = -.2, 
-                    ymin = coef(fit)[1], 
-                    ymax = coef(fit)[1]) 
-
-save_fig("V1_2_3.png", save)
-
-```
-
-<p class=math> 
-<font color=red>$\hat{y}$</font>
-$=$
-<font color=blue>$a$</font>
-$+bx$
-</p>
-
-Der Regressionsparameter $a$ ist der **Intercept**, bzw. die Konstante. Es ist der Wert für $y$ bei dem die Regressionsgerade die Y-Achse schneidet. Anders ausgedrückt: Der Intercept ist der Vorhersagewert für $y$, wenn alle X-Variablen im Modell den Wert $0$ aufweisen. 
-
-Hier: ein Befragter der oder die komplett unzufrieden mit der Wirtschaftslage ist, hat im Schnitt ein politisches Vertrauen von `r round(coef(fit)[1],1)`.
-
-<p class=math> 
-<font color=red>$\hat{y}$</font>
-$=$
-<font color=blue>$`r round(coef(fit)[1],1)`$</font>
-$+bx$
-</p>
-
-Der zweite Regressionsparameter in diesem Beispiel ist der b-Koeffizient. 
-
-```{r}
-ggplot(data=ess_c6,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha = .1) +
-  geom_vline(xintercept=0, col="black") +
-  geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
-  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
-  coord_cartesian(clip = 'off') +
-  geom_smooth(method="lm", 
-              se=FALSE, 
-              fullrange = TRUE,
-              col = "red") +
-  theme_light() +
-  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
-  annotation_custom(grob = grid::textGrob(label = "Intercept", 
-                                          hjust=1, 
-                                          gp=gpar(col="blue", cex=.91)),
-                    xmin = -1.5, 
-                    xmax = -1.5, 
-                    ymin = coef(fit)[1], 
-                    ymax = coef(fit)[1]) +
-  annotation_custom(grob = linesGrob(arrow=arrow(type="open", ends="last",
-                                                 length=unit(3,"mm")), 
-                                     gp=gpar(col="blue", lwd=2)), 
-                    xmin = -1.2, 
-                    xmax = -.2, 
-                    ymin = coef(fit)[1], 
-                    ymax = coef(fit)[1]) +
-  geom_polygon(data=shape, aes(x=x, y=y), 
-               alpha=.3, fill = 'darkorange') +
-  annotation_custom(grob = grid::textGrob(label = "Slope", 
-                                          hjust=0, gp=gpar(col="darkorange", cex=1)),
-                    xmin = 2.15, 
-                    xmax = 2.15, 
-                    ymin = y_lab1,
-                    ymax = y_lab1) 
-
-save_fig("V1_3_4.png", save)
-```
-
-<p class=math> 
-<font color=red>$\hat{y}$</font>
-$=$
-<font color=blue>$a$</font>
-$+$
-<font color=darkorange>$b$</font>
-$x$
-</p>
-
-
-Der b-Koeffizient  ist der Steigungsparameter, bzw. der **Slope**. Er gibt an, um wie viele Skalenpunkte die abhängige Variable steigt, wenn die unabhängige Variable um einen Skalenpunkt zunimmt. 
-
-Also wenn wir auf der X-Achse um einen Skalenpunkt nach rechts gehen, um wieviel müssen wir nach oben?
-
-In unserem Beispiel beträgt der Slope `r round(coef(fit)[2],1)`.
-
-<p class=math> 
-<font color=red>$\hat{y}$</font>
-$=$
-<font color=blue>$`r round(coef(fit)[1],1)`$</font>
-$+$
-<font color=darkorange>$`r round(coef(fit)[2],1)`$</font>
-$x$
-</p>
-
-Die Regressionsgerade, welche mit $a+bx$ beschrieben wird, gibt uns die geschätzten Vorhersagewerte $\hat{y}$. Allerdings: Die tatsächlich beobachteten Werte $y$ und die Vorhersagewerte sind nicht identisch. Durch Kenntnis der unabhängigen Variable können wir nicht deterministisch auf den Wert der abhängigen Variable schließen. 
-
-Schauen wir hier nochmal auf ein reduziertes Bild der Punktewolke:
-
-```{r}
-ess_c6$predicted <- predict(fit)   # Save the predicted values
-ess_c6$Residuen <- residuals(fit)
-
-ess_c6_r <- ess_c6[sample(1:length(ess_c6[,1]), 18),]
-ggplot(data=ess_c6_r,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
-  geom_point(size=1, alpha = 1, col = "blue") +
-  geom_vline(xintercept=0, col="black") +
-  geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
-  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
-  coord_cartesian(clip = 'off') +
-  geom_smooth(data=ess_c6,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft),
-              method="lm", 
-              se=FALSE, 
-              fullrange = TRUE,
-              col = "red") +
-  theme_light() +
-  theme(plot.margin=unit(c(.12,2,0,2), "cm"))
-
-save_fig("V1_3_5.png", save)
-```
-
-<p class=math> 
-<font color=blue>$y$</font>
-$\ne$
-<font color=red>$\hat{y}$</font>
-</p>
-
-
-Die beobachteten Werte $y$ - hier in blau - streuen um die Vorhersagewerte $\hat{y}$ der roten Regressionsgeraden. Mal liegen sie darunter mal liegen sie darüber. 
-
-
-```{r}
-ggplot(data=ess_c6_r,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
-  geom_point(size=1, alpha = 1, col = "blue") +
-  geom_segment(aes(xend = zufr_wirtschaft, yend = predicted), col = "darkorange") +  
-  geom_vline(xintercept=0, col="black") +
-  geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
-  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
-  coord_cartesian(clip = 'off') +
-  geom_smooth(data=ess_c6,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft),
-              method="lm", 
-              se=FALSE, 
-              fullrange = TRUE,
-              col = "red") +
-  theme_light() +
-  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
-    annotation_custom(grob = grid::textGrob(label = "Residuen e", 
-                                          hjust=0, gp=gpar(col="darkorange", cex=1)),
-                    xmin = 5, 
-                    xmax = 5, 
-                    ymin = 2,
-                    ymax = 2) 
-
-
-save_fig("V1_3_6.png", save)
-```
-
-<p class=math> 
-<font color=darkorange>$e$</font>
-$=$
-<font color=blue>$y$</font>
-$-$
-<font color=red>$\hat{y}$</font>
-</p>
-
-
-Der Differenz zwischen Vorhersagewert und beobachteten Wert, also das, was hier orange dargestellt ist, ist der Fehler, bzw. das Residuum. In Formeln wird das recht uneinheitlich als $r$, $u$, $e$ oder $\epsilon$ (Epsilon) notiert: $r$ für Residuum, $u$ für unerklärte Varianz oder unobserved Variance, und $e$ bzw. $\epsilon$ für Error.  
-
-Die Gleichung können wir auch umstellen: der Vorhersagewert $\hat{y}$ plus Fehler führt zum beobachteten Wert. 
-
-<p class=math> 
-<font color=blue>$y$</font>
-$=$
-<font color=red>$\hat{y}$</font>
-$+$
-<font color=darkorange>$e$</font>
-</p>
-
-Und statt $\hat{y}$ können wir auch $a+bx$ schreiben, dann hat man die klassische Regressionsgleichung: 
-
-<p class=math> 
-<font color=blue>$y$</font>
-$=$
-<font color=red>$a+bx$</font>
-$+$
-<font color=darkorange>$e$</font>
-</p>
-
-
-
-
-
-Diese Residuen haben für die Regression eine sehr große Bedeutung:
-
-1. Über die quadrierte Summe der Fehler lässt sich bestimmen, welche Regressionsgerade den Zusammenhang am besten beschreibt. Das ist sogar namensgebend: **OLS** bedeutet **O**rdinary **L**east **S**qaures und meint den kleinste Quadrate Schätzer. Also: Suche die Regressionsparameter $a$ und $b$ so aus, das die Summe der quadrierten Fehler minimiert wird.
-
-2. Anhand der Summe der quadrierten Fehler lässt sich das sogenannte $R^2$ berechnen. Das ist die Kennzahl die beschreibt, wie groß die **Erklärungskraft** eines Regressionsmodells ist.
-
-3. Anhand der Residuen lässt sich prüfen, ob wir den Ergebnissen unserer Regression trauen können. Dafür betrachten wir im Rahmen der **Regressionsdiagnostik** die Verteilung der Residuen und untersuchen, ob die Regressionsannahmen eingehalten werden. 
-
-
-### Und was hat das mit Mehrebenenregression zu tun? {.unnumbered}
-
-Und an dieser Stelle kommt die Mehrebenenregression ins Spiel: 
-
-Wenn Ihre Daten eine Mehrebenenstruktur aufweisen, wenn also Kontextfaktoren für einen Teil der Varianz in den Daten verantwortlich sind, dann kann es sein, dass eine einfache OLS Regression keine effiziente Schätzung liefert. Was heißt das? 
-
-Wenn die Mehrebenenstruktur nicht berücksichtigt wird, sind die Residuen der Beobachtungseinheiten nicht unabhängig voneinander. Man spricht von korrelierten Fehlern oder geclusterten Fehlern.
-
-Schauen wir das in unserem Beispiel einmal an. 
-
-
-Wir rechnen eine OLS Regression, bei der alle Befragten unabhängig vom Land gleichzeitig berücksichtigt werden. Wir betrachten also die Fälle als eine einzige große Stichprobe. In der Literatur findet man dafür manchmal die Bezeichnung *full  pooling*, weil alle Ebene 2 Einheiten zusammengepoolt werden.
-
-
-```{r}
-p1 <- ggplot(data=ess_c6,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry)) + 
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha = 1, show.legend = F) +
-  geom_vline(xintercept=0, col="black") +
-  geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
-  scale_colour_manual(values = farben) +  
-  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
-  coord_cartesian(clip = 'off') +
-  geom_smooth(method="lm", 
-              se=FALSE, 
-              fullrange = TRUE,
-              col = "red") +
-  theme_light() +
-  theme(plot.margin=unit(c(.12,0,0,.8), "cm")) 
-
-
-p2 <- ggplot(data=ess_c6,
-              aes(y=Residuen, x=cntry, color=cntry)) +
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha = .3, show.legend = F) +
-  stat_summary(fun=mean, geom="hpline", 
-               size=1.2, width = 1, show.legend=FALSE) +  
-  scale_x_discrete(labels = flags) +  
-  scale_colour_manual(values = farben) +
-  theme_light() +
-  coord_cartesian(clip = 'off') +
-  theme(plot.margin=unit(c(.12,0,0,0), "cm")) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x  = element_markdown(color = "black", size = 7))
-
-library(gridExtra)
-grid.arrange(p1, p2, nrow=1)
-save_fig("V1_4_5.png", save)
-```
-
-Links ist die Regressionsgerade zu sehen. Rechts die Verteilung der Residuen getrennt nach Ländern. Wie wir an den Residuen sehen: Für Bulgarien überschätzt die Regressionsgerade das politische Vertrauen. Die Residuen sind im Schnitt negativ. 
-
-Für Norwegen dagegen unterschätzen wir mit der Regressionsgeraden das politische Vertrauen. Die Residuen sind also im Schnitt positiv.
-
-Die Fehler der Individualebene korrelieren also mit einem Kontextmerkmal, nämlich der Länderzugehörigkeit der Befragten. Wir nehmen an, die Befragten wären unabhängig voneinander, was sie in Wahrheit nicht sind. 
-
-In der Folge ist oft die Varianz der Fehler nicht konstant ist, es liegen also heteroskedastische Fehler vor. Außerdem kann es sein, dass die Residuen nicht unabhängig von den X-Variablen sind, wenn sie mit der übergeordneten Ebene korrelieren. Sie verstoßen also gegen Regressionsannahmen.
-
-Auch die Standardfehler die für die Regressionskoeffizienten im einfachen OLS Modell berechnet werden, werden auf Basis der gesamten Stichprobe berechnet. Es wird nicht berücksichtigt, dass die Varianzen und Fallzahlen in den Gruppen unterschiedlich sind. Als Folge werden die Standardfehler unterschätzt. 
-
-Wenn die Standardfehler aber kleiner sind, als sie sein müssten, wird auch die Irrtumswahrscheinlichkeit beim Signifikanztest unterschätzt. 
-
-Im schlechtesten Fall gehen Sie also von signifikanten Effekten aus, wo in Wahrheit kein Zusammenhang zu finden ist.
-
-Darüber hinaus kann es auch sein, dass das Modell inhaltlich fehlspezifiziert ist. Unterschiede zwischen den Ländern werden durch die einfache OLS Regression überdeckt.
-
-Vielleicht werden Sie jetzt sagen, es gibt doch eine naheliegende Lösung: Können wir nicht eine OLS Regression rechnen und die übergeordnete Ebene explizit im Modell berücksichtigen? Man kann ja Dummy-Variablen für die Länderzugehörigkeit mit ins Modell aufnehmen.
-
-Ein solches Modell wird in der Literatur *no pooling* Modell bezeichnet. Wir könnten auch für jedes Land ein separates Regressionsmodell schätzen. Wir betrachten also jedes Land als separate Stichprobe.
-
-Aber auch diese Spezifikation führt nicht zu einer zufriedenstellenden Schätzung der gesuchten Regressionsparameter.
-
-Weil Variabilität der Effekte überschätzt wird. Und auch die Standardfehler sind größer, da die Ebene 2 Einheiten unabhängig voneinander betrachtet werden. Die Informationen die im Rest der Stichprobe, also in den anderen Ländern vorhanden sind, werden dabei ignoriert.
-
-Die Mehrebenenregression ist ein Kompromiss aus no pooling und full pooling. Wir betrachten die Daten als eine große, aber nach Ländern geschichtete Stichprobe. Es ist ein *partial pooling*.  
-
-Die Regressionsparameter für die jeweiligen Länder sind dann quasi ein gewichteter Mittelwert, aus den Daten für das jeweilige Land und den Daten aus den anderen Ländern.
-
-Wenn wir für ein Land überdurchschnittlich viele Befragte haben, wird der geschätzte Regressionsparameter stärker von den Fällen des jeweiligen Landes bestimmt.
-
-Wenn für ein Land besonders wenige Fälle vorliegen (wenn wir also eine große Unsicherheit bezüglich unserer Schätzung hätten), wird der geschätzte Regressionsparameter stärker von den Werten der anderen Länder beeinflusst. 
-
-Da so die Informationen aus der gesamten Stichprobe berücksichtigt werden, haben wir kleinere Standardfehler als wenn wir jedes Land für sich alleine betrachten. Und die Standardfehler berücksichtigen trotzdem, dass für jedes Land eine andere Varianz und andere Fallzahl auf Ebene 1 vorliegt. So haben wir eine präzisere Schätzung und kleinere Konfidenzbänder, also weniger Unsicherheit.
-
-### Vergleich der LM und LMER
-
-```{r, eval=T}
-library(foreign)
-ess <- read.spss("./Daten/ESS9e02.sav", 
-                 use.value.labels = FALSE,
-                 to.data.frame = TRUE,
-                 reencode = TRUE)
-idx_vars <- c("trstprl","trstplt","trstprt")
-ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
-                              na.rm = F)
-ess$zufr_wirtschaft <- ess$stfeco
-
-disbalance <- function(df){
-  cntry_n <- aggregate(x = list(cntry_n = df$pol_vertrauen),
-                       by=list(cntry = df$cntry),
-                       FUN=length)
-  # Sampling 10 Fach ungleicher:
-  cntry_n$ratio <- exp(log(cntry_n$cntry_n/max(cntry_n$cntry_n))*5)
-  cntry_n$cntry_n_neu  <- round(cntry_n$ratio * cntry_n$cntry_n/2,0)
-  
-  df_list <-list()
-  for(cntry in unique(df$cntry)){
-    df_list[[cntry]] <- df[df$cntry == cntry,]
-    df_list[[cntry]] <- df_list[[cntry]][sample(1:length(df_list[[cntry]][,1]), 
-                                                         cntry_n$cntry_n_neu[cntry_n$cntry == cntry]),]
-  }
-  df <- do.call("rbind", df_list)
-  return(df)
-}
-
-# Create ESS subset with only few L1 Units
-ess_tiny <- ess[sample(1:47086, 470),]
-# Create ESS subset with very disbalanced numbers of observations on L1
-ess_disbalanced <- disbalance(ess)
-
-
-mlm_ml_comparison <- function(ess, label){
-  # Create function to compare lm and lmer results 
-  # Returns 4 figures in a list of figures
-
-  library(lmerTest) 
-  library(arm)
-  mreg0 <-lmer(pol_vertrauen ~ 1 +
-                 (1 | cntry), 
-               data=ess, REML=F)
-  
-  fit_lm <- lm(pol_vertrauen ~ cntry, data=ess)
-
-
-  full_pooling <- lm(pol_vertrauen ~ zufr_wirtschaft, data=ess)
-  no_pooling <- lm(pol_vertrauen ~ zufr_wirtschaft + cntry, data=ess)
-  mreg <-lmer(pol_vertrauen ~ 1 + zufr_wirtschaft +
-                 (1 | cntry), 
-               data=ess, REML=T)  
-  
-  fixed_effects <- data.frame(label = rep(label, 3),
-                              model = c("lm full pooling", "lm no pooling", "lmer"),
-                              b1 =c(coef(full_pooling)[1], coef(no_pooling)[1], fixef(mreg)[1]),
-                              se = c(sqrt(diag(vcov(full_pooling)))[1], 
-                                     sqrt(diag(vcov(no_pooling)))[1],
-                                     se.fixef(mreg)[1]),
-                              b2 =c(coef(full_pooling)[2], coef(no_pooling)[2], fixef(mreg)[2]),
-                              b2se = c(sqrt(diag(vcov(full_pooling)))[2], 
-                                     sqrt(diag(vcov(no_pooling)))[2],
-                                     se.fixef(mreg)[2]))
-
-  res <- list()
-  res$fixed_effects <- fixed_effects
-  
-  coef(fit_lm)
-  # Diese sind nichts anderes als die Mittelwerte der abhängigen Variable nach Ländern:
-  # Bzw. genauer: die Abweichung dieser Mittelwerte vom Mittelwert des Landes, das die Referenzkategorie 
-  # in der Regression bildet. hier: Österreich (Länderkürzel AT)
-  lm_estimates <- aggregate(x = list(cntry_means = ess$pol_vertrauen), 
-                            by=list(cntry = ess$cntry), 
-                            FUN=mean, na.rm=T)
-
-    # Zieht man Österreich ab, dann sind das exakt die Werte aus der Regression
-  cbind(lm_estimates$cntry_means - lm_estimates$cntry_means[1],
-        coef(fit_lm))
-  
-  # Auf Basis der Ländermittelwerte können wir den Mittelwert der Mittelwerte berechnen: den Grand Mean:
-  mean(lm_estimates$cntry_means)
-  # Und diesen von den Ländermittelwerten abziehen. So erhält man für alle Länder den Ländereffekt, ohne
-  # eine Referenzkategorie nutzen zu müssen.
-  lm_estimates$cntry_effects <- lm_estimates$cntry_means -  mean(lm_estimates$cntry_means)
-  # Schließlich fügen wir noch die Standardfehler aus dem Regressionsmodell hinzu
-  lm_estimates$se <-sqrt(diag(vcov(fit_lm)))
-  
-  lm_estimates$model <- "lm"
-  lm_estimates$n <- aggregate(x = list(n = ess$pol_vertrauen), 
-                            by=list(cntry = ess$cntry), 
-                            FUN=length)[,2]
-  
-
-  # Diese Schätzung können wir nun direkt mit den random effects aus dem Mehrebenemodell vergleichen
-  library(arm) # um se.ranef() nutzen zu können
-  lmer_estimates <- data.frame(cntry = rownames(ranef(mreg0)$cntry),
-                               cntry_effects = ranef(mreg0)$cntry$"(Intercept)",
-                               se = se.ranef(mreg0)$cntry[,1],
-                               model = "lmer")
-  lmer_estimates$n <- aggregate(x = list(n = ess$pol_vertrauen), 
-                                by=list(cntry = ess$cntry), 
-                                FUN=length)[,2]
-  
-  df <- rbind(lm_estimates[,c(1,3,4,5,6)], 
-              lmer_estimates)
-  
-  df$cntry <- forcats::fct_reorder(df$cntry, 
-                                   df$cntry_effects, 
-                                   'min')
-  library(ggplot2)
-  res$fig[[1]] <- ggplot(df, aes(x = cntry, 
-                 y = cntry_effects, 
-                 ymin = cntry_effects-se,
-                 ymax = cntry_effects+se,
-                 color = model)) + 
-    geom_pointrange(position = position_dodge(width = .5)) +
-    coord_flip() +
-    theme_minimal()
-  
-  
-  res$fig[[2]] <- ggplot(df, aes(x = cntry, 
-                 y = cntry_effects, 
-                 ymin = cntry_effects-se,
-                 ymax = cntry_effects+se,
-                 color = model)) + 
-    geom_pointrange(position = position_dodge(width = .5)) +
-      coord_flip() +
-      theme_minimal() +
-      facet_wrap(. ~ model)
-  
-  res$fig[[3]] <- ggplot(df, aes(x = cntry, 
-                 y = cntry_effects, 
-                 ymin = cntry_effects-se,
-                 ymax = cntry_effects+se,
-                 color = model)) + 
-    geom_pointrange(position = position_dodge(width = .5)) +
-    geom_hline(yintercept=-2) +
-      coord_flip() +
-      theme_minimal() +
-      facet_wrap(. ~ model)
-  
-  df$cntry <- forcats::fct_reorder(df$cntry, 
-                                   df$n, 
-                                   'mean')
-  
-  res$fig[[4]] <- ggplot(df, aes(x = cntry, 
-                 y = cntry_effects, 
-                 ymin = cntry_effects-se,
-                 ymax = cntry_effects+se,
-                 color = model)) + 
-    geom_pointrange(position = position_dodge(width = .5)) +
-    coord_flip() +
-    theme_minimal()
-  
-  return(res)
-}
-
-fig_ess <- mlm_ml_comparison(ess, "large")
-fig_ess$fixed_effects
-fig_ess$fig[[1]]
-
-
-fig_ess_tiny <- mlm_ml_comparison(ess_tiny, "tiny")
-fig_ess_tiny$fixed_effects
-fig_ess_tiny$fig[[1]]
-
-fig_ess_disbalanced <- mlm_ml_comparison(ess_disbalanced, "disbalanced")
-fig_ess_disbalanced$fixed_effects
-fig_ess_disbalanced$fig[[1]]
-
-
-comparison_df <- rbind(fig_ess$fixed_effects,
-                       fig_ess_tiny$fixed_effects,
-                       fig_ess_disbalanced$fixed_effects)
-
-ggplot(comparison_df, aes(x=label, y=b1,
-                          color=model, 
-                          ymin=b1-1.92*se, ymax=b1+1.92*se)) +
-  geom_pointrange(position = position_dodge(width = .5)) +
-  coord_flip()
-
-
-
-ggplot(comparison_df, aes(x=label, y=b2se,
-                          fill=model)) +
-  geom_bar(stat="identity", position="dodge") +
-  theme_minimal()
-```
-
-
-## Erweiterung der Regressionsgleichung
-
-
-<p class=math> 
-<font color=blue>$y$</font>
-$=$
-<font color=red>$\beta_0+\beta_1x_1$</font>
-$+~...~\beta_nx_n~+~$
-<font color=darkorange>$e$</font>
-</p>
-
-
-
-
-
-<p class=math> 
-<font color=red>$\hat{y}$</font>
-$=$
-<font color=blue>$\beta_0$</font>
-$+$
-<font color=darkorange>$\beta_1$</font>
-$x_1$
-</p>
-
-<p class=math> 
-<font color=red>$\hat{y}$</font>
-$=$
-<font color=blue>$\beta_0$</font>
-$+$
-<font color=darkorange>$\beta_1$</font>
-$x_1 ~+~ ...~ \beta_nx_n$
-</p>
-
-
-```{r}
-knitr::opts_chunk$set(eval=F)
-```
-
-
-## Variierende Regressionsparameter
-
-### Einfache lineare Regression
-
-
-
-
-```{r}
-fit <- lm(pol_vertrauen ~ zufr_wirtschaft, ess_c6)
-
-b <- round(fit$coefficients, 1) 
-
-ggplot() +
-  geom_jitter(data=ess_c6,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft),
-       position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha = .15) +
-  geom_vline(xintercept=0, col="black") +
-  geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
-  theme_light() +
-  theme(plot.margin=unit(c(0,2,0,2), "cm")) +
-  guides(colour = guide_legend(override.aes = list(size=2, alpha=1)))
-
-save_fig("V1_2_1.png", save)
-
-
-ggplot() +
-  geom_jitter(data=ess_c6,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft),
-       position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha = .15) +
-  geom_smooth(data=ess_c6, aes(y=pol_vertrauen, x=zufr_wirtschaft), 
-              method="lm", se=F, fullrange = T,
-              color ="magenta") +
-  geom_vline(xintercept=0, col="black") +
-  geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
-  theme_light() +
-  theme(plot.margin=unit(c(0,2,0,2), "cm")) +
-  guides(colour = guide_legend(override.aes = list(size=2, alpha=1))) +
-  annotate("text", x=1, y=1, hjust=0,
-           label=bquote(hat(y)==.(b[1])+.(b[2])~x),
-                parse = F, col="magenta", cex=4)
-
-save_fig("V1_2_2.png", save)
-
-
-ess_c6$zufr_wirtschaft <- scale(ess_c6$zufr_wirtschaft, scale=F)
-
-fit_cent <- lm(pol_vertrauen ~ zufr_wirtschaft, ess_c6)
-b_cent <- round(fit_cent$coefficients, 1) 
-
-ggplot() +
-  geom_jitter(data=ess_c6,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft),
-       position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha = .15) +
-  geom_smooth(data=ess_c6, aes(y=pol_vertrauen, x=zufr_wirtschaft), 
-              method="lm", se=F, fullrange = T,
-              color ="magenta") +
-  geom_vline(xintercept=0, col="black") +
-  geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
-  theme_light() +
-  theme(plot.margin=unit(c(0,2,0,2), "cm")) +
-  guides(colour = guide_legend(override.aes = list(size=2, alpha=1))) +
-  annotate("text", x=1, y=3.6, hjust=0,
-           label=bquote(hat(y)==.(b_cent[1])+.(b_cent[2])~x),
-                parse = F, col="magenta", cex=4)
-
-save_fig("V1_2_3.png", save)
-```
-
-### Mit variierendem Intercept
-
-```{r}
-fit_cntry <- lm(pol_vertrauen ~ zufr_wirtschaft + cntry, ess_c6)
-b_cntry <- round(fit_cntry$coefficients, 2) 
-
-#Wert für Schweden etwas verringern, da Linie sonst identisch zu NO
-b_cntry[7] <- b_cntry[7]-0.03 
-
-lm_df_cntry <- data.frame(cntry = sort(laender),
-                          b1 = c(b_cntry[1], b_cntry[1]+c(b_cntry[3:7])),
-                          b2 = b_cntry[2],
-                          row.names = c())
-
-ggplot() +
-  geom_jitter(data=ess_c6,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry),
-       position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha = .15) +
-  scale_colour_manual(values = farben) +
-  geom_vline(xintercept=0, col="black") +
-  geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
-  theme_light() +
-  theme(plot.margin=unit(c(0,0,0,2), "cm")) +
-  guides(colour = guide_legend(override.aes = list(size=2, alpha=1)))
-
-save_fig("V1_2_4.png", save)
-```
-
-
-```{r}
-kableExtra::kable_paper(knitr::kable(lm_df_cntry, format = "html"), bootstrap_options = "striped", full_width = F)
-
-ggplot() +
-  geom_jitter(data=ess_c6,
-              aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry),
-       position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha = .15) +
-  geom_abline(data=lm_df_cntry, aes(intercept=b1, slope=b2),
-              color = farben, size=.7) +
-  scale_colour_manual(values = farben) +
-  geom_vline(xintercept=0, col="black") +
-  geom_hline(yintercept=0, col="black") +
-  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
-  theme_light() +
-  theme(plot.margin=unit(c(0,0,0,2), "cm")) +
-  guides(colour = guide_legend(override.aes = list(size=2, alpha=1)))
-
-save_fig("V1_2_5.png", save)
-```
-
-### Mit variierendem Intercept und variierendem Slope
-
-```{r}
-fit_slope <- lm(pol_vertrauen ~ zufr_wirtschaft + cntry + cntry:zufr_wirtschaft, ess_c6)
-b_slope <- round(fit_slope$coefficients, 1) 
-
-lm_df_slope <- data.frame(cntry = sort(laender),
-                          b1 = c(b_slope[1], b_slope[1]+c(b_slope[3:7])),
-                          b2 = c(b_slope[2], b_slope[2]+c(b_slope[8:12])),
-                          row.names = c())
-
-ggplot(ess_c6, 
-       aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry)) +
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha = .15) +
-  geom_smooth(data=ess_c6, aes(y=pol_vertrauen, x=zufr_wirtschaft), 
-              method="lm", se=F, fullrange = T, size=.7,
-              show.legend=FALSE) +
-  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  scale_colour_manual(values = farben) +
-  labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
-  theme_light() +
-  theme(plot.margin=unit(c(0,0,0,2), "cm"),
-        axis.text.x  = element_markdown(color = "black", size = 7)) +
-  guides(colour = guide_legend(override.aes = list(size=2, alpha = 1))) +
-  geom_vline(xintercept=0, col="black") +
-  geom_hline(yintercept=0, col="black")
-  
-save_fig("V1_2_6.png", save)
-
-kableExtra::kable_paper(knitr::kable(lm_df_slope, format = "html"), bootstrap_options = "striped", full_width = F)
-```
-
-
-```{r}
-ggplot(ess_c6, 
-       aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry)) +
-  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha =1) +
-  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
-  scale_colour_manual(values = farben) +
-  labs(y="Pol. Vertrauen", x="zufr_wirtschaft") +
-  theme_light() +
-  theme(axis.title.x = element_blank(),
-        plot.margin=unit(c(0,0,0,2), "cm"),
-        axis.text.x  = element_markdown(color = "black", size = 7)) +
-  guides(colour = guide_legend(override.aes = list(size=2))) +
-  facet_grid(. ~ cntry)+
-  geom_hline(data = means_df, aes(yintercept=pol_vertrauen, group=cntry),
-             size=1, color=farben) +
-  geom_vline(xintercept=0, col="black") +
-  geom_hline(yintercept=0, col="black") +
-  geom_abline(data=lm_df_cntry, aes(intercept=b1, slope=b2, group=cntry),
-              color = farben, size=.5) 
- 
-```
 
 
 #	Lernzielabgleich
@@ -1362,9 +295,9 @@ Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernzi
 
 - Sie kennen die unterschiedlichen Bezeichnungen der Mehrebenenregression.
 - Sie können das Grundprinzip der Mehrebenenregression erläutern.
+- Sie wissen, welche unterschiedlichen Varianten der Mehrebenenregression es gibt.
 - Sie können darlegen, worin sich eine Mehrebenenregression von einer einfachen Linearen Regression unterscheidet.
 - Sie können aufzählen können, Vorteile eine Mehrebenenregression hat.
-- Sie wissen, welche unterschiedlichen Varianten der Mehrebenenregression es gibt.
 - Sie können entscheiden, für welche Fragestellungen welche Variante der Mehrebenenregression geeignet ist.
 
 

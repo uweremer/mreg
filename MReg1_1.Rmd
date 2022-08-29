@@ -1,0 +1,914 @@
+---
+title: "Was ist eine Mehrebenenregression"
+subtitle: "Videoserie Mehrebenenregression Teil 1/6"
+author: "Dr. Uwe Remer"
+date: "Juli 2022"
+output:
+  html_document:
+    toc: yes
+    number_sections: yes
+    toc_depth: 2
+    toc_float:
+      collapsed: true
+    df_print: paged
+    highlight: tango
+    theme: spacelab
+---
+
+```{r setup, include=FALSE}
+# Figure size in inches
+w = 5
+h = 2.5
+s = 2.8
+    
+knitr::opts_chunk$set(eval=TRUE, echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.width=w, fig.height=h, fig.align='center')
+save <-  F
+save_fig <- function(filename, save = TRUE){
+  if(save==TRUE){
+    ggsave(paste0("./Grafiken/", filename), 
+         width = w, height = h,
+         #scale = s,       
+         unit = "in")
+  }
+  else{
+    message("Saving skipped...")
+  }
+}
+```
+
+## Die Mehrebenenregression als Erweiterung der OLS Regression
+
+Um uns die Mehrebenenregression zu erschließen starten wir bei der einfachen linearen Regression, der OLS Regression.
+
+Betrachten wir zum Einstieg den simplen bivariaten Fall:
+
+Die abhängige Variable ist die uns bereits bekannte Variable `politisches Vertrauen`. Als unabhängige Variable nehme ich die Variable `Zufriedenheit mit der Wirtschaftslage` auf. 
+
+Wo die Menschen mit der wirtschaftlichen Lage zufrieden sind, erwarten wir ein höheres Vertrauen in die Politik. Als Theorie für diese Annahme können wir Wahlweise auf den Rational Choice Ansatz zurückgreifen oder auf das Konzept der Output-Legitimität heranziehen.  
+
+Den Zusammenhang zwischen beiden Variablen kann man dann in einer Punktewolke visualisieren:
+
+
+```{r erstes_beispiel_daten_vorbereiten}
+set.seed(2022)
+library(foreign)
+ess <- read.spss("./Daten/ESS9e02.sav", 
+                 use.value.labels = FALSE,
+                 to.data.frame = TRUE,
+                 reencode = TRUE)
+
+idx_vars <- c("trstprl","trstplt","trstprt")
+ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
+                              na.rm = F)
+ess$zufr_wirtschaft <- ess$stfeco
+
+
+# Subset an Ländern, da sonst zu viele Daten
+laender <- c("BG","CY","DE","NO","SE","FR")
+ess_c6 <- ess[ess$cntry %in% laender, ]
+
+
+
+# Gruppierungsvariable ohne Gruppen (complete pooling)
+ess$no_countries <- "alle Befragte"
+ess_c6$no_countries <- "alle Befragte"
+
+# Nur Gültige
+ess_c6 <- na.omit(ess_c6[,c("pol_vertrauen",
+                            "zufr_wirtschaft",
+                            "cntry", 
+                            "no_countries")])
+
+# Mittelwert
+means_df <- aggregate(list(pol_vertrauen = ess_c6$pol_vertrauen),
+                           by=list(cntry = ess_c6$cntry),
+                           FUN=mean, na.rm=T)
+grand_mean <- mean(means_df[,2])
+farben <- c("#00966E", "#D57800", "#FFCC00", "#002654","#BA0C2F", "#006AA7")
+
+```
+
+
+```{r}
+library(ggplot2)
+ggplot() +
+  geom_jitter(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft),
+       position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .15) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +   
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  theme_light() +
+  theme(plot.margin=unit(c(0,2,0,2), "cm")) +
+  guides(colour = guide_legend(override.aes = list(size=2, alpha=1)))
+
+save_fig("V1_2_1.png", save)
+```
+
+Die Y-Variable politisches Vertrauen finden wir auf der Y-Achse. Die unabhängige Variable auf der X-Achse. 
+
+Wir sehen schon: Wie erwartet ist das politische Vertrauen größer, wenn die Befragten mit der Wirtschaftslage zufrieden sind.  
+
+Dieser Zusammenhang kann nun mit Hilfe einer Regressionsgeraden beschrieben werden:
+
+### Das Grundmodell der Regression {.unnumbered}
+
+```{r}
+ggplot(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .15) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  coord_cartesian(clip = 'off') +
+  geom_smooth(method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  theme_light() +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm")) 
+
+save_fig("V1_2_2.png", save)
+```
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=black>$a+bx$</font>
+</p>
+
+Die dazugehörige Regressionsgleichung drückt diesen Zusammenhang mathematisch aus. 
+$\hat{y}$ ist dabei der Vorhersagewert, der sich aus dem Term $a+bx$ berechnet und über alle Werte von X die Regressionsgerade bildet. 
+
+
+```{r}
+fit <- lm(ess_c6$pol_vertrauen ~ ess_c6$zufr_wirtschaft) 
+y_lab1 <- (coef(fit)[1]+coef(fit)[2] + coef(fit)[1]+coef(fit)[2]*2)/2
+
+# Shape for rectangle to denote slope
+shape <- data.frame(
+  x = c(1,2,2),
+  y = c(coef(fit)[1]+coef(fit)[2],
+        coef(fit)[1]+coef(fit)[2],
+        coef(fit)[1]+coef(fit)[2]*2)
+)
+
+library(grid)
+ggplot(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .15) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  coord_cartesian(clip = 'off') +
+  geom_smooth(method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  theme_light() +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
+  annotation_custom(grob = grid::textGrob(label = "Intercept", 
+                                          hjust=1, 
+                                          gp=gpar(col="blue", cex=.91)),
+                    xmin = -1.5, 
+                    xmax = -1.5, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) +
+  annotation_custom(grob = linesGrob(arrow=arrow(type="open", ends="last",
+                                                 length=unit(3,"mm")), 
+                                     gp=gpar(col="blue", lwd=2)), 
+                    xmin = -1.2, 
+                    xmax = -.2, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) 
+
+save_fig("V1_2_3.png", save)
+
+```
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$a$</font>
+$+bx$
+</p>
+
+Der Regressionsparameter $a$ ist der **Intercept**, bzw. die Konstante. Es ist der Wert für $y$ bei dem die Regressionsgerade die Y-Achse schneidet. Anders ausgedrückt: Der Intercept ist der Vorhersagewert für $y$, wenn alle X-Variablen im Modell den Wert $0$ aufweisen. 
+
+Hier: ein Befragter der oder die komplett unzufrieden mit der Wirtschaftslage ist, hat im Schnitt ein politisches Vertrauen von `r round(coef(fit)[1],1)`.
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$`r round(coef(fit)[1],1)`$</font>
+$+bx$
+</p>
+
+Der zweite Regressionsparameter in diesem Beispiel ist der b-Koeffizient. 
+
+```{r}
+ggplot(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .1) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  coord_cartesian(clip = 'off') +
+  geom_smooth(method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  theme_light() +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
+  annotation_custom(grob = grid::textGrob(label = "Intercept", 
+                                          hjust=1, 
+                                          gp=gpar(col="blue", cex=.91)),
+                    xmin = -1.5, 
+                    xmax = -1.5, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) +
+  annotation_custom(grob = linesGrob(arrow=arrow(type="open", ends="last",
+                                                 length=unit(3,"mm")), 
+                                     gp=gpar(col="blue", lwd=2)), 
+                    xmin = -1.2, 
+                    xmax = -.2, 
+                    ymin = coef(fit)[1], 
+                    ymax = coef(fit)[1]) +
+  geom_polygon(data=shape, aes(x=x, y=y), 
+               alpha=.3, fill = 'darkorange') +
+  annotation_custom(grob = grid::textGrob(label = "Slope", 
+                                          hjust=0, gp=gpar(col="darkorange", cex=1)),
+                    xmin = 2.15, 
+                    xmax = 2.15, 
+                    ymin = y_lab1,
+                    ymax = y_lab1) 
+
+save_fig("V1_3_4.png", save)
+```
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$a$</font>
+$+$
+<font color=darkorange>$b$</font>
+$x$
+</p>
+
+
+Der b-Koeffizient  ist der Steigungsparameter, bzw. der **Slope**. Er gibt an, um wie viele Skalenpunkte die abhängige Variable steigt, wenn die unabhängige Variable um einen Skalenpunkt zunimmt. 
+
+Also wenn wir auf der X-Achse um einen Skalenpunkt nach rechts gehen, um wieviel müssen wir nach oben?
+
+In unserem Beispiel beträgt der Slope `r round(coef(fit)[2],1)`.
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$`r round(coef(fit)[1],1)`$</font>
+$+$
+<font color=darkorange>$`r round(coef(fit)[2],1)`$</font>
+$x$
+</p>
+
+Die Regressionsgerade, welche mit $a+bx$ beschrieben wird, gibt uns die geschätzten Vorhersagewerte $\hat{y}$. Allerdings: Die tatsächlich beobachteten Werte $y$ und die Vorhersagewerte sind nicht identisch. Durch Kenntnis der unabhängigen Variable können wir nicht deterministisch auf den Wert der abhängigen Variable schließen. 
+
+Schauen wir hier nochmal auf ein reduziertes Bild der Punktewolke:
+
+```{r}
+ess_c6$predicted <- predict(fit)   # Save the predicted values
+ess_c6$Residuen <- residuals(fit)
+
+ess_c6_r <- ess_c6[sample(1:length(ess_c6[,1]), 18),]
+ggplot(data=ess_c6_r,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
+  geom_point(size=1, alpha = 1, col = "blue") +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  coord_cartesian(clip = 'off') +
+  geom_smooth(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft),
+              method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  theme_light() +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm"))
+
+save_fig("V1_3_5.png", save)
+```
+
+<p class=math> 
+<font color=blue>$y$</font>
+$\ne$
+<font color=red>$\hat{y}$</font>
+</p>
+
+
+Die beobachteten Werte $y$ - hier in blau - streuen um die Vorhersagewerte $\hat{y}$ der roten Regressionsgeraden. Mal liegen sie darunter mal liegen sie darüber. 
+
+
+```{r}
+ggplot(data=ess_c6_r,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft)) + 
+  geom_point(size=1, alpha = 1, col = "blue") +
+  geom_segment(aes(xend = zufr_wirtschaft, yend = predicted), col = "darkorange") +  
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  coord_cartesian(clip = 'off') +
+  geom_smooth(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft),
+              method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  theme_light() +
+  theme(plot.margin=unit(c(.12,2,0,2), "cm")) +
+    annotation_custom(grob = grid::textGrob(label = "Residuen e", 
+                                          hjust=0, gp=gpar(col="darkorange", cex=1)),
+                    xmin = 5, 
+                    xmax = 5, 
+                    ymin = 2,
+                    ymax = 2) 
+
+
+save_fig("V1_3_6.png", save)
+```
+
+<p class=math> 
+<font color=darkorange>$e$</font>
+$=$
+<font color=blue>$y$</font>
+$-$
+<font color=red>$\hat{y}$</font>
+</p>
+
+
+Der Differenz zwischen Vorhersagewert und beobachteten Wert, also das, was hier orange dargestellt ist, ist der Fehler, bzw. das Residuum. In Formeln wird das recht uneinheitlich als $r$, $u$, $e$ oder $\epsilon$ (Epsilon) notiert: $r$ für Residuum, $u$ für unerklärte Varianz oder unobserved Variance, und $e$ bzw. $\epsilon$ für Error.  
+
+Die Gleichung können wir auch umstellen: der Vorhersagewert $\hat{y}$ plus Fehler führt zum beobachteten Wert. 
+
+<p class=math> 
+<font color=blue>$y$</font>
+$=$
+<font color=red>$\hat{y}$</font>
+$+$
+<font color=darkorange>$e$</font>
+</p>
+
+Und statt $\hat{y}$ können wir auch $a+bx$ schreiben, dann hat man die klassische Regressionsgleichung: 
+
+<p class=math> 
+<font color=blue>$y$</font>
+$=$
+<font color=red>$a+bx$</font>
+$+$
+<font color=darkorange>$e$</font>
+</p>
+
+
+
+
+
+Diese Residuen haben für die Regression eine sehr große Bedeutung:
+
+1. Über die quadrierte Summe der Fehler lässt sich bestimmen, welche Regressionsgerade den Zusammenhang am besten beschreibt. Das ist sogar namensgebend: **OLS** bedeutet **O**rdinary **L**east **S**qaures und meint den kleinste Quadrate Schätzer. Also: Suche die Regressionsparameter $a$ und $b$ so aus, das die Summe der quadrierten Fehler minimiert wird.
+
+2. Anhand der Summe der quadrierten Fehler lässt sich das sogenannte $R^2$ berechnen. Das ist die Kennzahl die beschreibt, wie groß die **Erklärungskraft** eines Regressionsmodells ist.
+
+3. Anhand der Residuen lässt sich prüfen, ob wir den Ergebnissen unserer Regression trauen können. Dafür betrachten wir im Rahmen der **Regressionsdiagnostik** die Verteilung der Residuen und untersuchen, ob die Regressionsannahmen eingehalten werden. 
+
+
+### Und was hat das mit Mehrebenenregression zu tun? {.unnumbered}
+
+Und an dieser Stelle kommt die Mehrebenenregression ins Spiel: 
+
+Wenn Ihre Daten eine Mehrebenenstruktur aufweisen, wenn also Kontextfaktoren für einen Teil der Varianz in den Daten verantwortlich sind, dann kann es sein, dass eine einfache OLS Regression keine effiziente Schätzung liefert. Was heißt das? 
+
+Wenn die Mehrebenenstruktur nicht berücksichtigt wird, sind die Residuen der Beobachtungseinheiten nicht unabhängig voneinander. Man spricht von korrelierten Fehlern oder geclusterten Fehlern.
+
+Schauen wir das in unserem Beispiel einmal an. 
+
+
+Wir rechnen eine OLS Regression, bei der alle Befragten unabhängig vom Land gleichzeitig berücksichtigt werden. Wir betrachten also die Fälle als eine einzige große Stichprobe. In der Literatur findet man dafür manchmal die Bezeichnung *full  pooling*, weil alle Ebene 2 Einheiten zusammengepoolt werden.
+
+
+```{r}
+p1 <- ggplot(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry)) + 
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = 1, show.legend = F) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) + 
+  scale_colour_manual(values = farben) +  
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  coord_cartesian(clip = 'off') +
+  geom_smooth(method="lm", 
+              se=FALSE, 
+              fullrange = TRUE,
+              col = "red") +
+  theme_light() +
+  theme(plot.margin=unit(c(.12,0,0,.8), "cm")) 
+
+library(ungeviz)
+library(ggtext)
+flags <- c("<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Bulgaria.svg/320px-Flag_of_Bulgaria.svg.png' alt='Bulgarien', title='Bulgarien'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Flag_of_Cyprus.svg/320px-Flag_of_Cyprus.svg.png'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/en/thumb/b/ba/Flag_of_Germany.svg/320px-Flag_of_Germany.svg.png'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/en/thumb/c/c3/Flag_of_France.svg/320px-Flag_of_France.svg.png'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Norway.svg/320px-Flag_of_Norway.svg.png'  width='20' /><br>",
+           "<img src='https://upload.wikimedia.org/wikipedia/en/thumb/4/4c/Flag_of_Sweden.svg/320px-Flag_of_Sweden.svg.png'  width='20' /><br>")
+
+p2 <- ggplot(data=ess_c6,
+              aes(y=Residuen, x=cntry, color=cntry)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .3, show.legend = F) +
+  stat_summary(fun=mean, geom="hpline", 
+               size=1.2, width = 1, show.legend=FALSE) +  
+  scale_x_discrete(labels = flags) +  
+  scale_colour_manual(values = farben) +
+  theme_light() +
+  coord_cartesian(clip = 'off') +
+  theme(plot.margin=unit(c(.12,0,0,0), "cm")) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x  = element_markdown(color = "black", size = 7))
+
+library(gridExtra)
+grid.arrange(p1, p2, nrow=1)
+save_fig("V1_4_5.png", save)
+```
+
+Links ist die Regressionsgerade zu sehen. Rechts die Verteilung der Residuen getrennt nach Ländern. Wie wir an den Residuen sehen: Für Bulgarien überschätzt die Regressionsgerade das politische Vertrauen. Die Residuen sind im Schnitt negativ. 
+
+Für Norwegen dagegen unterschätzen wir mit der Regressionsgeraden das politische Vertrauen. Die Residuen sind also im Schnitt positiv.
+
+Die Fehler der Individualebene korrelieren also mit einem Kontextmerkmal, nämlich der Länderzugehörigkeit der Befragten. Wir nehmen an, die Befragten wären unabhängig voneinander, was sie in Wahrheit nicht sind. 
+
+In der Folge ist oft die Varianz der Fehler nicht konstant ist, es liegen also heteroskedastische Fehler vor. Außerdem kann es sein, dass die Residuen nicht unabhängig von den X-Variablen sind, wenn sie mit der übergeordneten Ebene korrelieren. Sie verstoßen also gegen Regressionsannahmen.
+
+Auch die Standardfehler die für die Regressionskoeffizienten im einfachen OLS Modell berechnet werden, werden auf Basis der gesamten Stichprobe berechnet. Es wird nicht berücksichtigt, dass die Varianzen und Fallzahlen in den Gruppen unterschiedlich sind. Als Folge werden die Standardfehler unterschätzt. 
+
+Wenn die Standardfehler aber kleiner sind, als sie sein müssten, wird auch die Irrtumswahrscheinlichkeit beim Signifikanztest unterschätzt. 
+
+Im schlechtesten Fall gehen Sie also von signifikanten Effekten aus, wo in Wahrheit kein Zusammenhang zu finden ist.
+
+Darüber hinaus kann es auch sein, dass das Modell inhaltlich fehlspezifiziert ist. Unterschiede zwischen den Ländern werden durch die einfache OLS Regression überdeckt.
+
+Vielleicht werden Sie jetzt sagen, es gibt doch eine naheliegende Lösung: Können wir nicht eine OLS Regression rechnen und die übergeordnete Ebene explizit im Modell berücksichtigen? Man kann ja Dummy-Variablen für die Länderzugehörigkeit mit ins Modell aufnehmen.
+
+Ein solches Modell wird in der Literatur *no pooling* Modell bezeichnet. Wir könnten auch für jedes Land ein separates Regressionsmodell schätzen. Wir betrachten also jedes Land als separate Stichprobe.
+
+Aber auch diese Spezifikation führt nicht zu einer zufriedenstellenden Schätzung der gesuchten Regressionsparameter.
+
+Weil Variabilität der Effekte überschätzt wird. Und auch die Standardfehler sind größer, da die Ebene 2 Einheiten unabhängig voneinander betrachtet werden. Die Informationen die im Rest der Stichprobe, also in den anderen Ländern vorhanden sind, werden dabei ignoriert.
+
+Die Mehrebenenregression ist ein Kompromiss aus no pooling und full pooling. Wir betrachten die Daten als eine große, aber nach Ländern geschichtete Stichprobe. Es ist ein *partial pooling*.  
+
+Die Regressionsparameter für die jeweiligen Länder sind dann quasi ein gewichteter Mittelwert, aus den Daten für das jeweilige Land und den Daten aus den anderen Ländern.
+
+Wenn wir für ein Land überdurchschnittlich viele Befragte haben, wird der geschätzte Regressionsparameter stärker von den Fällen des jeweiligen Landes bestimmt.
+
+Wenn für ein Land besonders wenige Fälle vorliegen (wenn wir also eine große Unsicherheit bezüglich unserer Schätzung hätten), wird der geschätzte Regressionsparameter stärker von den Werten der anderen Länder beeinflusst. 
+
+Da so die Informationen aus der gesamten Stichprobe berücksichtigt werden, haben wir kleinere Standardfehler als wenn wir jedes Land für sich alleine betrachten. Und die Standardfehler berücksichtigen trotzdem, dass für jedes Land eine andere Varianz und andere Fallzahl auf Ebene 1 vorliegt. So haben wir eine präzisere Schätzung und kleinere Konfidenzbänder, also weniger Unsicherheit.
+
+### Vergleich der LM und LMER
+
+```{r, eval=T}
+library(foreign)
+ess <- read.spss("./Daten/ESS9e02.sav", 
+                 use.value.labels = FALSE,
+                 to.data.frame = TRUE,
+                 reencode = TRUE)
+idx_vars <- c("trstprl","trstplt","trstprt")
+ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
+                              na.rm = F)
+ess$zufr_wirtschaft <- ess$stfeco
+
+disbalance <- function(df){
+  cntry_n <- aggregate(x = list(cntry_n = df$pol_vertrauen),
+                       by=list(cntry = df$cntry),
+                       FUN=length)
+  # Sampling 10 Fach ungleicher:
+  cntry_n$ratio <- exp(log(cntry_n$cntry_n/max(cntry_n$cntry_n))*5)
+  cntry_n$cntry_n_neu  <- round(cntry_n$ratio * cntry_n$cntry_n/2,0)
+  
+  df_list <-list()
+  for(cntry in unique(df$cntry)){
+    df_list[[cntry]] <- df[df$cntry == cntry,]
+    df_list[[cntry]] <- df_list[[cntry]][sample(1:length(df_list[[cntry]][,1]), 
+                                                         cntry_n$cntry_n_neu[cntry_n$cntry == cntry]),]
+  }
+  df <- do.call("rbind", df_list)
+  return(df)
+}
+
+# Create ESS subset with only few L1 Units
+ess_tiny <- ess[sample(1:47086, 470),]
+# Create ESS subset with very disbalanced numbers of observations on L1
+ess_disbalanced <- disbalance(ess)
+
+
+mlm_ml_comparison <- function(ess, label){
+  # Create function to compare lm and lmer results 
+  # Returns 4 figures in a list of figures
+
+  library(lmerTest) 
+  library(arm)
+  mreg0 <-lmer(pol_vertrauen ~ 1 +
+                 (1 | cntry), 
+               data=ess, REML=F)
+  
+  fit_lm <- lm(pol_vertrauen ~ cntry, data=ess)
+
+
+  full_pooling <- lm(pol_vertrauen ~ zufr_wirtschaft, data=ess)
+  no_pooling <- lm(pol_vertrauen ~ zufr_wirtschaft + cntry, data=ess)
+  mreg <-lmer(pol_vertrauen ~ 1 + zufr_wirtschaft +
+                 (1 | cntry), 
+               data=ess, REML=T)  
+  
+  fixed_effects <- data.frame(label = rep(label, 3),
+                              model = c("lm full pooling", "lm no pooling", "lmer"),
+                              b1 =c(coef(full_pooling)[1], coef(no_pooling)[1], fixef(mreg)[1]),
+                              se = c(sqrt(diag(vcov(full_pooling)))[1], 
+                                     sqrt(diag(vcov(no_pooling)))[1],
+                                     se.fixef(mreg)[1]),
+                              b2 =c(coef(full_pooling)[2], coef(no_pooling)[2], fixef(mreg)[2]),
+                              b2se = c(sqrt(diag(vcov(full_pooling)))[2], 
+                                     sqrt(diag(vcov(no_pooling)))[2],
+                                     se.fixef(mreg)[2]))
+
+  res <- list()
+  res$fixed_effects <- fixed_effects
+  
+  coef(fit_lm)
+  # Diese sind nichts anderes als die Mittelwerte der abhängigen Variable nach Ländern:
+  # Bzw. genauer: die Abweichung dieser Mittelwerte vom Mittelwert des Landes, das die Referenzkategorie 
+  # in der Regression bildet. hier: Österreich (Länderkürzel AT)
+  lm_estimates <- aggregate(x = list(cntry_means = ess$pol_vertrauen), 
+                            by=list(cntry = ess$cntry), 
+                            FUN=mean, na.rm=T)
+
+    # Zieht man Österreich ab, dann sind das exakt die Werte aus der Regression
+  cbind(lm_estimates$cntry_means - lm_estimates$cntry_means[1],
+        coef(fit_lm))
+  
+  # Auf Basis der Ländermittelwerte können wir den Mittelwert der Mittelwerte berechnen: den Grand Mean:
+  mean(lm_estimates$cntry_means)
+  # Und diesen von den Ländermittelwerten abziehen. So erhält man für alle Länder den Ländereffekt, ohne
+  # eine Referenzkategorie nutzen zu müssen.
+  lm_estimates$cntry_effects <- lm_estimates$cntry_means -  mean(lm_estimates$cntry_means)
+  # Schließlich fügen wir noch die Standardfehler aus dem Regressionsmodell hinzu
+  lm_estimates$se <-sqrt(diag(vcov(fit_lm)))
+  
+  lm_estimates$model <- "lm"
+  lm_estimates$n <- aggregate(x = list(n = ess$pol_vertrauen), 
+                            by=list(cntry = ess$cntry), 
+                            FUN=length)[,2]
+  
+
+  # Diese Schätzung können wir nun direkt mit den random effects aus dem Mehrebenemodell vergleichen
+  library(arm) # um se.ranef() nutzen zu können
+  lmer_estimates <- data.frame(cntry = rownames(ranef(mreg0)$cntry),
+                               cntry_effects = ranef(mreg0)$cntry$"(Intercept)",
+                               se = se.ranef(mreg0)$cntry[,1],
+                               model = "lmer")
+  lmer_estimates$n <- aggregate(x = list(n = ess$pol_vertrauen), 
+                                by=list(cntry = ess$cntry), 
+                                FUN=length)[,2]
+  
+  df <- rbind(lm_estimates[,c(1,3,4,5,6)], 
+              lmer_estimates)
+  
+  df$cntry <- forcats::fct_reorder(df$cntry, 
+                                   df$cntry_effects, 
+                                   'min')
+  library(ggplot2)
+  res$fig[[1]] <- ggplot(df, aes(x = cntry, 
+                 y = cntry_effects, 
+                 ymin = cntry_effects-se,
+                 ymax = cntry_effects+se,
+                 color = model)) + 
+    geom_pointrange(position = position_dodge(width = .5)) +
+    coord_flip() +
+    theme_minimal()
+  
+  
+  res$fig[[2]] <- ggplot(df, aes(x = cntry, 
+                 y = cntry_effects, 
+                 ymin = cntry_effects-se,
+                 ymax = cntry_effects+se,
+                 color = model)) + 
+    geom_pointrange(position = position_dodge(width = .5)) +
+      coord_flip() +
+      theme_minimal() +
+      facet_wrap(. ~ model)
+  
+  res$fig[[3]] <- ggplot(df, aes(x = cntry, 
+                 y = cntry_effects, 
+                 ymin = cntry_effects-se,
+                 ymax = cntry_effects+se,
+                 color = model)) + 
+    geom_pointrange(position = position_dodge(width = .5)) +
+    geom_hline(yintercept=-2) +
+      coord_flip() +
+      theme_minimal() +
+      facet_wrap(. ~ model)
+  
+  df$cntry <- forcats::fct_reorder(df$cntry, 
+                                   df$n, 
+                                   'mean')
+  
+  res$fig[[4]] <- ggplot(df, aes(x = cntry, 
+                 y = cntry_effects, 
+                 ymin = cntry_effects-se,
+                 ymax = cntry_effects+se,
+                 color = model)) + 
+    geom_pointrange(position = position_dodge(width = .5)) +
+    coord_flip() +
+    theme_minimal()
+  
+  return(res)
+}
+
+fig_ess <- mlm_ml_comparison(ess, "large")
+fig_ess$fixed_effects
+fig_ess$fig[[1]]
+
+
+fig_ess_tiny <- mlm_ml_comparison(ess_tiny, "tiny")
+fig_ess_tiny$fixed_effects
+fig_ess_tiny$fig[[1]]
+
+fig_ess_disbalanced <- mlm_ml_comparison(ess_disbalanced, "disbalanced")
+fig_ess_disbalanced$fixed_effects
+fig_ess_disbalanced$fig[[1]]
+
+
+comparison_df <- rbind(fig_ess$fixed_effects,
+                       fig_ess_tiny$fixed_effects,
+                       fig_ess_disbalanced$fixed_effects)
+
+ggplot(comparison_df, aes(x=label, y=b1,
+                          color=model, 
+                          ymin=b1-1.92*se, ymax=b1+1.92*se)) +
+  geom_pointrange(position = position_dodge(width = .5)) +
+  coord_flip()
+
+
+
+ggplot(comparison_df, aes(x=label, y=b2se,
+                          fill=model)) +
+  geom_bar(stat="identity", position="dodge") +
+  theme_minimal()
+```
+
+
+## Erweiterung der Regressionsgleichung
+
+
+<p class=math> 
+<font color=blue>$y$</font>
+$=$
+<font color=red>$\beta_0+\beta_1x_1$</font>
+$+~...~\beta_nx_n~+~$
+<font color=darkorange>$e$</font>
+</p>
+
+
+
+
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$\beta_0$</font>
+$+$
+<font color=darkorange>$\beta_1$</font>
+$x_1$
+</p>
+
+<p class=math> 
+<font color=red>$\hat{y}$</font>
+$=$
+<font color=blue>$\beta_0$</font>
+$+$
+<font color=darkorange>$\beta_1$</font>
+$x_1 ~+~ ...~ \beta_nx_n$
+</p>
+
+
+```{r}
+knitr::opts_chunk$set(eval=F)
+```
+
+
+## Variierende Regressionsparameter
+
+### Einfache lineare Regression
+
+
+
+
+```{r}
+fit <- lm(pol_vertrauen ~ zufr_wirtschaft, ess_c6)
+
+b <- round(fit$coefficients, 1) 
+
+ggplot() +
+  geom_jitter(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft),
+       position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .15) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  theme_light() +
+  theme(plot.margin=unit(c(0,2,0,2), "cm")) +
+  guides(colour = guide_legend(override.aes = list(size=2, alpha=1)))
+
+save_fig("V1_2_1.png", save)
+
+
+ggplot() +
+  geom_jitter(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft),
+       position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .15) +
+  geom_smooth(data=ess_c6, aes(y=pol_vertrauen, x=zufr_wirtschaft), 
+              method="lm", se=F, fullrange = T,
+              color ="magenta") +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  labs(x="Zufriedenheit Wirtschaft", y="Pol. Vertrauen") +
+  theme_light() +
+  theme(plot.margin=unit(c(0,2,0,2), "cm")) +
+  guides(colour = guide_legend(override.aes = list(size=2, alpha=1))) +
+  annotate("text", x=1, y=1, hjust=0,
+           label=bquote(hat(y)==.(b[1])+.(b[2])~x),
+                parse = F, col="magenta", cex=4)
+
+save_fig("V1_2_2.png", save)
+
+
+ess_c6$zufr_wirtschaft <- scale(ess_c6$zufr_wirtschaft, scale=F)
+
+fit_cent <- lm(pol_vertrauen ~ zufr_wirtschaft, ess_c6)
+b_cent <- round(fit_cent$coefficients, 1) 
+
+ggplot() +
+  geom_jitter(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft),
+       position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .15) +
+  geom_smooth(data=ess_c6, aes(y=pol_vertrauen, x=zufr_wirtschaft), 
+              method="lm", se=F, fullrange = T,
+              color ="magenta") +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
+  theme_light() +
+  theme(plot.margin=unit(c(0,2,0,2), "cm")) +
+  guides(colour = guide_legend(override.aes = list(size=2, alpha=1))) +
+  annotate("text", x=1, y=3.6, hjust=0,
+           label=bquote(hat(y)==.(b_cent[1])+.(b_cent[2])~x),
+                parse = F, col="magenta", cex=4)
+
+save_fig("V1_2_3.png", save)
+```
+
+### Mit variierendem Intercept
+
+```{r}
+fit_cntry <- lm(pol_vertrauen ~ zufr_wirtschaft + cntry, ess_c6)
+b_cntry <- round(fit_cntry$coefficients, 2) 
+
+#Wert für Schweden etwas verringern, da Linie sonst identisch zu NO
+b_cntry[7] <- b_cntry[7]-0.03 
+
+lm_df_cntry <- data.frame(cntry = sort(laender),
+                          b1 = c(b_cntry[1], b_cntry[1]+c(b_cntry[3:7])),
+                          b2 = b_cntry[2],
+                          row.names = c())
+
+ggplot() +
+  geom_jitter(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry),
+       position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .15) +
+  scale_colour_manual(values = farben) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
+  theme_light() +
+  theme(plot.margin=unit(c(0,0,0,2), "cm")) +
+  guides(colour = guide_legend(override.aes = list(size=2, alpha=1)))
+
+save_fig("V1_2_4.png", save)
+```
+
+
+```{r}
+kableExtra::kable_paper(knitr::kable(lm_df_cntry, format = "html"), bootstrap_options = "striped", full_width = F)
+
+ggplot() +
+  geom_jitter(data=ess_c6,
+              aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry),
+       position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .15) +
+  geom_abline(data=lm_df_cntry, aes(intercept=b1, slope=b2),
+              color = farben, size=.7) +
+  scale_colour_manual(values = farben) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
+  theme_light() +
+  theme(plot.margin=unit(c(0,0,0,2), "cm")) +
+  guides(colour = guide_legend(override.aes = list(size=2, alpha=1)))
+
+save_fig("V1_2_5.png", save)
+```
+
+### Mit variierendem Intercept und variierendem Slope
+
+```{r}
+fit_slope <- lm(pol_vertrauen ~ zufr_wirtschaft + cntry + cntry:zufr_wirtschaft, ess_c6)
+b_slope <- round(fit_slope$coefficients, 1) 
+
+lm_df_slope <- data.frame(cntry = sort(laender),
+                          b1 = c(b_slope[1], b_slope[1]+c(b_slope[3:7])),
+                          b2 = c(b_slope[2], b_slope[2]+c(b_slope[8:12])),
+                          row.names = c())
+
+ggplot(ess_c6, 
+       aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha = .15) +
+  geom_smooth(data=ess_c6, aes(y=pol_vertrauen, x=zufr_wirtschaft), 
+              method="lm", se=F, fullrange = T, size=.7,
+              show.legend=FALSE) +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_colour_manual(values = farben) +
+  labs(x="Zufriedenheit Wirtschaft (zentr.)", y="Pol. Vertrauen") +
+  theme_light() +
+  theme(plot.margin=unit(c(0,0,0,2), "cm"),
+        axis.text.x  = element_markdown(color = "black", size = 7)) +
+  guides(colour = guide_legend(override.aes = list(size=2, alpha = 1))) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black")
+  
+save_fig("V1_2_6.png", save)
+
+kableExtra::kable_paper(knitr::kable(lm_df_slope, format = "html"), bootstrap_options = "striped", full_width = F)
+```
+
+
+```{r}
+ggplot(ess_c6, 
+       aes(y=pol_vertrauen, x=zufr_wirtschaft, color=cntry)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha =1) +
+  scale_y_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_colour_manual(values = farben) +
+  labs(y="Pol. Vertrauen", x="zufr_wirtschaft") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,0,0,2), "cm"),
+        axis.text.x  = element_markdown(color = "black", size = 7)) +
+  guides(colour = guide_legend(override.aes = list(size=2))) +
+  facet_grid(. ~ cntry)+
+  geom_hline(data = means_df, aes(yintercept=pol_vertrauen, group=cntry),
+             size=1, color=farben) +
+  geom_vline(xintercept=0, col="black") +
+  geom_hline(yintercept=0, col="black") +
+  geom_abline(data=lm_df_cntry, aes(intercept=b1, slope=b2, group=cntry),
+              color = farben, size=.5) 
+ 
+```
