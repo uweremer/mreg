@@ -45,8 +45,7 @@ save_fig <- function(filename, save = TRUE){
 - dass Sie wissen, welche unterschiedlichen Varianten der Mehrebenenregression es gibt.
 - dass Sie entscheiden können, für welche Fragestellungen welche Variante der Mehrebenenregression geeignet sind.
 
-- dass Sie erläutern können, worin sich eine Mehrebenenregression von einer einfachen linearen Regression unterscheidet.
-- dass Sie aufzählen können, welche Vorteile eine Mehrebenenregression hat.
+
 
 
 # „Wann ist eine Mehrebenenregression angebracht?“ 
@@ -57,6 +56,11 @@ save_fig <- function(filename, save = TRUE){
 - wissen was der ICC ist und was der Design Effekt ausdrückt
 - wie man den ICC und den Design Effekt mit R berechnet
 - wie der ICC und der Design Effekt im hinblick auf die Merhebenenregression interpretiert wird 
+
+
+# „Warum ist eine Mehrebenenregression sinnvoll"?
+- dass Sie erläutern können, worin sich eine Mehrebenenregression von einer einfachen linearen Regression unterscheidet.
+- dass Sie aufzählen können, welche Vorteile eine Mehrebenenregression hat.
 
 
 # „Wie schätzt man eine Mehrebenenregression in R?“

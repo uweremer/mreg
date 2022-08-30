@@ -135,7 +135,7 @@ Solche Ebenen können neben sozialen Gruppen und Organisationszugehörigkeiten a
 
 Immer wenn solche hierarchischen Daten vorliegen, ist die Mehrebenenregression das passende statistische Modell, dass den datengenerierenden Prozess am besten abbilden kann. 
 
-Technisch spricht man davon, dass es mehrere Ebenen gibt, im englischen *levels*.
+Technisch spricht man davon, dass es mehrere Ebenen gibt, im englischen *Levels*.
 Jede Ebene hat eine bestimmte Anzahl an Fällen (*Units*).
 
 Wir beschäftigen uns in der Videoserie mit dem einfachen Fall von zwei Ebenen.
@@ -146,7 +146,23 @@ Wir beschäftigen uns in der Videoserie mit dem einfachen Fall von zwei Ebenen.
 Wir haben $n$ Individuen $i_{1, ...n}$ auf Ebene 1 geclustert in $j$ Klassen/Gruppen
 $j_{1,...m}$ auf Ebene 2.
 
-Hier ein konkretes Beispiel anhand der Daten des European Social Survey, kurz ESS:
+Hier ein konkretes Beispiel.
+
+<p style="max-width: 20%; float: right; margin: 2em;"><a href="https://www.europeansocialsurvey.org" target="_blank" rel="external">
+![](./Grafiken/ESS_Logo.jpg "ESS Logo by ESS-ERIC, a European Research Infrastructure Consortium, see https://www.europeansocialsurvey.org")</a>
+</p>
+
+Die Daten stammen aus dem 9. European Social Survey, - kurz ESS - aus dem Jahr 2018.^[ESS Round 9: European Social Survey Round 9 Data (2018). Data file edition 3.1. Sikt - Norwegian Agency for Shared Services in Education and Research, Norway – Data Archive and distributor of ESS data for ESS ERIC. doi:10.21338/NSD-ESS9-2018] 
+
+Sie benötigen die ESS Daten umin späteren Videos den R Code aus R-Script-Dateien ausführen zu können. Die Daten können Sie über die Webseite des ESS herunterladen:
+
+https://www.europeansocialsurvey.org/ 
+
+oder direkt über die DOI-Adresse:
+
+https://doi.org/10.21338/NSD-ESS9-2018 
+
+Schauen wir mal nur auf die Anzahl der Befragten in den 27 teilnehmenden Ländern.
 
 ```{r}
 library(foreign)
@@ -168,9 +184,9 @@ save_fig("V1_0_1.png", save)
 
 ```
 
-Die Grafik zeigt die Anzahl der Befragten in den 28 teilnehmenden Ländern.
+Hier haben wir schon eine geclusterte Datenstruktur:
 
-Die Mehrebenenstruktur in den Daten lässt sich folgendermaßen ausdrücken:
+Die Mehrebenenstruktur lässt sich folgendermaßen ausdrücken:
 
 Wir haben $`r length(ess[,1])`$ Individuen $i_{1,\dots`r length(ess[,1])`}$ auf Ebene 1 geclustert in $`r length(unique(ess[,'cntry']))`$ Ländern
 $j_{1,\dots `r length(unique(ess[,'cntry']))`}$ auf Ebene 2.
@@ -308,18 +324,9 @@ Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernzi
 
 # Literatur
 
-### Mehrebenenregression {.unlisted .unnumbered}
-
 Literatur zum Einstieg in die Mehrebenenregression (in aufsteigender Schwierigkeit sortiert):
 
 - Tausendpfund, Markus (2020): Mehrebenenanalyse. In: ebd. (Hrsg.): Fortgeschrittene Analyseverfahren in den Sozialwissenschaften. Grundwissen Politik. Springer VS, Wiesbaden. https://doi.org/10.1007/978-3-658-30237-5_5 
 - Pötschke, Manuela. (2020). Mehrebenenmodelle. In: Wagemann, Claudius; Goerres, Achim; Siewert, Markus B. (Hrsg.): Handbuch Methoden der Politikwissenschaft. Springer VS, Wiesbaden. https://doi.org/10.1007/978-3-658-16936-7_29 
 - Gellman, Andrew; Hill, Jennifer (2009): Data-Analysis Using regression and Multilevel/Hierachical Models. Cambridge: Cambridge University Press. Kap. 12 & 13. https://doi.org/10.1017/CBO9780511790942 
 
-### Beipiel: Politische Unterstützung {.unlisted .unnumbered}
-
-Literatur zur Beispielfragestellung (nach Aktualität sortiert):
-
-- Dalton, Russell J. (2019): Citizen politics: Public opinion and political parties in advanced industrial democracies. Cq Press.
-- van Ham, Caroline, Thomassen, Jaques. J., Aarts, Kees., & Andeweg, Rudy B. (Hrsg.). (2017). Myth and reality of the legitimacy crisis: Explaining trends and cross-national differences in established democracies. Oxford University Press. https://doi.org/10.1093/oso/9780198793717.001.0001 
-- Arzheimer, Kai (2002): Politikverdrossenheit. Bedeutung, Verwendung und empirische Relevanz eines politikwissenschaftlichen Begriffes. Wiesbaden: Westdeutscher Verlag. Volltext: https://www.kai-arzheimer.com/politikverdrossenheit.pdf 

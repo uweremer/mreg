@@ -37,7 +37,7 @@ save_fig <- function(filename, save = TRUE){
 }
 ```
 
-```{css, eval=T}
+```{css, eval=F}
 /* CSS Stil für Formeln unter Scatterplots */
 P.math {
     text-align: center;
@@ -55,7 +55,7 @@ In diesem zweiten Video vertiefen wir diesen Aspekt.
 
 In der ersten Hälfte möchte ich an einem Beispiel verdeutlichen, was es eigentlich heißt, dass Daten eine Mehrebenenstruktur aufweisen und wie sich das in der Gleichung des Mehrebenenmodells wiederspiegelt.
 
-In der zewiten Hälfte schauen wir dann, wie mit Hilfe des Intraklassenkorrelationskoeffizienten ICC und mit dem Design Effekt bestimmt werden kann, ob eine Mehrebenenregression angemessen ist. 
+In der zewiten Hälfte schauen wir dann, wie mit Hilfe des Intraklassenkorrelationskoeffizienten $ICC$ und mit dem Design Effekt bestimmt werden kann, ob eine Mehrebenenregression angemessen ist. 
 Dann heißt auch Hands-on und wir berechnen diese beiden Maßzahlen mit R. 
 
 
@@ -69,15 +69,6 @@ Die konkreten Lernziele sind, dass Sie...
   - wie der ICC und der Design Effekt im hinblick auf die Merhebenenregression interpretiert wird 
 
 
-
-```{r}
-library(foreign)
-ess <- read.spss("./Daten/ESS9e02.sav", 
-                 use.value.labels = FALSE,
-                 to.data.frame = TRUE,
-                 reencode = TRUE)
-```
-
 # Context Matters
 
 Viele Phänomene, die wir erklären wollen, oder über die wir eine Prognose treffen wollen lassen sich nicht alleine auf der Individualebene, bzw. der Mikroebene modellieren.
@@ -90,27 +81,11 @@ Der soziale Kontext und die institutionellen Strukturen auf Meso- und Makroebene
 
 Mit den Konzepten des methodologischen Individualismus und dem Makro-Mikro-Makro-Schema, das besser bekannt ist als die Coleman’sche Badewanne, wird analytisch klar, dass die Erklärung sozialer Phänomene immer alle Ebenen berücksichtigen muss.
 
-Dieses Argument möchte ich Ihnen auch anhand von konkreten Daten veranschaulichen. 
-In allen Videos nutzen wir dasselbe Beispiel. 
+Dieses Argument möchte ich Ihnen anhand der Daten des ESS verdeutlichen. 
 
-<p style="max-width: 20%; float: right; margin: 2em;"><a href="https://www.europeansocialsurvey.org" target="_blank" rel="external">
-![](./Grafiken/ESS_Logo.jpg "ESS Logo by ESS-ERIC, a European Research Infrastructure Consortium, see https://www.europeansocialsurvey.org")</a>
-</p>
+Unser durchgängiges Beispiel in der Videoserie ist das Thema Politikverdrossenheit. Was in den Medien oder Alltagssprachlich als Politikverdrossenheit bezeichnet wird, wird in der Forschung mit dem Konzept „Political Support“ untersucht. Eine Komponente davon ist das politische Vertrauen der Bürger. Das ist unsere abhängige Variable.
 
-Die Daten stammen aus dem 9. European Social Survey, - kurz ESS - aus dem Jahr 2018.^[ESS Round 9: European Social Survey Round 9 Data (2018). Data file edition 3.1. Sikt - Norwegian Agency for Shared Services in Education and Research, Norway – Data Archive and distributor of ESS data for ESS ERIC. doi:10.21338/NSD-ESS9-2018] Im ESS wurden in 27 Ländern insgesamt 47.086 Personen zu einer Vielzahl an Themen befragt. Um schon Mal vorweg zu greifen: die 27 Länder sind die Ebene 2 und die 47.086 Befragten, sind die Beobachtungseinheiten auf Ebene 1.
-
-
-Sie benötigen die ESS Daten um den R Code aus R-Script-Dateien zu den Videos ausführen zu können. Die Daten können Sie über die Webseite des ESS herunterladen:
-
-https://www.europeansocialsurvey.org/ 
-
-oder direkt über die DOI-Adresse:
-
-https://doi.org/10.21338/NSD-ESS9-2018 
-
-Für unser Beispiel befassen wir uns mit dem Thema Politikverdrossenheit. Was in den Medien oder Alltagssprachlich als Politikverdrossenheit bezeichnet wird, wird in der Forschung mit dem Konzept „Political Support“ untersucht. Eine Komponente davon ist das politische Vertrauen der Bürger. 
-
-Wer mehr darüber wissen möchte, für den gibt es am Ende des Videos noch Literaturhinweise. 
+Wer mehr inhaltlich darüber wissen möchte, für den gibt es am Ende des Videos noch Literaturhinweise. 
 Also: Schauen wir uns das politische Vertrauen in Europa an: 
 
 ```{r erstes_beispiel_daten_vorbereiten}
@@ -147,7 +122,9 @@ ess_c6 <- na.omit(ess_c6[,c("pol_vertrauen",
 means_df <- aggregate(list(pol_vertrauen = ess_c6$pol_vertrauen),
                            by=list(cntry = ess_c6$cntry),
                            FUN=mean, na.rm=T)
+
 grand_mean <- mean(means_df[,2])
+
 ```
 
 
@@ -301,7 +278,7 @@ Was wir nun sehen ist, dass ein Teil der Streuung in der Punktewolke auf Varianz
 ggplot(ess_c6, 
        aes(pol_vertrauen, cntry, color=cntry)) +
   geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha =1) +
+              size=1, alpha =.5) +
   stat_summary(fun=mean, geom="vpline", 
                size=1.2, height = 1, show.legend=FALSE) +  
   scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
@@ -325,7 +302,7 @@ Jedes Land hat ein anderes durchschnittliches Niveau von politischem Vertrauen. 
 ggplot(ess_c6, 
        aes(pol_vertrauen, cntry, color=cntry)) +
   geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
-              size=1, alpha =1) +
+              size=1, alpha =.5) +
   stat_summary(fun=mean, geom="vpline", 
                size=1.2, height = 1, show.legend=FALSE) +  
   geom_vline(xintercept=grand_mean, col="black", size=1) +
@@ -343,7 +320,207 @@ ggplot(ess_c6,
 save_fig("V1_1_8.png", save)
 ```
 
-Was wir jetzt sehen: Es gibt also Varianz innerhalb der Länder: Befragte streuen um den ihren jeweiligen Landesmittelwert. Und es es gibt Varianz zwischen den Ländern. Die Länder streuen um den Grand Mean. 
+Was wir jetzt sehen: Es gibt also Varianz innerhalb der Länder: Befragte streuen um den ihren jeweiligen Landesmittelwert. Und es es gibt Varianz zwischen den Ländern. Die Länder streuen um den Gesamtmittelwert, den Grand Mean. 
+
+Die Varianz innerhalb der Länder, also Varianz auf Individualebene kann nur durch Prädiktoren auf Individualebene erklärt werden. Und Varianz zwischen den Ländern kann nur durch Merkmale auf Ebene der Länder erklärt werden.
+
+Also: Menschen haben hohes oder niedriges politisches Vertrauen (Mikroebene). Aber der soziale Kontext - hier das politische System und gesellschaftliche Faktoren auf Ebene der Länder - beeinflussen als Makroebene das politische Vertrauen. Ein Teil der Unterschiede im politischen Vertrauen, geht also alleine auf diese Kontextfaktoren zurück. Und kann also nur durch Variation auf der Kontextebene erklärt werden. 
+
+Wie wir bereits gesehen haben ist die Mehrebenenregression das geeignete Verfahren zur Analyse sozialer Phänomene, bei denen Kontextfaktoren und deren Wechselwirkungen mit der Individualebene explizit modelliert werden sollen. 
+
+Eine Bedingung ist aber, dass die Daten auch empirisch eine hierarchische Struktur aufweisen.
+
+Also dass die Ebenen nicht nur strukturell vorhanden sind, sondern darüber hinaus, dass auch tatsächlich eine emprische Variation zwischen den Ländern vorhanden ist.
+
+Und zwar für die jeweilige Y-Variable, die für Sie in Ihrer Forschungsfrage relevant ist! 
+
+Das heißt ob und wie stark die Mehrebenenstruktur ausgeprägt ist, ist kein Merkmal des gesamten Datensatzes, sondern ein spezifisches Merkmal einer Variable in abhängigkeit einer spezifischen Gruppierungsvariable - und kann bei einer anderen Variable, die einem anderen datengernerierenden Prozess unterliegt ganz anders aussehen. 
+
+
+# Die Intraklassenkorrelation ICC
+
+Wie können wir wir berechnen, ob empirisch ausreichend Varianz auf Ebene 2 vorliegt, damit ein Mehrebenenmodell Sinn macht?
+
+Wie wir gerade gesehen haben, können die Varianz in einer abhängigen Variable in Varianzkomponenten zerlegen. 
+
+Wie viel der Variation steckt in der Abweichung der Individuen vom jeweiligen Gruppenmittelwert? Und wie viel der Variation steckt in der Abweichung der Gruppen vom Gesamtmittelwert, bzw. Grand Mean?
+
+
+Kurz nochmal als Auffrischung: Die Varianz ist die Summe der quadrierten Abweichungen vom Mittelewert. Dann muss noch um die Stichprobengröße bereinigt werden, da ja sonst größere Fallzahl auch zu größerer Varianz führen würde. Das ganze sieht dann so aus:
+
+$$s^2=\frac{\sum\nolimits _{i=1}^{n}{(x_i-\bar{x})^2}}{n-1}$$
+Also der Abstand von Beobachtungswert zum Mittelwert wird qaudriert und über alle Befragten aufsummiert. Dann durch die Fallzahl minus 1 geteilt.
+
+
+Die Gesamtvarianz hier im Bild in der Variable `politisches Vertrauen` ist `r round(var(ess_c6$pol_vertrauen, na.rm=T),2)`.
+
+Machen wir ein Gedankenbeispiel: 
+
+Wenn wir für jedes Land den Ländermittelwert abziehen, das heißt um den Gruppenmittelwert zentrieren, dann rechnen wir die Varianz auf Ebene 2 aus der Gesamtvarianz heraus. Es bleibt nur noch die Varianz auf Individualebene, unabhängig von der Länderzugehörigkeit.
+
+Das sehen Sie nun rechts im Bild.
+
+```{r }
+V2_1_8 <- ggplot(ess_c6, 
+       aes(pol_vertrauen, cntry, color=cntry)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha =.5, show.legend = F) +
+  stat_summary(fun=mean, geom="vpline", 
+               size=1.2, height = 1, show.legend=FALSE) +  
+  geom_vline(xintercept=grand_mean, col="black", size=1) +
+  scale_x_continuous(limits = c(0,10), breaks=seq(0,10, by=2)) +  
+  scale_y_discrete(labels = flags) +  
+  scale_colour_manual(values = farben) +
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,0,0,0), "cm"),
+        axis.text.x  = element_markdown(color = "black", size = 2)) 
+
+
+# Zentrieren um den Gruppenmittelwert
+sdf <- split(ess_c6, ess_c6$cntry)
+ess_c6$pol_vertrauen_gc <- do.call("c", sapply(sdf, function(x) x$pol_vertrauen - mean(x$pol_vertrauen, na.rm=T)))
+means_df_gc <- aggregate(list(pol_vertrauen_gc = ess_c6$pol_vertrauen_gc),
+                           by=list(cntry = ess_c6$cntry),
+                           FUN=mean, na.rm=T)
+
+grand_mean_gc <- mean(means_df_gc[,2])
+
+
+
+V2_1_9 <- ggplot(ess_c6, 
+       aes(pol_vertrauen_gc, cntry, color=cntry)) +
+  geom_jitter(position = position_jitter(width=.3, height = .3, seed = 2022), 
+              size=1, alpha =.5, show.legend= F) +
+  geom_vline(xintercept=grand_mean_gc, col="black", size=1) +
+  scale_x_continuous(limits = c(-10,10), breaks=seq(-10,10, by=2)) +  
+  scale_y_discrete(labels = flags) +  
+  scale_colour_manual(values = farben) +
+  coord_flip() +
+  labs(y="Länder", x="Pol. Vertrauen") +
+  theme_light() +
+  theme(axis.title.x = element_blank(),
+        plot.margin=unit(c(0,0,0,0), "cm"),
+        axis.text.x  = element_markdown(color = "black", size = 2)) 
+
+
+library(gridExtra)
+grid.arrange(V2_1_8, V2_1_9, nrow=1)
+
+save_fig("V1_1_9.png", save)
+```
+
+Hier ist die Varainz nur noch bei `r round(var(ess_c6$pol_vertrauen_gc, na.rm=T),2)`, weil die Varianz zwischen den Ländern fehlt. `r round(var(ess_c6$pol_vertrauen_gc, na.rm=T),2)` ist die Varianz auf Individualebene.
+
+Jetzt können wir auch ausrechnen, wie große der Anteil der Varianz zwischen den Ländern an der Gesamtvarianz ist:
+
+$$\frac{Varianz~auf~L2}{Gesamtvarianz} = \frac{Gesamtvarianz ~ -  ~ Varianz~auf~L1}{Gesamtvarianz} = \frac{`r round(var(ess_c6$pol_vertrauen, na.rm=T),2)` - `r  round(var(ess_c6$pol_vertrauen_gc, na.rm=T),2)`}{`r  round(var(ess_c6$pol_vertrauen, na.rm=T),2)`} = `r  round((var(ess_c6$pol_vertrauen, na.rm=T)-var(ess_c6$pol_vertrauen_gc, na.rm=T))/var(ess_c6$pol_vertrauen, na.rm=T), 2)`$$
+
+
+```{r}
+gesamtvarianz <- var(ess_c6$pol_vertrauen, na.rm=T)
+varianz_L1 <- var(ess_c6$pol_vertrauen_gc, na.rm=T)
+varianz_L2 <- gesamtvarianz - varianz_L1
+varianz_L2/gesamtvarianz
+```
+
+Wenn wir diesen Wert mit 100 multiplizieren, können wir den Wert als Prozentwert intepretieren: Wir sehen also, dass `r  round((var(ess_c6$pol_vertrauen, na.rm=T)-var(ess_c6$pol_vertrauen_gc, na.rm=T))/var(ess_c6$pol_vertrauen, na.rm=T), 2)*100` Prozent der Varianz in den Daten (hier für diese 6 Länder) auf Kontexteffekte zurückgehen. 
+
+Was wir hier berechnet haben ist der sogennante **Intraklassenkorrelationkoeffizient** kurz $ICC$. In Lehrbüchern finden Sie auch manchmal folgende Notation: 
+
+
+$\rho=\frac{\sigma^2_{L2}}{\sigma^2_{L1}+\sigma^2_{L2}}$
+
+
+Der $ICC$ gibt an, wie viel Varianz in den einer Variable durch die Gruppierungsvariable aufgeklärt werden kann (in Prozent).  
+
+Als **Daumenregel** wird häufig genannt, dass der $ICC \ge 0.05$ sein sollte. Wenn also mindetsens 5 Prozent der Varianz auf der Kontextebene zu finden sind, ist ein Mehrebenenmodell sinnvoll.
+
+Allerdings ist das kein hartes Kriterium. Denn: Soblad der $ICC$ positive Werte annimmt werden die Standardfehler bei nicht Berücksichtigung der Mehrebenenstruktur bereits unterschätzt (Muthen/Satorra 1995: 289)! Im schlechtesten Fall geht man von signifikanten Effekten aus, wo gar keine sind. Dazu aber auch noch mehr im dritten Video.
+
+
+Neben dem $ICC$ wird häufig auch der sogenannte **Design Effect** $D_{eff}$ betrachtet. Der Design Effect gibt an, um welchen Faktor die Varianz eines Parameters unterschätzt würde, wenn mann die Mehrebenenstruktur nicht explizit berücksichtigt. 
+
+Die Idee ist, dass die Mehrebenenstruktur als eine Art geschichtete Stichprobe aufgefasst werden kann, bei der das Schichtungsmerkmal mit bestimmten Merkmalen korrelieren (und wieviel, das sagt uns der der $ICC$).
+
+Wenn der ICC aber 0 ist, dann können wir die Daten verstehen, als stammen sie aus einer einfachen Zufallsstichprobe. Also, als ob es kein Schichtungsmerkmal, dass mit einem Parameter korreliert. 
+
+Der Design Effect sagt uns nun, um welchen Faktor unsere Varianzen unter- oder überschätzt werden, wenn man so tut, als ob die Daten aus einer einfachen Zufallsstichprobe stammen, obwohl sie eigentlich geclustert sind.
+
+Bei Werten von 1 sind die Varianzen nicht verzerrt. Bei Werten > 1 ist die Varianz eines Parameters größer wenn man die Mehrebenenstruktur korrekt berücksichtigt. Im umkehrschluss heißt das, dass man die Varianz eines Parameters unterschätzt, wenn man die Mehrebenenstruktur ignoeriert und eine einfache OLS Regression rechnet und so tut, als wären die Daten alle aus einer ungeschichteten Stichprobe.
+
+Der Design Effect berechnet sich aus 1 plus der mittleren Fallzahl der Gruppen mal dem $ICC$.^[ebd.]
+
+$$D_{eff}=1+(n-1)\rho$$ 
+Bei einem $D_{eff}\ge 2$ sollte eine Mehrebenenregression genutzt werden (Muthen 1999).
+
+
+Beide Paramter, der ICC und der Design Effect müssen zum Glück nicht von Hand berechnet werden. 
+Schauen wir uns nun in R an, wie wir diese beiden Maße berechnen:
+
+
+Noch ein letzte Wort zu Fallzahlen:
+
+Ein häufiges Argument, warum von einem Merhebenenmodell abgeraten wird ist, dass man zu wenig Fälle hat. Entwder, weil es zu wenig Fälle pro Kontexteinheit gibt, also zu wenig Indviduen pro Level 2 Einheit. Oder weil es zu wenig Ebene 2 Einheiten gibt.
+
+Die Literatur bentwortet die Frage aber eigentlich eindeutig.
+
+Ich möchte auf wezi Beiträge hinweisen:
+
+Einmal...
+
+
+Und ...
+
+Wenn Sie einfache lineare Merhebenenmodelle schätzen, sind Modelle auch mit geringer Fallzahl möglich. Idelerweise sollte der REML Schätzer genutzt werden. Sie benötigien keine Mindestanzahl an Einheiten auf Ebene 2 um unverzerrte Effekte zu schätzen. Bei Generalisierten nicht-linearen Modellen Nur Falls zusätzlich wenig Fälle pro L2 Einheit auf Ebene 1 vorliegen 
+
+Nutzen Sie den REML Schätzer. 
+
+
+
+# Fazit 
+
+Die Frage die sich nun stellt ist: Wie lässt sich nun bestimmen, ob und wie große eine solche Varianz zwicshen den Gruppen ist und ob eine Mehrebenenrergression also notwendig ist.
+
+Dafür gibt es zwei Maßzahlen, die wir berechnen können:
+
+Den ICC und den Design Effekt.
+
+Beide Maßzahlen schauen wir uns im folgenden an berechnen sie für unser Beipsiel.
+
+
+
+
+
+ETWAS ZU MINDESTFALLZAHLEN
+
+
+
+
+
+#	Lernzielabgleich
+
+Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernziele erreicht haben: 
+
+
+
+
+# Literatur
+
+- Muthen, B. O., & Satorra, A. (1995). Complex sample data in structural equation modeling. Sociological methodology, 267-316. DOI: https://doi.org/10.2307/271070
+- Muthen, Linda (1999): Discussion on Intraclass correlations. Online: http://www.statmodel.com/discussion/messages/12/18.html
+
+Literatur zur Beispielfragestellung (nach Aktualität sortiert):
+
+- Dalton, Russell J. (2019): Citizen politics: Public opinion and political parties in advanced industrial democracies. Cq Press.
+- van Ham, Caroline, Thomassen, Jaques. J., Aarts, Kees., & Andeweg, Rudy B. (Hrsg.). (2017). Myth and reality of the legitimacy crisis: Explaining trends and cross-national differences in established democracies. Oxford University Press. https://doi.org/10.1093/oso/9780198793717.001.0001 
+- Arzheimer, Kai (2002): Politikverdrossenheit. Bedeutung, Verwendung und empirische Relevanz eines politikwissenschaftlichen Begriffes. Wiesbaden: Westdeutscher Verlag. Volltext: https://www.kai-arzheimer.com/politikverdrossenheit.pdf 
+
+
+
+
 
 
 ## Regressionsgleichung
@@ -413,59 +590,5 @@ $+~...~\beta_nx_n~+~$
 </p>
 
 
-
-
-
-## Zischenfazit
-
-
-Also: Menschen haben hohes oder niedriges politisches Vertrauen (Mikroebene). Aber der soziale Kontext - hier das politische System und gesellschaftliche Faktoren auf Ebene der Länder - beeinflussen als Makroebene das politische Vertrauen. Ein Teil der Unterschiede im politischen Vertrauen, geht also alleine auf diese Kontextfaktoren zurück. Und kann also nur durch Variation auf der Kontextebene erklärt werden. 
-
-Wie wir bereits gesehen haben ist die Mehrebenenregression das geeignete Verfahren zur Analyse sozialer Phänomene, bei denen Kontextfaktoren und deren Wechselwirkungen mit der Individualebene explizit modelliert werden sollen. 
-
-Eine Bedingung, dass das funktioniert ist aber, dass die Daten auch tatsächlich eine hierarchische Struktur aufweisen.
-
-Und das heißt nicht nur, dass die Ebenen strukturell vorhanden sind, sondern darüber hinaus, dass auch  tatsächlich eine emprische Variation zwischen den Einheiten auf der Ebene in unserem Beispiel den Ländern vorhanden ist.
-
-Und zwar für die jeweilige Y-Variable, die für Sie in Ihrer Forschungsfrage relevant ist! Das heißt ob und wie stark die Mehrebenenstruktur ausgeprägt ist, ist kein Merkmal des gesamten Datensatzes, sondern ein spezifisches Merkmal einre Variable in abhängigkeit der Gruppierungsvariable.
-
-
-Ok, wir wissen nun also, dass wir zuerst schauen müssen, ob unsere Abhängige Variable ausreichend Variation zwischen den Gruppen aufweist, damit eine Mehrebeneregression Sinn macht. Denn: und das haben wir schon im ersten Video gehört: wenn die Daten keine Mehrebenenstruktur aufweisen, dann unterscheiden sich die Egrebnisse iner MLM nicht von denen einer OLS Regression. Da aber die MLM deutlich afuwändiger ist, rechnet man sie nur, wenn es die Daten erfordern.
-
-
-# ICC
-
-# Design Effect
-
-# Fazit 
-
-Die Frage die sich nun stellt ist: Wie lässt sich nun bestimmen, ob und wie große eine solche Varianz zwicshen den Gruppen ist und ob eine Mehrebenenrergression also notwendig ist.
-
-Dafür gibt es zwei Maßzahlen, die wir berechnen können:
-
-Den ICC und den Design Effekt.
-
-Beide Maßzahlen schauen wir uns im folgenden an berechnen sie für unser Beipsiel.
-
-
-
-
-
-ETWAS ZU MINDESTFALLZAHLEN
-
-
-
-
-
-#	Lernzielabgleich
-
-Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernziele erreicht haben: 
-
-- Sie kennen die unterschiedlichen Bezeichnungen der Mehrebenenregression.
-- Sie können das Grundprinzip der Mehrebenenregression erläutern.
-- Sie können darlegen, worin sich eine Mehrebenenregression von einer einfachen Linearen Regression unterscheidet.
-- Sie können aufzählen können, Vorteile eine Mehrebenenregression hat.
-- Sie wissen, welche unterschiedlichen Varianten der Mehrebenenregression es gibt.
-- Sie können entscheiden, für welche Fragestellungen welche Variante der Mehrebenenregression geeignet ist.
 
 
