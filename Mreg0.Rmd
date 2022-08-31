@@ -50,17 +50,13 @@ save_fig <- function(filename, save = TRUE){
 
 # „Wann ist eine Mehrebenenregression angebracht?“ 
 
-- theretisch begründen können wie und warum der Kontext einen Einfluss auf Ihre Datenstruktur hat
+- theoretisch begründen können wie und warum der Kontext einen Einfluss auf Ihre Datenstruktur hat
 - erläutern können, was ein Nullmodell ist. und wo dort was Varianzkomponenten sind und wo diese in der Regrgressionsgleichung zu finden sind
 
-- wissen was der ICC ist und was der Design Effekt ausdrückt
-- wie man den ICC und den Design Effekt mit R berechnet
-- wie der ICC und der Design Effekt im hinblick auf die Merhebenenregression interpretiert wird 
+- wissen was der Intraklassenkorrelation ICC ist
+- wie man den ICC mit R berechnet
+- wie der ICC im hinblick auf die Merhebenenregression interpretiert wird 
 
-
-# „Warum ist eine Mehrebenenregression sinnvoll"?
-- dass Sie erläutern können, worin sich eine Mehrebenenregression von einer einfachen linearen Regression unterscheidet.
-- dass Sie aufzählen können, welche Vorteile eine Mehrebenenregression hat.
 
 
 # „Wie schätzt man eine Mehrebenenregression in R?“
@@ -74,8 +70,13 @@ Daten einlesen
 
 # „Wie findet man das passende Modell für die Mehrebenenregression?“ 
 
-# „Wie erfolgt die Regressionsdiagnostik der Mehrebenenregression?“ 
 
 # „Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?“
 
 
+
+
+# „Warum ist die Mehrebenenregression das bessere Modell?"
+
+- dass Sie erläutern können, worin sich eine Mehrebenenregression von einer einfachen linearen Regression unterscheidet.
+- dass Sie aufzählen können, welche Vorteile eine Mehrebenenregression hat.

@@ -1,63 +1,11 @@
----
-title: "Was ist eine Mehrebenenregression"
-subtitle: "Videoserie Mehrebenenregression Teil 1/6"
-author: "Dr. Uwe Remer"
-date: "Juli 2022"
-output:
-  html_document:
-    toc: yes
-    number_sections: yes
-    toc_depth: 2
-    toc_float:
-      collapsed: true
-    df_print: paged
-    highlight: tango
-    theme: spacelab
----
-
-```{r setup, include=FALSE}
-# Figure size in inches
-w = 5
-h = 2.5
-s = 2.8
-    
-knitr::opts_chunk$set(eval=TRUE, echo = FALSE, message = FALSE, warning = FALSE,
-                      fig.width=w, fig.height=h, fig.align='center')
-save <-  F
-save_fig <- function(filename, save = TRUE){
-  if(save==TRUE){
-    ggsave(paste0("./Grafiken/", filename), 
-         width = w, height = h,
-         #scale = s,       
-         unit = "in")
-  }
-  else{
-    message("Saving skipped...")
-  }
-}
-```
-
-```{css, eval=T}
-/* CSS Stil für Formeln unter Scatterplots */
-P.math {
-    text-align: center;
-    font-size: 2vw;
-}
-
-table {
-  width: 50%;
-}
-
-```
-
-#	Begrüßung und Themenüberblick
+﻿#	Begrüßung und Themenüberblick 2:10
 
 Hallo und herzlich Willkommen zu dieser Videoserie zum Thema Mehrebenenregression in R. 
 Damit Sie den Inhalten folgen können, sollten Sie Vorkenntnisse zur linearen OLS Regression haben, sowie Grundlagen in R beherrschen. Ideal wäre es, wenn Sie auch schon einen Lehrbuchtext zur Mehrebenenregression gelesen haben. Eine Auswahl an geeigneten Texten finden Sie am Ende des Videos.
 
-Diese Videoserie besteht aus sechs aufeinander aufbauenden Teilen:  
+Diese Videoserie besteht aus 6 aufeinander aufbauenden Teilen:  
 
-- Teil 1: „Was ist eine Mehrebenenregression?“
+- Teil 1: „Was ist eine Mehrebenenregression“
 - Teil 2: „Wann ist eine Mehrebenenregression angebracht?“ 
 - Teil 3: „Wie schätzt man eine Mehrebenenregression in R?“ 
 - Teil 4: „Wie findet man das passende Modell für die Mehrebenenregression?“ 
@@ -79,7 +27,7 @@ Lernziele für dieses Video sind…
 - dass Sie entscheiden können, für welche Fragestellung welche Variante der Mehrebenenregression geeignet ist.
 
 
-#	Ein Modell mit vielen Namen
+#	Ein Modell mit vielen Namen 02:27 / 04:37
 
 > HLM, MLM und MEA, Mixed Effects, LMM und MLA 
 
@@ -100,7 +48,9 @@ Schon nach wenigen Minuten ist nun Ihr Statistik Wortschatz um einige beeindruck
 Lassen Sie uns jetzt den Begriff der Mehrebenenregression mit Inhalt füllen.
 
 
-# Warum und wozu eine Mehrebenenregression
+# Warum und wozu eine Mehrebenenregression 02:34 / 07:11
+
+## Prolog
 
 In der empirisch-analytischen Wissenschaft haben wir die vereinfachende Vorstellung, dass es eine Art datengenerierenden Prozess gibt (im Englischen: data generating process, oder kurz DGP). Das ist die Vorstellung, dass die Phänomene, oder besser gesagt, die Daten, die wir zu diesen Phänomenen messen (also z.B. das Einkommen einer Person, oder ihr politisches Vertrauen usw.) das Ende oder Resultat einer komplexen Kette an Ursache/Wirkungszusammenhängen sind. 
 
@@ -146,10 +96,6 @@ $j_{1,...m}$ auf Ebene 2.
 
 Hier ein konkretes Beispiel.
 
-<p style="max-width: 20%; float: right; margin: 2em;"><a href="https://www.europeansocialsurvey.org" target="_blank" rel="external">
-![](./Grafiken/ESS_Logo.jpg "ESS Logo by ESS-ERIC, a European Research Infrastructure Consortium, see https://www.europeansocialsurvey.org")</a>
-</p>
-
 Die Daten stammen aus dem 9. European Social Survey, - kurz ESS - aus dem Jahr 2018.^[ESS Round 9: European Social Survey Round 9 Data (2018). Data file edition 3.1. Sikt - Norwegian Agency for Shared Services in Education and Research, Norway – Data Archive and distributor of ESS data for ESS ERIC. doi:10.21338/NSD-ESS9-2018] 
 
 Sie benötigen die ESS Daten umin späteren Videos den R Code aus R-Script-Dateien ausführen zu können. Die Daten können Sie über die Webseite des ESS herunterladen:
@@ -162,53 +108,24 @@ https://doi.org/10.21338/NSD-ESS9-2018
 
 Schauen wir mal nur auf die Anzahl der Befragten in den 27 teilnehmenden Ländern.
 
-```{r}
-library(foreign)
-ess <- read.spss("./Daten/ESS9e02.sav", 
-                 use.value.labels = FALSE,
-                 to.data.frame = TRUE,
-                 reencode = TRUE)
-library(ggplot2)
-ggplot(ess, aes(x=cntry)) +
-  geom_bar() +
-  geom_text(stat='count', aes(label=..count..), 
-            col="white",
-            hjust=1,
-            angle=90) +
-  theme_minimal() + 
-  scale_x_discrete("Länder") +
-  theme(axis.text=element_text(size=6))
-save_fig("V1_0_1.png", save)
-
-```
-
 Hier sehen wir bereits die geclusterte Datenstruktur:
 
 Die Mehrebenenstruktur lässt sich folgendermaßen ausdrücken:
 
-Wir haben $`r length(ess[,1])`$ Individuen $i_{1,\dots`r length(ess[,1])`}$ auf Ebene 1 geclustert in $`r length(unique(ess[,'cntry']))`$ Ländern
-$j_{1,\dots `r length(unique(ess[,'cntry']))`}$ auf Ebene 2.
+Wir haben gut 47000 Individuen i 1 bis 47000 auf Ebene 1 geclustert in 27 Ländern
+j 1 bis 27 auf Ebene 2.
 
 
 Die Ländervariable ist also die Gruppierungsvariable, in denen die Einheiten der unteren Ebene geclustert sind.
 Theoretisch lassen sich noch weitere Ebenen einfügen. Das würde dann so aussehen...
 
-```{r}
-ggplot(ess, aes(x=cntry, color=region)) +
-  geom_bar(position = "stack", show.legend = F) +
-  theme_minimal() + 
-  scale_x_discrete("Länder mit Regionen") +
-  theme(axis.text=element_text(size=6))
-
-save_fig("V1_0_2.png", save)
-```
 
 Hier sind die Befragten in Regionen (z.B. Bundesländern oder Kantonen) geclustert, die dann wiederum Teil von Ländern (also den Nationalstaaten) sind. 
 
 Für die Videoserie bleiben wir aber beim einfachen Beispiel mit zwei Ebenen.
 
 
-## Varianz auf Ebene 2
+## Varianz auf Ebene 2 1:25 / 11:55
 
 Hier kommt ein wichtiger Punkt: 
 
@@ -230,7 +147,7 @@ Ein weiterer Vorteil ist, dass wir die Wechselwirkungen zwischen den Ebenen expl
 Was heißt das genau?
 
 
-## Grundidee und Varianten der Mehrebenenregression
+## Grundidee und Varianten der Mehrebenenregression 4:51 / 16:46
 
 Nun, die Grundidee der Mehrebenenregression ist folgende: 
 
@@ -244,7 +161,7 @@ Mit Hilfe der Mehrebenenregression lässt sich ein Modell spezifizieren, dass di
 
 
 
-Starten wir bei einem klassischen OLS Regressionsmodell, hier ein einfaches bivariates Beispiel. Das kennen Sie. A
+Starten wir bei einem klassischen OLS Regressionsmodell, hier ein einfaches bivariates Beispiel. Das kennen Sie. 
 
 **HIER Bild Gelman entwickeln**
 
@@ -277,7 +194,7 @@ Die Mehrebenenregression schätzt aber gleichzeitig ein Modell auf Kontextebene,
 Jetzt kennen Sie die unterschiedlichen Varianten, wie man Mehrebenenregression spezifizieren kann:
 
 - Varying Intercept Modell 
-- (Varying Slope Modell) Was in der Praxis nur selten ohne varying Intercept gemacht wird
+- (Varying Slope Modell) Was in der Praxis nur selten ohne varyong intgercept gemacht wird
 - Varying Intercept, Varying Slope Modell 
 - Varying Intercept, Varying Slope Modell mit Cross-Level Interaktion
 
@@ -296,6 +213,7 @@ Damit wären wir am Ende des ersten Videos anfgelangt.
 
 
 Im folgenden finden Sie noch eine kleine Aufgabe zur Wiederholung, sowie nochmal eine Übersicht über die Lernziele. Ganz am Ende gibt es noch ein paar Literaturhinweise.
+
 
 # Aufgabe zur Wiederholung
 

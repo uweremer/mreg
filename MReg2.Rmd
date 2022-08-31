@@ -37,11 +37,11 @@ save_fig <- function(filename, save = TRUE){
 }
 ```
 
-```{css, eval=F}
+```{css, eval=T}
 /* CSS Stil für Formeln unter Scatterplots */
 P.math {
     text-align: center;
-    font-size: 2vw;
+    font-size: 1.8vw;
 }
 ```
 
@@ -55,18 +55,18 @@ In diesem zweiten Video vertiefen wir diesen Aspekt.
 
 In der ersten Hälfte möchte ich an einem Beispiel verdeutlichen, was es eigentlich heißt, dass Daten eine Mehrebenenstruktur aufweisen und wie sich das in der Gleichung des Mehrebenenmodells wiederspiegelt.
 
-In der zewiten Hälfte schauen wir dann, wie mit Hilfe des Intraklassenkorrelationskoeffizienten $ICC$ und mit dem Design Effekt bestimmt werden kann, ob eine Mehrebenenregression angemessen ist. 
-Dann heißt auch Hands-on und wir berechnen diese beiden Maßzahlen mit R. 
+In der zweiten Hälfte schauen wir dann, wie mit Hilfe des Nullmodell und dem Intraklassenkorrelationskoeffizienten $ICC$  bestimmt werden kann, ob eine Mehrebenenregression angemessen ist. 
+
+Dann heißt auch Hands-on und wir rechnen mit R. 
 
 
 Die konkreten Lernziele sind, dass Sie...
 
-- theretisch begründen können wie und warum der Kontext einen Einfluss auf Ihre Datenstruktur hat
-- erläutern können, was ein Nullmodell ist.
- und wo dort was Varianzkomponenten sind und wo diese in der Regrgressionsgleichung zu finden sind
-- wissen was der ICC ist und was der Design Effekt ausdrückt
-  - wie man den ICC und den Design Effekt mit R berechnet
-  - wie der ICC und der Design Effekt im hinblick auf die Merhebenenregression interpretiert wird 
+- theoretisch begründen können wie und warum der Kontext einen Einfluss auf Ihre Datenstruktur hat.
+- erläutern können, was ein Nullmodell und es als Regressionsgleichung formulieren können.
+- wissen welche Varianzkomponenten das Nullmodell beinhaltet und wo sie in der Regrgressionsgleichung zu finden sind.
+- wissen was die Intraklassenkorrelation ist und wie man sie mit R berechnet und interpretiert.
+
 
 
 # Context Matters
@@ -320,7 +320,7 @@ ggplot(ess_c6,
 save_fig("V1_1_8.png", save)
 ```
 
-Was wir jetzt sehen: Es gibt also Varianz innerhalb der Länder: Befragte streuen um den ihren jeweiligen Landesmittelwert. Und es es gibt Varianz zwischen den Ländern. Die Länder streuen um den Gesamtmittelwert, den Grand Mean. 
+Was wir jetzt sehen: Es gibt also Varianz innerhalb der Länder: Befragte streuen um den ihren jeweiligen Landesmittelwert. Und es gibt Varianz zwischen den Ländern. Die Länder streuen um den Gesamtmittelwert, den Grand Mean. 
 
 Die Varianz innerhalb der Länder, also Varianz auf Individualebene kann nur durch Prädiktoren auf Individualebene erklärt werden. Und Varianz zwischen den Ländern kann nur durch Merkmale auf Ebene der Länder erklärt werden.
 
@@ -330,33 +330,118 @@ Wie wir bereits gesehen haben ist die Mehrebenenregression das geeignete Verfahr
 
 Eine Bedingung ist aber, dass die Daten auch empirisch eine hierarchische Struktur aufweisen.
 
-Also dass die Ebenen nicht nur strukturell vorhanden sind, sondern darüber hinaus, dass auch tatsächlich eine emprische Variation zwischen den Ländern vorhanden ist.
+Also dass die Ebenen nicht nur strukturell vorhanden sind, sondern darüber hinaus, dass auch tatsächlich eine empirische Variation zwischen den Ländern vorhanden ist.
 
 Und zwar für die jeweilige Y-Variable, die für Sie in Ihrer Forschungsfrage relevant ist! 
 
-Das heißt ob und wie stark die Mehrebenenstruktur ausgeprägt ist, ist kein Merkmal des gesamten Datensatzes, sondern ein spezifisches Merkmal einer Variable in abhängigkeit einer spezifischen Gruppierungsvariable - und kann bei einer anderen Variable, die einem anderen datengernerierenden Prozess unterliegt ganz anders aussehen. 
+Das heißt ob und wie stark die Mehrebenenstruktur ausgeprägt ist, ist kein Merkmal des gesamten Datensatzes, sondern ein  Merkmal einer spezifischen Variable in Abhängigkeit einer spezifischen Gruppierungsvariable. Und das kann bei einer anderen Variable, die einem anderen datengenerierenden Prozess unterliegt, ganz anders aussehen. 
+
+Der erste Schritt einer Mehrebeneanalyse ist also zu prüfen, ob ausreichend Variation auf der oberen Ebene vorhanden. Dafür schätzen wir ein sogenannten **Nullmodell** oder leeres Modell (manchmal auch Baseline Modell). 
+
+
+# Das Nullmodell
+
+Das Nullmodell ist ein Mehrebenenmodell, bei dem noch *keine* unabhängigen Variablen mit ins Modell aufgenommen 
+werden. Es ist ein Random Intercept Modell ohne Prädiktoren. 
+
+Das hier erkennen Sie bestimmt: 
+
+<p class=math> 
+$\hat{y}=a+bx$
+</p>
+
+Es ist die klassische Regressiongleichung. 
+
+Der Vorhersagewert $\hat{y}$ ergibt sich aus einer Regressionsgeraden, welche die Y-Achse an einem bestimmten Punkt schneidet. Das ist der Intercept $a$. Und der Regressionskoeffizient $b$ sagt uns, um welchen Wert die Regressionsgerade steigt, wenn die unabhänige Variable $x$ um einen bestimmten Wert zunimmt. Dieser Steigungsparameter $b$ wird im englischen Slope genannt.
+
+Auch dier Mehrebenenregression basiert auf dieser klassischen Gleichung. Allerdings werden alle Regressionsparamter, also der Intercept und die Slopes einfach mit $\beta$ bezeichnet und durchgezählt. $\beta_0$ ist der Intercept, $\beta_1$ die erste unabhänige Variable, $\beta_2$  die zweite, usw..
+
+<p class=math> 
+$\hat{y}=\beta_0+\beta_1x_1$
+</p>
+
+Weil das einfache OLS Modell nur eine Ebene hat, verzichtet man häufig auf einen Index. Vollständig würde die Gleichung aber lauten:
+
+<p class=math> 
+$\hat{y}_i=\beta_0+\beta_1x_{1i}$
+</p>
+
+
+Der Vorhersagewert und der Wert der x-Variable sind Befragtenspezifisch, daher Index $i$.
+
+Auch im klassischen OLS Modell könnten wir ein Nullmodel, also ein Modell ohne unabhängige Variablen schätzen.
+
+
+<p class=math> 
+$\hat{y}_i=\beta_0$
+</p>
+
+Der Vorhersagewert wäre für alle Befragten einfach der Intercept, also eine Gerade, die parallel zur x-Achse verläuft und dem Mittelwert der abhängigen Variable entspricht.
+
+
+Das Nullmodell einer Mehrebenenregression wird Formel folgendermaßen ausgedrückt:
+
+<p class=math> 
+$\hat{y}_{ij} = \beta_{0j}$
+</p>
+
+Neu ist, dass der Vorhersagewert und der Intercept zusätzlich den Index $j$ haben. Für den Vorhersagewert $\hat{y}$ heißt das, nur das es sich um den Wert des Befrgaten $i$ in Land $j$ handelt. Für den Intercept $\beta_{0}$ heißt es, dass es sich um einen länderspezifischen Mittelwert handelt.
+
+Im Nullmodell ergibt sich also der Vorhersagewert $\hat{y}_{ij}$ einzig aus einem länderspezifischen Intercept $\beta_{0j}$.
+
+Wir könnten die Formel auch etwas ausführlicher schreiben:
+
+<p class=math> 
+$y_{ij} = \beta_{0j} + r_{ij}$
+</p>
+
+Statt dem Vorhersagewert $\hat{y}$ haben wir nun den beobachteten Wert $y$ auf der linken Seite. Damit die Gleichung trotzdem aufgeht, ergänzen wir rechts noch die Fehlerterm, bzw. die Residuen $r_{ij}$.
+
+Der beobachtete Wert $y_{ij}$ für Befragten $i$ in Land $j$ ergibt sich demnach aus dem Intercept $\beta_{0j}$ für Land $j$ und einem Fehlerterm oder Residuum $r_{ij}$ für den jeweiligen Befragten $i$ in Land $j$. 
+
+Der länderspezifische Intercept $\beta_{0j}$ macht nichts anderes, als dass er die Varianz zwischen den Ländern aus den Daten heraus rechnet. 
+
+Was bleibt, ist die Varianz auf Individualebene. Und da wir keine weiteren Prädiktoren im Modell haben, ist steckt alle Varianz zwischen den Befragten also im Residuum $r_{ij}$.
+
+Da der Intercept $\beta_{0j}$ aber länderspezifisch ist (das sehen wir im Index $j$), müssen wir auch das im Modell berücksichtigen. Das heißt das Nullmodell ergänzen wir noch um eine zweite Zeile, die angibt, wie sich der variierende Intercept zusammensetzt. Oder anders ausgedrückt: Wir müssen noch ein Modell für die Ebene 2 formulieren:
+
+
+<p class=math> 
+$y_{ij} = \beta_{0j} + r_{ij}$
+
+mit 
+
+$\beta_{0j} = \gamma_{00} + u_{0j}$
+</p>
+
+
+Die zweite Zeile sagt nun: Der Ebene 1 Intercept $\beta_{0j}$ für Land $j$ ergibt sich aus einem Ebene 2 Intercept $\gamma_{00}$ (Gamma Null Null) und einem Ebene 2 Residuum $u_{0j}$.
+
+$\gamma_{00}$ ist dabei der Grand Mean, also der Mittelwert der Ländermittelwerte. Wie jeder Intercept ist das eine Konstante. Da $\gamma_{00}$ nicht variiert, hat es keinen Index $j$.
+
+Das Ebene 2 Residuum $u_{0j}$ beschtreibt dann für jedes Land $j$ die Abweichung vom Grand Mean, also vom Ebene 2 Intercept $\gamma_{00}$. Alle Varianz zwischen den Ländern steckt also im Ebene 2 Residuum $u_{0j}$
+
+
+Mit Hilfe des Nullmodells können wir also berechnen, wie viel Varianz jeweils auf Individualebene und auf Kontextebene zu finden ist. 
+
+Damit können wir den sogenannten $ICC$ berechnen, der uns Hilft zu entscheiden, ob eine Mehrebenenregression notwendig ist.
 
 
 # Die Intraklassenkorrelation ICC
 
-Wie können wir wir berechnen, ob empirisch ausreichend Varianz auf Ebene 2 vorliegt, damit ein Mehrebenenmodell Sinn macht?
+Wie wir gerade gesehen haben, können die Gesamtvarianz in einer abhängigen Variable mit Hilfe des Nullmodels in Varianzkomponenten zerlegt werden. 
 
-Wie wir gerade gesehen haben, können die Varianz in einer abhängigen Variable in Varianzkomponenten zerlegen. 
+Wir können bestimmen, wie viel der Variation  in der Abweichung der Individuen vom jeweiligen Gruppenmittelwert - also dem länderspezifischen Intercept $\beta_{0j}$ steck. Und wie viel der Variation in der Abweichung der Gruppen bzw. Länder vom Gesamtmittelwert, bzw. Grand Mean $\gamma_{00}$ steckt.
 
-Wie viel der Variation steckt in der Abweichung der Individuen vom jeweiligen Gruppenmittelwert? Und wie viel der Variation steckt in der Abweichung der Gruppen vom Gesamtmittelwert, bzw. Grand Mean?
-
-
-Kurz nochmal als Auffrischung: Die Varianz ist die Summe der quadrierten Abweichungen vom Mittelewert. Dann muss noch um die Stichprobengröße bereinigt werden, da ja sonst größere Fallzahl auch zu größerer Varianz führen würde. Das ganze sieht dann so aus:
+Kurz nochmal als Auffrischung: Die Varianz ist die Summe der quadrierten Abweichungen vom Mittelwert, die um die Stichprobengröße bereinigt ist. Das Ganze sieht dann so aus:
 
 $$s^2=\frac{\sum\nolimits _{i=1}^{n}{(x_i-\bar{x})^2}}{n-1}$$
-Also der Abstand von Beobachtungswert zum Mittelwert wird qaudriert und über alle Befragten aufsummiert. Dann durch die Fallzahl minus 1 geteilt.
 
+Also der Abstand von Beobachtungswert zum Mittelwert wird quadriert und über alle Befragten aufsummiert. Dann durch die Fallzahl minus 1 geteilt.
 
-Die Gesamtvarianz hier im Bild in der Variable `politisches Vertrauen` ist `r round(var(ess_c6$pol_vertrauen, na.rm=T),2)`.
+Die Gesamtvarianz hier im Bild in der Variable politisches Vertrauen ist `r round(var(ess_c6$pol_vertrauen, na.rm=T),2)`.
 
-Machen wir ein Gedankenbeispiel: 
-
-Wenn wir für jedes Land den Ländermittelwert abziehen, das heißt um den Gruppenmittelwert zentrieren, dann rechnen wir die Varianz auf Ebene 2 aus der Gesamtvarianz heraus. Es bleibt nur noch die Varianz auf Individualebene, unabhängig von der Länderzugehörigkeit.
+Wenn wir für jedes Land den Ländermittelwert, also den länderpsezifischen Intercept $beta_{0j}$ abziehen, man könnte auch sagen, um den Gruppenmittelwert zentrieren, dann rechnen wir die Varianz auf Ebene 2 aus der Gesamtvarianz heraus. Es bleibt nur noch die Varianz auf Individualebene, unabhängig von der Länderzugehörigkeit. 
 
 Das sehen Sie nun rechts im Bild.
 
@@ -399,10 +484,10 @@ V2_1_9 <- ggplot(ess_c6,
   scale_y_discrete(labels = flags) +  
   scale_colour_manual(values = farben) +
   coord_flip() +
-  labs(y="Länder", x="Pol. Vertrauen") +
+  labs(y="Länder", x="") +
   theme_light() +
   theme(axis.title.x = element_blank(),
-        plot.margin=unit(c(0,0,0,0), "cm"),
+        plot.margin=unit(c(0,.3,0,0), "cm"),
         axis.text.x  = element_markdown(color = "black", size = 2)) 
 
 
@@ -412,92 +497,161 @@ grid.arrange(V2_1_8, V2_1_9, nrow=1)
 save_fig("V1_1_9.png", save)
 ```
 
-Hier ist die Varainz nur noch bei `r round(var(ess_c6$pol_vertrauen_gc, na.rm=T),2)`, weil die Varianz zwischen den Ländern fehlt. `r round(var(ess_c6$pol_vertrauen_gc, na.rm=T),2)` ist die Varianz auf Individualebene.
+Hier ist die Varianz nur noch bei `r round(var(ess_c6$pol_vertrauen_gc, na.rm=T),2)`, weil die Varianz zwischen den Ländern fehlt. `r round(var(ess_c6$pol_vertrauen_gc, na.rm=T),2)` ist die Varianz auf Individualebene.
 
 Jetzt können wir auch ausrechnen, wie große der Anteil der Varianz zwischen den Ländern an der Gesamtvarianz ist:
 
 $$\frac{Varianz~auf~L2}{Gesamtvarianz} = \frac{Gesamtvarianz ~ -  ~ Varianz~auf~L1}{Gesamtvarianz} = \frac{`r round(var(ess_c6$pol_vertrauen, na.rm=T),2)` - `r  round(var(ess_c6$pol_vertrauen_gc, na.rm=T),2)`}{`r  round(var(ess_c6$pol_vertrauen, na.rm=T),2)`} = `r  round((var(ess_c6$pol_vertrauen, na.rm=T)-var(ess_c6$pol_vertrauen_gc, na.rm=T))/var(ess_c6$pol_vertrauen, na.rm=T), 2)`$$
 
 
-```{r}
+```{r, results='hide'}
 gesamtvarianz <- var(ess_c6$pol_vertrauen, na.rm=T)
 varianz_L1 <- var(ess_c6$pol_vertrauen_gc, na.rm=T)
 varianz_L2 <- gesamtvarianz - varianz_L1
 varianz_L2/gesamtvarianz
 ```
 
-Wenn wir diesen Wert mit 100 multiplizieren, können wir den Wert als Prozentwert intepretieren: Wir sehen also, dass `r  round((var(ess_c6$pol_vertrauen, na.rm=T)-var(ess_c6$pol_vertrauen_gc, na.rm=T))/var(ess_c6$pol_vertrauen, na.rm=T), 2)*100` Prozent der Varianz in den Daten (hier für diese 6 Länder) auf Kontexteffekte zurückgehen. 
+Wenn wir diesen Wert mit 100 multiplizieren, können wir den Wert als Prozentwert interpretieren: Wir sehen also, dass `r  round((var(ess_c6$pol_vertrauen, na.rm=T)-var(ess_c6$pol_vertrauen_gc, na.rm=T))/var(ess_c6$pol_vertrauen, na.rm=T), 2)*100` Prozent der Varianz in den Daten (hier für diese 6 Länder) auf Kontexteffekte zurückgehen. 
 
-Was wir hier berechnet haben ist der sogennante **Intraklassenkorrelationkoeffizient** kurz $ICC$. In Lehrbüchern finden Sie auch manchmal folgende Notation: 
+Was wir hier berechnet haben ist der sogenannte **Intraklassenkorrelationkoeffizient** kurz $ICC$. In Lehrbüchern finden Sie auch manchmal die Notation mit griechischem $\rho$ (rho) für den ICC und $\sigma^2$ (sigma) für die Varianz: 
 
 
-$\rho=\frac{\sigma^2_{L2}}{\sigma^2_{L1}+\sigma^2_{L2}}$
+$ICC = \rho=\frac{\sigma^2_{L2}}{\sigma^2_{L1}+\sigma^2_{L2}}$
 
 
 Der $ICC$ gibt an, wie viel Varianz in den einer Variable durch die Gruppierungsvariable aufgeklärt werden kann (in Prozent).  
 
-Als **Daumenregel** wird häufig genannt, dass der $ICC \ge 0.05$ sein sollte. Wenn also mindetsens 5 Prozent der Varianz auf der Kontextebene zu finden sind, ist ein Mehrebenenmodell sinnvoll.
+Als **Daumenregel** wird häufig genannt, dass der $ICC \ge 0.05$ sein sollte. Wenn also mindestens 5 Prozent der Varianz auf der Kontextebene zu finden sind, ist ein Mehrebenenmodell sinnvoll.
 
-Allerdings ist das kein hartes Kriterium. Denn: Soblad der $ICC$ positive Werte annimmt werden die Standardfehler bei nicht Berücksichtigung der Mehrebenenstruktur bereits unterschätzt (Muthen/Satorra 1995: 289)! Im schlechtesten Fall geht man von signifikanten Effekten aus, wo gar keine sind. Dazu aber auch noch mehr im dritten Video.
+Allerdings ist das kein hartes Kriterium. Denn: Sobald der $ICC$ positive Werte annimmt werden die Standardfehler bei nicht Berücksichtigung der Mehrebenenstruktur bereits unterschätzt ([Muthen/Satorra 1995: 289](https://doi.org/10.2307/271070))! Im schlechtesten Fall geht man von signifikanten Effekten aus, wo gar keine sind. Dazu aber auch noch mehr im dritten Video.
 
-
-Neben dem $ICC$ wird häufig auch der sogenannte **Design Effect** $D_{eff}$ betrachtet. Der Design Effect gibt an, um welchen Faktor die Varianz eines Parameters unterschätzt würde, wenn mann die Mehrebenenstruktur nicht explizit berücksichtigt. 
-
-Die Idee ist, dass die Mehrebenenstruktur als eine Art geschichtete Stichprobe aufgefasst werden kann, bei der das Schichtungsmerkmal mit bestimmten Merkmalen korrelieren (und wieviel, das sagt uns der der $ICC$).
-
-Wenn der ICC aber 0 ist, dann können wir die Daten verstehen, als stammen sie aus einer einfachen Zufallsstichprobe. Also, als ob es kein Schichtungsmerkmal, dass mit einem Parameter korreliert. 
-
-Der Design Effect sagt uns nun, um welchen Faktor unsere Varianzen unter- oder überschätzt werden, wenn man so tut, als ob die Daten aus einer einfachen Zufallsstichprobe stammen, obwohl sie eigentlich geclustert sind.
-
-Bei Werten von 1 sind die Varianzen nicht verzerrt. Bei Werten > 1 ist die Varianz eines Parameters größer wenn man die Mehrebenenstruktur korrekt berücksichtigt. Im umkehrschluss heißt das, dass man die Varianz eines Parameters unterschätzt, wenn man die Mehrebenenstruktur ignoeriert und eine einfache OLS Regression rechnet und so tut, als wären die Daten alle aus einer ungeschichteten Stichprobe.
-
-Der Design Effect berechnet sich aus 1 plus der mittleren Fallzahl der Gruppen mal dem $ICC$.^[ebd.]
-
-$$D_{eff}=1+(n-1)\rho$$ 
-Bei einem $D_{eff}\ge 2$ sollte eine Mehrebenenregression genutzt werden (Muthen 1999).
+Schauen wir uns nun in R an, wie wir das Nullmodell schätzen und damit den $ICC$ berechnen.
 
 
-Beide Paramter, der ICC und der Design Effect müssen zum Glück nicht von Hand berechnet werden. 
-Schauen wir uns nun in R an, wie wir diese beiden Maße berechnen:
+## Umsetzung in R 
+
+```{r setup2, include=FALSE}
+knitr::opts_chunk$set(eval=TRUE, echo = TRUE)
+```
+
+Um den ICC berechnen zu können, schätzen wir ein sogenannten **Nullmodell** oder leeres Modell (manchmal auch Baseline Modell). 
+
+Dabei handelt es sich um ein Mehrebenenmodell, bei dem noch *keine* unabhängigen Variablen mit ins Modell aufgenommen 
+werden. Es ist ein Random Intercept Modell ohne Prädiktoren. 
+
+Das Nullmodell ist immer der erste Schritt bei einer Mehrebenenanalyse. Es liefert uns die Informationen, wie viel Varianz auf welcher Ebene zu finden ist - und damit, ob es sich überhaupt lohnt, weitere komplexere Mehrebenenmodelle zu schätzen.
+
+Bevor wir dieses Nullmodell berechnen können, müssen wir aber zunächst die Daten einlesen und vorbereiten. Ich nutze das `foreign`-Paket mit der Funktion `read.spss()` um den ESS Datensatz den ich heruntergeladen habe einzulesen. Information und Link zum Datensatz finden Sie im ersten Video.
 
 
-Noch ein letzte Wort zu Fallzahlen:
+```{r}
+# Einlesen des Datensatzes
+library(foreign)
+ess <- read.spss("./Daten/ESS9e02.sav", 
+                 use.value.labels = FALSE,
+                 to.data.frame = TRUE,
+                 reencode = TRUE)
+```
 
-Ein häufiges Argument, warum von einem Merhebenenmodell abgeraten wird ist, dass man zu wenig Fälle hat. Entwder, weil es zu wenig Fälle pro Kontexteinheit gibt, also zu wenig Indviduen pro Level 2 Einheit. Oder weil es zu wenig Ebene 2 Einheiten gibt.
-
-Die Literatur bentwortet die Frage aber eigentlich eindeutig.
-
-Ich möchte auf wezi Beiträge hinweisen:
-
-Einmal...
-
-
-Und ...
-
-Wenn Sie einfache lineare Merhebenenmodelle schätzen, sind Modelle auch mit geringer Fallzahl möglich. Idelerweise sollte der REML Schätzer genutzt werden. Sie benötigien keine Mindestanzahl an Einheiten auf Ebene 2 um unverzerrte Effekte zu schätzen. Bei Generalisierten nicht-linearen Modellen Nur Falls zusätzlich wenig Fälle pro L2 Einheit auf Ebene 1 vorliegen 
-
-Nutzen Sie den REML Schätzer. 
+Als nächstes erstelle ich einen Mittelwertindex mit der Funktion `rowMeans()` aus den drei Vertrauens-Items `trstpr`, `trstpl` und `trstprt`. Der Mittelwertindex hat den Vorteil, dass wir nicht so viele Missing Values erhalten wie bei einem additiven Index. Beim additiven Index genügt schon ein `NA` auf einem der drei Items um zu einem listenweisen Fallausschluss zu führen.
 
 
+```{r}
+# Operationalisierung der abh. Variable 
+# "Politisches Vertrauen"
+# Mittelwertindex aus drei Items:
+idx_vars <- c("trstprl","trstplt","trstprt")
+ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
+                              na.rm = F)
 
-# Fazit 
+#table(ess$pol_vertrauen, useNA = "always")
+#DescTools::Desc(ess$pol_vertrauen)
+#table(ess$cntry)
 
-Die Frage die sich nun stellt ist: Wie lässt sich nun bestimmen, ob und wie große eine solche Varianz zwicshen den Gruppen ist und ob eine Mehrebenenrergression also notwendig ist.
+``` 
 
-Dafür gibt es zwei Maßzahlen, die wir berechnen können:
+Wir haben nun also die Variable `pol_vertrauen` als abhängige Variable und die Variable `cntry` als L2 Gruppierungsvariable.
+Da wir für das Nullmodell noch keine weiteren Prädiktoren benötigen, können wir direkt im nächsten Schritt das Nullmodell schätzen.
 
-Den ICC und den Design Effekt.
-
-Beide Maßzahlen schauen wir uns im folgenden an berechnen sie für unser Beipsiel.
-
-
-
+Für die Mehrebenenregression nutzen wir das Paket `lme4` von [Bates et al. (2015)](https://doi.org/10.18637/jss.v067.i01 ). Darauf aufbauend gibt es noch das Paket `lmerTest`, welches zusätzlich Signifikanztests mit ausgibt.
 
 
-ETWAS ZU MINDESTFALLZAHLEN
+```{r}
+library(lme4)
+library(lmerTest) #Eigentlich genügt lmerTest, da das automatisch auch lme4 lädt
+```
+
+Beide Pakete enthalten die Funktion `lmer()`. **lmer** steht für **l**inear **m**ixed **e**ffects **r**egression.
+
+Die `lmer()`-Funktion erwartet im einfachsten Fall nur eine Formel, die das Modell spezifiziert und den Dataframe den wir nutzen.  
+
+Was neu ist, ist dass wir nun explizit angeben müssen, dass ein Intercept geschätzt werden soll.
+
+Die Formel für den R-Code lautet `pol_vertrauen ~ 1 + (1 | cntry)`.
+
+```{r}
+mreg.0 <- lmer(pol_vertrauen ~ 1 + (1 | cntry),
+               data = ess)
+
+```
 
 
+Allgemeiner heißt das:
 
+- Die abhängige Variable `pol_vertrauen`
+- wird regrediert `~`
+- auf einen Ebene 1 Intercept `1`
+- dabei darf der Intercept `1` variieren `|` nach der Gruppierungsvariable `cntry`: also: `(1 | cntry)`
+
+Das der Intercept mit einer `1` angegeben wird, kommt daher, dass die Regressionsgleichung eigentlich so aussieht:
+
+<p class=math> 
+$\hat{y}_{ij}=\beta_0j$
+<font color=red>$1$</font>
+$+\beta_1x_{ij}$
+</p>
+
+Der Intercept wird nämlich für jeden Befragten mal 1 genommen, was man aber in der Formle nicht ausschreiben muss. 
+
+
+Das Regressionsobjekt haben wir unter dem Namen `mreg.0` gespeichert.
+
+Das können wir nun aufrufen oder direkt mit der Funktion `summary()` anzeigen lassen:
+
+```{r}
+summary(mreg.0)
+```
+
+Viele Informationen in diesem Output sind an dieser Stelle nicht wichtig. Für uns sind folgende Quanitites of Interest relevant:
+
+Unten bei den <font color="blue">Fixed Effects</font> in blau hervorgehoben, sehen wir den durchschnittlichen Wert der variienden Intercepts, also den Grand Mean $\gamma_{00}$. Dieser liegt bei $`r round(fixef(mreg.0),1)`$. 
+
+Aber: der Intercept darf ja variierenden , Und wie groß diese Varianz ist, sehen wir oben bei den <font color="red">Random Effects</font>, hier in rot hervorgehoben. Hier finden wir die Varianzkomponenten des Modells. Also: das was variieren darf, und was noch nicht systematisch im Modell erklärt wird. Daher auch die Bezeichnung *Random* Effects. 
+
+Auf der Ebene der Gruppierungsvariable `cntry` haben wir einen variierenden Intercept, das ist das $\beta_{0j}$, mit einer Varianz von $`r round(c(unlist( lapply(VarCorr(mreg.0), diag) ), attr(VarCorr(mreg.0),"sc")^2),2)[1]`.$ 
+
+Übrig bleibt eine Resiudalvarianz auf Ebene 1, also das was nicht durch den variierenden Intercept erklärt wird. Das sind hier $`r round(c(unlist( lapply(VarCorr(mreg.0), diag) ), attr(VarCorr(mreg.0),"sc")^2),2)[2]`.$
+
+Mit diesen beiden Zahlen lässt sich nun der $ICC$ berechnen.
+
+$\frac{`r round(c(unlist( lapply(VarCorr(mreg.0), diag) ), attr(VarCorr(mreg.0),"sc")^2)[1],2)`}{`r round(c(unlist( lapply(VarCorr(mreg.0), diag) ), attr(VarCorr(mreg.0),"sc")^2)[1],2)` + `r round(c(unlist( lapply(VarCorr(mreg.0), diag) ), attr(VarCorr(mreg.0),"sc")^2)[2],2)`}= `r round(c(unlist( lapply(VarCorr(mreg.0), diag) ), attr(VarCorr(mreg.0),"sc")^2)[1] / (sum(unlist( lapply(VarCorr(mreg.0), diag) ), attr(VarCorr(mreg.0),"sc")^2)) ,2)`$
+
+Um das nicht von Hand erledigen zu müssen, gibt es im Paket `performance` die Funktion `icc()`, die man auf das Nullmodell anwendet:
+
+```{r}
+library(performance)
+icc(mreg.0)
+```
+
+Wir sehen also der$ICC$ beträgt `r icc(mreg.0)[1]` - `r round(icc(mreg.0)$ICC_adjusted[1]*100,1)` Prozent der Varianz liegen auf Ebene 2.
+
+Das ist ziemlich guter Wert für eine abhängige Variable aus dem Bereich der politikwissenschaftlichen Einstellungs- und Verhaltensforschung. Der datengenerierende Prozess resultiert also tatsächlich in einer geclusterten bzw. hierarchischen Datenstruktur. Die obere Ebene ist für fast ein Fünftel der Varianz in den Daten verantwortlich.  
+
+Somit wissen wir: Eine Mehrebenenregression ist unbedingt einer einfachen OLS Regression vorzuziehen, wenn wir korrekte Ergebnisse erhalten wollen, denen wir auch trauen können.
+
+Was unter 'korrekten Ergebnissen' zu verstehen ist, wie sich die Ergebnisse einer Mehrebenenregression von denen einer OLS Regression unterscheiden und welche Rolle dabei Fallzahlen spielen, besprechen wir im sechsten und letzten Video dieser Videoreihe, da es sich um weiterführende Themen handelt.
+
+Bevor wir dorthin kommen, werden wir nächsten Video Nummer drei uns damit beschäftigen, wie die unterschiedlichen Varianten der Mehrebenenregression mit R umgesetzt werden und wie man die Ergebnisse interpretiert.  
 
 
 #	Lernzielabgleich
@@ -505,90 +659,23 @@ ETWAS ZU MINDESTFALLZAHLEN
 Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernziele erreicht haben: 
 
 
+- Sie können theoretisch begründen  wie und warum der Kontext einen Einfluss auf Ihre Datenstruktur hat.
+- Sie können erläutern, was ein Nullmodell ist und können es als Regressionsgleichung formulieren.
+- Sie wissen welche Varianzkomponenten das Nullmodell beinhaltet und wo sie in der Regrgressionsgleichung zu finden sind.
+- Sie wissen was die Intraklassenkorrelation ist und wie man sie mit R berechnet und interpretiert.
 
 
 # Literatur
 
-- Muthen, B. O., & Satorra, A. (1995). Complex sample data in structural equation modeling. Sociological methodology, 267-316. DOI: https://doi.org/10.2307/271070
-- Muthen, Linda (1999): Discussion on Intraclass correlations. Online: http://www.statmodel.com/discussion/messages/12/18.html
+- Bates, D., Mächler, M., Bolker, B., & Walker, S. (2015). Fitting Linear Mixed-Effects Models Using lme4. Journal of Statistical Software, 67(1), 1–48. DOI: https://doi.org/10.18637/jss.v067.i01 
+- Elff, Martin; Heisig, Jan Paul;  Schaeffer, Merlin; Shikano, Susumu (2021): Multilevel Analysis with Few Clusters: Improving Likelihood-based Methods to Provide Unbiased Estimates and Accurate Inference. British Journal of Political Science 51(1): 412-426. DOI: https://doi.org/10.1017/S0007123419000097
+- Gelman, Andrew; Hill, Jennifer (2009): Data-Analysis Using regression and Multilevel/Hierachical Models. Cambridge: Cambridge University Press. Kap. 12 & 13. https://doi.org/10.1017/CBO9780511790942 
+- Muthen, B. O.; Satorra, A. (1995): Complex sample data in structural equation modeling. Sociological methodology, 267-316. DOI: https://doi.org/10.2307/271070
+
 
 Literatur zur Beispielfragestellung (nach Aktualität sortiert):
 
 - Dalton, Russell J. (2019): Citizen politics: Public opinion and political parties in advanced industrial democracies. Cq Press.
-- van Ham, Caroline, Thomassen, Jaques. J., Aarts, Kees., & Andeweg, Rudy B. (Hrsg.). (2017). Myth and reality of the legitimacy crisis: Explaining trends and cross-national differences in established democracies. Oxford University Press. https://doi.org/10.1093/oso/9780198793717.001.0001 
+- van Ham, Caroline; Thomassen, Jaques. J.; Aarts, Kees; Andeweg, Rudy B. (Hrsg.)(2017): Myth and reality of the legitimacy crisis: Explaining trends and cross-national differences in established democracies. Oxford University Press. https://doi.org/10.1093/oso/9780198793717.001.0001 
 - Arzheimer, Kai (2002): Politikverdrossenheit. Bedeutung, Verwendung und empirische Relevanz eines politikwissenschaftlichen Begriffes. Wiesbaden: Westdeutscher Verlag. Volltext: https://www.kai-arzheimer.com/politikverdrossenheit.pdf 
-
-
-
-
-
-
-## Regressionsgleichung
-
-Schauen wir an dieser Stelle noch einmal auf die Regressionsgleichung.
-
-So kennen wir die einfache OLS Regression.
-
-<p class=math> 
-$y_i=a+bx_i+e_i$
-</p>
-
-Wir könnten aber es genau so auch folgendermaßen notieren, ohne dass sich irgendetwas ändert:
-
-<p class=math> 
-$y_i=\beta_{0}+\beta_1x_i+e_ij$
-</p>
-
-Das verdeutlicht aber, dass der Intercept $\beta_0$ dabei genau so ein Regressionskoeffizient ist wie die b-Koeffizienten. 
-
-Und wenn man es ganz genau nehmen wöllte, könnte man auch schreiben:
-
-<p class=math> 
-$y_i=\beta_{0}x_0+\beta_1x_i+e_ij$
-</p>
-
-Jetzt werden Sie sagen, aber wir haben ja gar keine Variable $x_0$.
-
-Naja, nicht ganz. Nur: Diese Variable stammt nicht aus den Daten und genau genommen ist es keine Variable, sondern eine Konstante, die Sie in die Regressionsgleichung mit aufnehmnem:
-
-$x_0$ ist für alle Befragten konstant 1, also: $x_0 = 1$. Warum: weil der Intercept geht für alle Befragten mit gleichem Wert in die Rgeressionsgleichung ein.
-
-<p class=math> 
-$y_i=\beta_{0}1+\beta_1x_i+e_ij$
-</p>
-
-Dann können wir die Gleichung aber gleich so schreiben...
-
-<p class=math> 
-$y_i=\beta_{0}+\beta_1x_i+e_ij$
-</p>
-
-
-
-wurde das Grundmodell der Mehrebenenregression, bei der 
-
-<p class=math> 
-$y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + r_{ij}$
-</p>
-
-mit 
-
-<p class=math> 
-$\beta_{0j} = \gamma_{00} + u_{0j}$
-</p>
-
-
-
-
-
-<p class=math> 
-<font color=blue>$y_{ij}$</font>
-$=$
-<font color=red>$\beta_0j+\beta_1x_ij$</font>
-$+~...~\beta_nx_n~+~$
-<font color=darkorange>$e$</font>
-</p>
-
-
-
 

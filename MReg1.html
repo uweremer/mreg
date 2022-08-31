@@ -2783,26 +2783,39 @@ div.tocify {
 </div>
 
 
-<div id="begrüßung-und-themenüberblick-210" class="section level1" number="1">
+<style type="text/css">
+/* CSS Stil für Formeln unter Scatterplots */
+P.math {
+    text-align: center;
+    font-size: 2vw;
+}
+
+table {
+  width: 50%;
+}
+
+</style>
+<div id="begrüßung-und-themenüberblick" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Begrüßung und
-Themenüberblick 2:10</h1>
+Themenüberblick</h1>
 <p>Hallo und herzlich Willkommen zu dieser Videoserie zum Thema
 Mehrebenenregression in R. Damit Sie den Inhalten folgen können, sollten
 Sie Vorkenntnisse zur linearen OLS Regression haben, sowie Grundlagen in
 R beherrschen. Ideal wäre es, wenn Sie auch schon einen Lehrbuchtext zur
 Mehrebenenregression gelesen haben. Eine Auswahl an geeigneten Texten
 finden Sie am Ende des Videos.</p>
-<p>Diese Videoserie besteht aus 6 aufeinander aufbauenden Teilen:</p>
+<p>Diese Videoserie besteht aus sechs aufeinander aufbauenden
+Teilen:</p>
 <ul>
-<li>Teil 1: „Was ist eine Mehrebenenregression“</li>
+<li>Teil 1: „Was ist eine Mehrebenenregression?“</li>
 <li>Teil 2: „Wann ist eine Mehrebenenregression angebracht?“</li>
 <li>Teil 3: „Wie schätzt man eine Mehrebenenregression in R?“</li>
 <li>Teil 4: „Wie findet man das passende Modell für die
 Mehrebenenregression?“</li>
-<li>Teil 5: „Wie erfolgt die Regressionsdiagnostik der
-Mehrebenenregression?“</li>
-<li>Teil 6: „Wie lassen sich die Ergebnisse einer Mehrebenregression
+<li>Teil 5: „Wie lassen sich die Ergebnisse einer Mehrebenregression
 berichten?“</li>
+<li>Teil 6: „Warum ist die Mehrebenenregression das bessere
+Modell?”</li>
 </ul>
 <p>Zu allen Videos gibt es den R Code als Datei zum Download, hier unter
 dem Video. Außerdem gibt es das ganze Skript zu den Videos auf meiner
@@ -2822,9 +2835,9 @@ Mehrebenenregression es gibt.</li>
 Variante der Mehrebenenregression geeignet ist.</li>
 </ul>
 </div>
-<div id="ein-modell-mit-vielen-namen-0227-0437" class="section level1" number="2">
+<div id="ein-modell-mit-vielen-namen" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Ein Modell mit vielen
-Namen 02:27 / 04:37</h1>
+Namen</h1>
 <blockquote>
 <p>HLM, MLM und MEA, Mixed Effects, LMM und MLA</p>
 </blockquote>
@@ -2861,11 +2874,9 @@ dahinter immer dasselbe Verfahren verbirgt.</p>
 <p>Lassen Sie uns jetzt den Begriff der Mehrebenenregression mit Inhalt
 füllen.</p>
 </div>
-<div id="warum-und-wozu-eine-mehrebenenregression-0234-0711" class="section level1" number="3">
+<div id="warum-und-wozu-eine-mehrebenenregression" class="section level1" number="3">
 <h1><span class="header-section-number">3</span> Warum und wozu eine
-Mehrebenenregression 02:34 / 07:11</h1>
-<div id="prolog" class="section level2" number="3.1">
-<h2><span class="header-section-number">3.1</span> Prolog</h2>
+Mehrebenenregression</h1>
 <p>In der empirisch-analytischen Wissenschaft haben wir die
 vereinfachende Vorstellung, dass es eine Art datengenerierenden Prozess
 gibt (im Englischen: data generating process, oder kurz DGP). Das ist
@@ -2896,9 +2907,8 @@ anderen Wert auf der Y-Variable aufweist.</p>
 <p>Mit dem statistischen Modell versuchen wir dann diese Theorie über
 den datengenerierenden Prozess mathematisch/statistisch
 auszudrücken.</p>
-</div>
-<div id="kontext-und-hierarchische-daten-0319-1030" class="section level2" number="3.2">
-<h2><span class="header-section-number">3.2</span> Kontext und
+<div id="kontext-und-hierarchische-daten-0319-1030" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Kontext und
 hierarchische Daten 03:19 / 10:30</h2>
 <p>In aller Regel laufen solche datengenerierende Prozesse aber
 kontextabhängig ab. Die Mechanismen die wirken, können je nach Kontext
@@ -2948,7 +2958,7 @@ Webseite des ESS herunterladen:</p>
 <p>Schauen wir mal nur auf die Anzahl der Befragten in den 27
 teilnehmenden Ländern.</p>
 <p><img src="data:image/png;base64,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" width="480" style="display: block; margin: auto;" /></p>
-<p>Hier haben wir schon eine geclusterte Datenstruktur:</p>
+<p>Hier sehen wir bereits die geclusterte Datenstruktur:</p>
 <p>Die Mehrebenenstruktur lässt sich folgendermaßen ausdrücken:</p>
 <p>Wir haben <span class="math inline">\(47086\)</span> Individuen <span class="math inline">\(i_{1,\dots47086}\)</span> auf Ebene 1 geclustert
 in <span class="math inline">\(27\)</span> Ländern <span class="math inline">\(j_{1,\dots 27}\)</span> auf Ebene 2.</p>
@@ -2962,9 +2972,9 @@ Nationalstaaten) sind.</p>
 <p>Für die Videoserie bleiben wir aber beim einfachen Beispiel mit zwei
 Ebenen.</p>
 </div>
-<div id="varianz-auf-ebene-2-125-1155" class="section level2" number="3.3">
-<h2><span class="header-section-number">3.3</span> Varianz auf Ebene 2
-1:25 / 11:55</h2>
+<div id="varianz-auf-ebene-2" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Varianz auf Ebene
+2</h2>
 <p>Hier kommt ein wichtiger Punkt:</p>
 <p>Dass ihre Daten durch das Vorhandensein einer Gruppierungsvariable
 eine Mehrebenenstruktur aufweist, ist zwar eine notwendige, aber keine
@@ -2990,9 +3000,9 @@ Ebenen explizit im Modell berücksichtigen können und in wenigen
 Maßzahlen auch kompakt beschreiben können.</p>
 <p>Was heißt das genau?</p>
 </div>
-<div id="grundidee-und-varianten-der-mehrebenenregression-451-1646" class="section level2" number="3.4">
-<h2><span class="header-section-number">3.4</span> Grundidee und
-Varianten der Mehrebenenregression 4:51 / 16:46</h2>
+<div id="grundidee-und-varianten-der-mehrebenenregression" class="section level2" number="3.3">
+<h2><span class="header-section-number">3.3</span> Grundidee und
+Varianten der Mehrebenenregression</h2>
 <p>Nun, die Grundidee der Mehrebenenregression ist folgende:</p>
 <p>Das was wir in den Daten an Variation haben, und das ist ja das, was
 wir erklären wollen, setzt sich (für den Moment verinfacht) aus zwei
@@ -3045,8 +3055,8 @@ erfassen und ggf. zu erklären.</p>
 Mehrebenenregression spezifizieren kann:</p>
 <ul>
 <li>Varying Intercept Modell</li>
-<li>(Varying Slope Modell) Was in der Praxis nur selten ohne varyong
-intgercept gemacht wird</li>
+<li>(Varying Slope Modell) Was in der Praxis nur selten ohne varying
+Intercept gemacht wird</li>
 <li>Varying Intercept, Varying Slope Modell</li>
 <li>Varying Intercept, Varying Slope Modell mit Cross-Level
 Interaktion</li>
@@ -3064,11 +3074,13 @@ Prädiktoren der Ebene 1 zwischen den Ebene 2 Einheiten
 unterscheiden?</li>
 </ul>
 <p>Diese Modelle schauen wir uns in Teil 3 der Videoserie noch einmal
-genauer an und werden sie mit R selbst umsetzen und interpretieren.</p>
+genauer an und setzen sie mit R um… Zuvor werden wir uns im nächsten
+Video Nummer zwei anschauen, wann denn eine Mehrebenenregression genutzt
+werden sollte.</p>
 <p>Damit wären wir am Ende des ersten Videos anfgelangt.</p>
-<p>Im folgenden finden Sie noch eine Aufgabe zur Wiederholung, sowie
-nochmal eine Übersicht über die Lernziele. Ganz am Ende, noch ein paar
-Literaturhinweise.</p>
+<p>Im folgenden finden Sie noch eine kleine Aufgabe zur Wiederholung,
+sowie nochmal eine Übersicht über die Lernziele. Ganz am Ende gibt es
+noch ein paar Literaturhinweise.</p>
 </div>
 </div>
 <div id="aufgabe-zur-wiederholung" class="section level1" number="4">
@@ -3096,18 +3108,12 @@ Mehrebenenregression.</li>
 <li>Sie können das Grundprinzip der Mehrebenenregression erläutern.</li>
 <li>Sie wissen, welche unterschiedlichen Varianten der
 Mehrebenenregression es gibt.</li>
-<li>Sie können darlegen, worin sich eine Mehrebenenregression von einer
-einfachen Linearen Regression unterscheidet.</li>
-<li>Sie können aufzählen können, Vorteile eine Mehrebenenregression
-hat.</li>
-<li>Sie können entscheiden, für welche Fragestellungen welche Variante
-der Mehrebenenregression geeignet ist.</li>
+<li>Sie können entscheiden, für welche Fragestellungen welche Varianten
+der Mehrebenenregression geeignet sind.</li>
 </ul>
 </div>
 <div id="literatur" class="section level1" number="6">
 <h1><span class="header-section-number">6</span> Literatur</h1>
-<div id="mehrebenenregression" class="section level3 unlisted unnumbered">
-<h3 class="unlisted unnumbered">Mehrebenenregression</h3>
 <p>Literatur zum Einstieg in die Mehrebenenregression (in aufsteigender
 Schwierigkeit sortiert):</p>
 <ul>
@@ -3117,26 +3123,10 @@ Grundwissen Politik. Springer VS, Wiesbaden. <a href="https://doi.org/10.1007/97
 <li>Pötschke, Manuela. (2020). Mehrebenenmodelle. In: Wagemann,
 Claudius; Goerres, Achim; Siewert, Markus B. (Hrsg.): Handbuch Methoden
 der Politikwissenschaft. Springer VS, Wiesbaden. <a href="https://doi.org/10.1007/978-3-658-16936-7_29" class="uri">https://doi.org/10.1007/978-3-658-16936-7_29</a></li>
-<li>Gellman, Andrew; Hill, Jennifer (2009): Data-Analysis Using
+<li>Gelman, Andrew; Hill, Jennifer (2009): Data-Analysis Using
 regression and Multilevel/Hierachical Models. Cambridge: Cambridge
 University Press. Kap. 12 &amp; 13. <a href="https://doi.org/10.1017/CBO9780511790942" class="uri">https://doi.org/10.1017/CBO9780511790942</a></li>
 </ul>
-</div>
-<div id="beipiel-politische-unterstützung" class="section level3 unlisted unnumbered">
-<h3 class="unlisted unnumbered">Beipiel: Politische Unterstützung</h3>
-<p>Literatur zur Beispielfragestellung (nach Aktualität sortiert):</p>
-<ul>
-<li>Dalton, Russell J. (2019): Citizen politics: Public opinion and
-political parties in advanced industrial democracies. Cq Press.</li>
-<li>van Ham, Caroline, Thomassen, Jaques. J., Aarts, Kees., &amp;
-Andeweg, Rudy B. (Hrsg.). (2017). Myth and reality of the legitimacy
-crisis: Explaining trends and cross-national differences in established
-democracies. Oxford University Press. <a href="https://doi.org/10.1093/oso/9780198793717.001.0001" class="uri">https://doi.org/10.1093/oso/9780198793717.001.0001</a></li>
-<li>Arzheimer, Kai (2002): Politikverdrossenheit. Bedeutung, Verwendung
-und empirische Relevanz eines politikwissenschaftlichen Begriffes.
-Wiesbaden: Westdeutscher Verlag. Volltext: <a href="https://www.kai-arzheimer.com/politikverdrossenheit.pdf" class="uri">https://www.kai-arzheimer.com/politikverdrossenheit.pdf</a></li>
-</ul>
-</div>
 </div>
 <div class="footnotes footnotes-end-of-document">
 <hr />
