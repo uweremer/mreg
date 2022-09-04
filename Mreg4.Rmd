@@ -1,0 +1,99 @@
+---
+title: "Wie schätzt man eine Mehrebenenregression in R?"
+subtitle: "Videoserie Mehrebenenregression Teil 3/6"
+author: "Dr. Uwe Remer"
+date: "Juli 2022"
+output:
+  html_document:
+    toc: yes
+    number_sections: yes
+    toc_depth: 2
+    toc_float:
+      collapsed: true
+    df_print: paged
+    highlight: tango
+    theme: spacelab
+---
+
+```{r setup, include=FALSE}
+# Figure size in inches
+w = 5
+h = 2.5
+s = 2.8
+    
+knitr::opts_chunk$set(eval=TRUE, echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.width=w, fig.height=h, fig.align='center')
+save <-  F
+save_fig <- function(filename, save = TRUE){
+  if(save==TRUE){
+    ggsave(paste0("./Grafiken/", filename), 
+         width = w, height = h,
+         #scale = s,       
+         unit = "in")
+  }
+  else{
+    message("Saving skipped...")
+  }
+}
+```
+
+```{css, eval=T}
+/* CSS Stil für Formeln unter Scatterplots */
+P.math {
+    text-align: center;
+    font-size: 2vw;
+}
+
+table {
+  width: 50%;
+}
+
+```
+
+
+# Themenüberblick
+
+Hallo und herzlich Willkommen zum dritten Teil der Videoserie zum Thema Mehrebenenregression in R. 
+
+
+
+Im vorigen Video haben wir gesehehn, wie man mit Hilfe des sogenannten Nullmodells berechnet, ob eine Mehrebenenregression überhaupt notwendig ist.
+Nur wenn dies der Fall ist, werden die eigentlich interessierenden Mehrebenenregressionsmodelle geschätzt.
+
+Und genau darum geht es in diesem ditten Video: Wie schätzt man eine Mehrebenenregression in R? 
+Und natürlich: wie interpretiert man die Ergebnisse?
+
+
+Sie sollen dabei lernen...
+
+- notwendigkeit des Zentrierens
+- Wie man die theoretischen Überlegungen zu variirenden Intercepts und variierenden Slopes und Cross-Level Interaktionen mit R modelliert
+- welche quantities of interest wichtig sind und wie sie interpretiert werden
+
+
+```{r}
+library(foreign)
+ess <- read.spss("./Daten/ESS9e02.sav", 
+                 use.value.labels = FALSE,
+                 to.data.frame = TRUE,
+                 reencode = TRUE)
+
+
+
+idx_vars <- c("trstprl","trstplt","trstprt")
+ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
+                              na.rm = F)
+ess$zufr_wirtschaft <- ess$stfeco
+
+```
+
+
+
+
+## Sequentielle Schätzung von aufeinander aufbauenden Modellen
+
+Nach jeder Schätzun eines Modells müssen Sie prüfen, ob das Modell signifikant besser ist als das vorige Modell (AIC berichten und signifikanz der ANOVA). Nur wenn das der Fall ist, dürfen Sie das nächste Modell schätzen.
+
+Sie berichten daher mehrere Mehrebenenmodelle, die aufeinander Aufbauen und immer komplexer werden. Für diese Interpretieren Sie die Signifikanz und Varianzaufklärung auf beiden Ebenen. Die eigentlche inhaltliche Interpretation der Regressionskoeffizienten (Intercepts und Slopes), nehmen Sie nur für das letzte Modell vor, dass noch eine signifikante Verbesserung darstellt!
+
+Wichtig: Sie können nicht in einem späteren Modell noch Variablen eines vorhergehenden Modells ändern. Wenn das notwendig wäre, müssen Sie wieder mit Schritt 1 beginnen.

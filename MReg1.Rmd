@@ -23,7 +23,7 @@ s = 2.8
     
 knitr::opts_chunk$set(eval=TRUE, echo = FALSE, message = FALSE, warning = FALSE,
                       fig.width=w, fig.height=h, fig.align='center')
-save <-  F
+save <-  T
 save_fig <- function(filename, save = TRUE){
   if(save==TRUE){
     ggsave(paste0("./Grafiken/", filename), 
@@ -43,11 +43,6 @@ P.math {
     text-align: center;
     font-size: 2vw;
 }
-
-table {
-  width: 50%;
-}
-
 ```
 
 #	Begrüßung und Themenüberblick
@@ -168,6 +163,7 @@ ess <- read.spss("./Daten/ESS9e02.sav",
                  use.value.labels = FALSE,
                  to.data.frame = TRUE,
                  reencode = TRUE)
+
 library(ggplot2)
 ggplot(ess, aes(x=cntry)) +
   geom_bar() +
@@ -178,7 +174,8 @@ ggplot(ess, aes(x=cntry)) +
   theme_minimal() + 
   scale_x_discrete("Länder") +
   theme(axis.text=element_text(size=6))
-save_fig("V1_0_1.png", save)
+
+save_fig("V1_1_1.png", save)
 
 ```
 
@@ -200,7 +197,7 @@ ggplot(ess, aes(x=cntry, color=region)) +
   scale_x_discrete("Länder mit Regionen") +
   theme(axis.text=element_text(size=6))
 
-save_fig("V1_0_2.png", save)
+save_fig("V1_1_2.png", save)
 ```
 
 Hier sind die Befragten in Regionen (z.B. Bundesländern oder Kantonen) geclustert, die dann wiederum Teil von Ländern (also den Nationalstaaten) sind. 

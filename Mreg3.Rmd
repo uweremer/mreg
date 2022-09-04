@@ -43,11 +43,6 @@ P.math {
     text-align: center;
     font-size: 2vw;
 }
-
-table {
-  width: 50%;
-}
-
 ```
 
 
@@ -63,15 +58,37 @@ Nur wenn dies der Fall ist, werden die eigentlich interessierenden Mehrebenenreg
 Und genau darum geht es in diesem ditten Video: Wie schätzt man eine Mehrebenenregression in R? 
 Und natürlich: wie interpretiert man die Ergebnisse?
 
+Dazu schauen wir ns zuerst die Operationalisireung der Variablen.
+Danach schätzen wir mehrere aufeinander aufbauende Modelle:
 
-Sie sollen dabei lernen...
+- Modell mit variierenden Intercepts mit Prädiktoren auf L1
+- Modell mit variierenden Intercepts mit Prädiktoren auf L1 und L2
+- Modell mit variierenden Intercepts und variierenden Slopes
+- Modell mit variierenden Intercepts und variierenden Slopes und Cross-Level-Interaktionen
 
-- notwendigkeit des Zentrierens
-- Wie man die theoretischen Überlegungen zu variirenden Intercepts und variierenden Slopes und Cross-Level Interaktionen mit R modelliert
-- welche quantities of interest wichtig sind und wie sie interpretiert werden
 
+Lernziele für dieses Video sind…
+
+- dass Sie die Variablen für das Mehrebenenmodell vorbereiten können:
+  - dass Sie wissen wie man Datensätze zussenspielt
+  - dass Sie verstehen, warum die unabhängigen Variablen zentriert werden müssen und wissen, wie Sie das in R umsetzen können
+- dass Sie unterschiedliche Varianten der Mehrebenenregression als Formel ausdrücken können
+- dass Sie wissen, wie man diese unterschiedlichen Varianten in R umsetzt
+- dass Sie die relevanten Quantities of Interest kennen und interpretieren können.
+
+Das alles schauen wir uns direkt in R an...
+
+
+# Operationalisierung
+
+Bevor wir unsere Modelle schätzen können, müssen die Variablen operationalisiert werden. Als Datensatz nutzen wir den ESS 9. Inforamtionen zum Datensatz finden Sie im ersten Video.
+
+Bereits im letzten Video Nr. 2 haben wir die abhängige Variable für unser Beispiel kennengelernt: das politische Vertrauen. 
+
+Den ersten Teil des R-Codes können wir direkt noch Mal nutzen. 
 
 ```{r}
+# Importieren des Datensatz
 library(foreign)
 ess <- read.spss("./Daten/ESS9e02.sav", 
                  use.value.labels = FALSE,
@@ -80,11 +97,24 @@ ess <- read.spss("./Daten/ESS9e02.sav",
 
 
 
+# Operationalisierung der abh. Variable 
+# "Politisches Vertrauen"
+# Mittelwertindex aus drei Items:
 idx_vars <- c("trstprl","trstplt","trstprt")
 ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
                               na.rm = F)
-ess$zufr_wirtschaft <- ess$stfeco
+#table(ess$pol_vertrauen, useNA = "always")
+#DescTools::Desc(ess$pol_vertrauen)
+```
 
+Neben der abhängigen Variable benötigen wir auch noch die unabhängigen Variablen
+
+
+
+```{r}
+#table(ess$cntry)
+
+ess$zufr_wirtschaft <- ess$stfeco
 ```
 
 
@@ -117,3 +147,9 @@ In Mehrebenenmodellen ist es erforderlich, dass die unabhängigen Variablen auf 
 ess_centered <- as.data.frame(scale(ess[,c(2:5,7)]))
 ess[,c(2:5,7)] <- ess_centered
 ```
+
+
+# Variierenden Intercepts mit Prädiktoren auf L1
+# Variierenden Intercepts mit Prädiktoren auf L1 und L2
+# Variierenden Intercepts und variierenden Prädiktoren
+# Cross-Level-Interaktionen
