@@ -78,6 +78,28 @@ Lernziele für dieses Video sind…
 
 Das alles schauen wir uns direkt in R an...
 
+Bevor es losgeht, benötigen wir aber noch eine Forschungsfrage. 
+
+Wenn wir nicht wissen, welche Frage wir eigentlich beantworten wollen, können wir auch nicht entscheiden, welche Variablen im Modell berücksichtigt werden müssen.
+
+Für die Beispielfragestellung bleiben wir beim politisches Vertrauen aus dem letzten Video 2 und Fragen:
+
+> Welchen Einfluss hat Bildung auf politisches Vertrauen?
+
+Bevor Sie weiterschauen können Sie ja Mal für sich selbst überlegen, welche Mechanismen Sie erwarten und ob Sie vermuten, Bildung hat einen positiven oder einen negativen Effekt auf politisches Vertrauen.
+
+Auch wenn es für beide Richtungen Argumente gibt, zeigt sich, dass üblicherweise höhere Bildung mit Eliten-kritischeren Einstellungen einhergeht. Bildung also einen negativen Effekt auf polititsches Vertrauen hat.
+
+Ob das so ist und ob dieser Effekt in allen europäischen Ländern zu finden ist, weollen wir untersuchen.
+
+Und um richtig zeigen zu können, was die Mehrebenenregression kann, ergänzen wir die Fragestellung noch folgendermaßen:
+
+> Wie beeinflusst Korruption die Wirkung von Bildung auf politisches Vertrauen?
+
+Diese zweite Fragestellung beinhaltet explizit ein Effekt der von der Kontextebene auf einen Effekt der Individualebene. 
+
+Da wir nun wissen, was wir untersuchen wollen, wechseln wir in R.
+
 
 # Operationalisierung
 
@@ -107,7 +129,10 @@ ess$pol_vertrauen <- rowMeans(ess[,idx_vars],
 #DescTools::Desc(ess$pol_vertrauen)
 ```
 
-Neben der abhängigen Variable benötigen wir auch noch die unabhängigen Variablen
+Neben der abhängigen Variable benötigen wir auch noch die unabhängigen Variablen.
+
+
+
 
 
 
