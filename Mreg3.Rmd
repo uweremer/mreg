@@ -37,7 +37,7 @@ save_fig <- function(filename, save = TRUE){
 }
 ```
 
-```{css, eval=T}
+```{css, eval=F}
 /* CSS Stil für Formeln unter Scatterplots */
 P.math {
     text-align: center;
@@ -126,23 +126,168 @@ idx_vars <- c("trstprl","trstplt","trstprt")
 ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
                               na.rm = F)
 #table(ess$pol_vertrauen, useNA = "always")
-#DescTools::Desc(ess$pol_vertrauen)
+library(DescTools)
+#Desc(ess$pol_vertrauen)
 ```
 
 Neben der abhängigen Variable benötigen wir auch noch die unabhängigen Variablen.
 
 
+### Bildung
 
+Als erstes unsere Haupterklärungsvariable `Bildung`. 
 
+Messung über die "International Standard Classification of Education" - EISCED.
 
+Skala aus Variable `eisced`:
 
-```{r}
-#table(ess$cntry)
+```{r Operationalisierung_X5}
+# Operationalisierung der unabh. Variable 
+# Bildung
+ess$bildung <- ess$eisced 
 
-ess$zufr_wirtschaft <- ess$stfeco
+# NAs definieren:
+# `0` und `55` auf `NA` setzten
+ess$bildung[ess$bildung %in% c(0,55)] <- NA
+
+Desc(ess$bildung)
 ```
 
 
+Neben der abhängigen und der uns interessierenden unabhängien Variable, müssen wir noch weitere Variablen im Modell berücksichtigen - die sogenannten Kontrollvariablen.
+
+Für unser Beispielfragestellung nutze ich die Variablen:
+
+- Wahrgenommene politische Responsivität
+- Zufriedenheit mit der Wirtschaftslage
+- Soziales Vertrauen
+
+
+### Wahrgenommene politische Responsivität
+
+Mittelwertindex aus zwei Items 
+
+*How much would you say the political system in [country] allows people like 
+you to have a say in what the government does?*
+
+*And how much would you say that the political system in [country] allows
+people like you to have an influence on politics?*
+
+- 1 Not at all
+- 5 A great deal
+
+```{r Operationalisierung_X2}
+# Operationalisierung der unabh. Variable 
+# Wahrgenommene politische Responsivität 
+# Mittelwertindex aus zwei Items 
+
+idx_vars <- c("psppsgva","psppipla")
+ess$responsivitaet <- rowMeans(ess[,idx_vars], 
+                               na.rm = F)
+
+# Wertebreich rekodieren auf 0 bis 4
+ess$responsivitaet <- ess$responsivitaet - 1
+
+Desc(ess$responsivitaet)
+```
+
+
+### Zufriedenheit Wirtschaftslage
+
+*On the whole how satisfied are you with the present state of the economy in
+[country]?*
+
+- 0 Extremely dissatisfied
+- 1 Extremely satisfied
+
+```{r Operationalisierung_X1}
+# Operationalisierung der unabh. Variable 
+# "Zufriedenheit Wirtschaftslage"
+
+ess$zufr_wirtschaft <- ess$stfeco
+Desc(ess$zufr_wirtschaft)
+```
+
+
+### Soziales Vertrauen
+
+*Generally speaking, would you say that most people can be trusted, or that you can't be too careful in dealing with people?*
+
+- 0 You can't be too careful
+- 10 Most people can be trusted
+
+```{r Operationalisierung_sozVertrauen}
+# Operationalisierung der unabh. Variable 
+# Soziales Vertrauen
+
+ess$soz_vertrauen <- ess$ppltrst
+Desc(ess$soz_vertrauen)
+```
+
+
+## Ebene 2 Prädiktoren 
+
+
+Auch als Kontextdatensatz verfügbar: https://ess-search.nsd.no/ 
+
+- Datensatz enthält alle Ebenen (Individual, Länder, NUTS Regionen, Größe: 2GB)
+- In ILIAS gibt es eine csv-Datei mit drei Makro-Variablen als Beispiel
+- Im R Code zur Sitzung, wird diese csv-Datei mit dem ESS Datensatz zusammengeführt (mit `merge()`).
+
+
+### Kontextdaten
+
+Wenn ma eine Mehrebenenregression rechnet, möchte man häufig auch Variablen der Makroebene nutzen. Wenn die Grupperiungsvariable Länder oder andere administrative Einheiten sind, gibt es diese Daten häufig bei den Statistischen Ämtern. Zum Beispiel Eurostat, das Statistischen Bundesamt,  der Weltbank, der OECD oder den Vereinten Nationen.
+
+Aber: wir sind in einre sehr komfortablen Situation, denn im Rahmen des ESS Programms wurden auch Makro-Datensätze erstellt, die Daten aus verschiedenen Qullen zusammentragen. Diese Datensätze enthalten neben den Individualdaten auch Kontextdaten. 
+
+Auch der Makrodatensatz ist nach Registrierung kostenlos verfügbar. Jedoch ist der Makrodatensatz über 1 GB groß. 
+Statt des ganzen Datensatzes, habe ich ihnen einen kleinen Ausschnitt davon als csv-Datei vorbereitet.
+
+Diese Datei enthält neben der Gruppierungsvariable `cntry` drei weitere Variablen:
+
+- `c_ticpi_2018` Corruption Perceptions Index^[Transparency International, https://www.transparency.org/en/cpi/2018]
+- `c_gini_2018` GINI Index^[Eurostat, http://ec.europa.eu/eurostat/data/database?node_code=ilc_di12]
+- `c_tensys_2018` System Tenure^[The World Bank - Database of Political Institutions (DPI), http://dx.doi.org/10.18235/0003049]
+
+Mit dieser csv-Datei haben wir gleich auch die Gelegenheit einen typischen Schritt der Datenvorbereitung umzusetzen: das **mergen** von Datensätzen.
+
+Megren heißt, dass man zwei Datensätze anhand einer Schlüsselvariable zusammenspielt.
+
+Probieren wir es aus:
+
+Die csv-Datei finden Sie als Download unter dem Video. Lesen wir zuerst den Makrodatensatz ein: 
+
+
+
+```{r read_macro, echo=T}
+# Vorbereitete Makrodaten einlesen und mit merge() hinzuspielen
+ess_macro <- read.table("./Daten/ess2018_macro.csv",
+                        sep=";", header=T)
+head(ess_macro)
+``` 
+
+Wir sehen im Environment Fenster in R, dass der Datenatz 4 Variablen mit 29 Beobachtungen enthält.
+Die `head()`-Funktion gibt uns einen ersten Blick auf die Daten. Wir sehen, dass jede Beobachtung, also jeder Fall ein Land ist. 
+
+Der ESS-Datensatz den wir vorhin eingelesen hatten, hat als Beobachtungseinheit Individuen.
+
+Trotzdem können wir beide Datensätze zusammenspeielen. Dafür nutzen wir die `cntry`-Variable als Schlüsselvariable.
+Jeder Befragte eine Landes, bekommt den jeweiligen Wert des Landes aus dem Makrodatensatz zugespielt.
+
+Dafür nutzen wir die `merge()`-Funktion: 
+
+
+```{r}
+ess_micro <- ess
+ess <- merge(ess_micro, ess_macro, # Die beiden Datensätze die zusammengespielt werden
+             by = "cntry", # Die Schlüsselvariable
+             all.x = T) # Das alle Fälle des x-Datensatzes (des erstgenannten) behalten werden
+```
+
+Der neue ESS Datensatz enthält wie der Mikro-Datensatz die gut 47.000 Befragten, aber drei zusätzliche Variablen aus dem Makrodatensatz. Die vierte Variable aus dem Makrodatensatz muss ja nicht übernommen werden, denn die `cntry`Variable war ja auch vorher schon ein Merkmal im Mikro-Datensatz.
+
+Von den drei Kontextvariablen nutzen wir in unserem Beispiel nur die Korruptionsvariable. Die anderen beiden können Sie für selbstständiges Üben nutzen.
 
 
 ## Missing Values ausschließen
@@ -152,10 +297,10 @@ Um einen Datensatz zu erhalten, der in über alle Modelle die gleiche Fallzahl a
 ```{r Missing_values_ausschließen}
 # Missing Values ausschließen
 variablen_im_modell <- c("pol_vertrauen",
+                         "bildung",      
+                         "responsivitaet",                         
                          "zufr_wirtschaft",
-                         "responsivitaet",
                          "soz_vertrauen", 
-                         "bildung", 
                          "cntry",
                          "c_ticpi_2018")
 ess <- na.omit(ess[,variablen_im_modell])
@@ -164,17 +309,62 @@ ess <- na.omit(ess[,variablen_im_modell])
 
 ## Zentrieren
 
-In Mehrebenenmodellen ist es erforderlich, dass die unabhängigen Variablen auf Ebene 1 Mittelwertzentriert werden. Das sog. *Grand-Mean-Centering* sorgt dafür, dass die Referenzkategorie für den Intercept (alle X-Var bei 0) der Grand Mean der abhängien Variable ist.
+In Mehrebenenmodellen ist es erforderlich, dass die unabhängigen Variablen auf Ebene 1 Mittelwertzentriert werden. Das sogenannte *Grand-Mean-Centering* sorgt dafür, dass die Referenzkategorie für den Intercept (alle X-Var bei 0) der Grand Mean der abhängien Variable ist.
 
-```{r zentrieren_L!_X-Vars}
+```{r zentrieren_L1_X-Vars}
 # Z_Transformation der Ebene 1 x-Variablen
-# Diese sind an 2. bis 5. Stelle im Datensatz
-ess_centered <- as.data.frame(scale(ess[,c(2:5,7)]))
-ess[,c(2:5,7)] <- ess_centered
+# Diese sind an 2. bis 5. und 7. Stelle im Datensatz
+
+#names(ess)
+#ess[,c(2:5)]
+#scale(ess[,c(2:5)], scale=F)
+ess_centered <- as.data.frame(scale(ess[,c(2:5)], scale=F))
+ess[,c(2:5)] <- ess_centered
 ```
 
 
 # Variierenden Intercepts mit Prädiktoren auf L1
+
+```{r}
+library(lmerTest) 
+mreg0 <- lmer(pol_vertrauen ~ 1 + (1 | cntry),  
+              data=ess)
+
+mreg1 <- lmer(pol_vertrauen ~ 1 + bildung + 
+                responsivitaet + zufr_wirtschaft + soz_vertrauen + 
+                (1 | cntry),  
+              data=ess)
+
+summary(mreg1)
+#ranef(mreg1)
+#fixef(mreg1)
+```
+
+
+```{r}
+# Gütemaße 
+model_performance(mreg1)
+r2(mreg1)
+
+icc(mreg1)
+
+as.data.frame(VarCorr(mreg1),comp="Variance")[,4]
+```  
+  
 # Variierenden Intercepts mit Prädiktoren auf L1 und L2
 # Variierenden Intercepts und variierenden Prädiktoren
 # Cross-Level-Interaktionen
+
+
+# Aufgabe
+
+- Überlegen Sie sich eine eigene Fragestellung, die mit den Variablen des ESS als Mehrebenenmodell geschätzt werden kann (Variablenübersicht im Codebuch des ESS). Rechnen Sie verschiedene Varianten der Mehrebenenregression und interpretieren Sie die Ergebnisse.
+
+- Laden Sie den vollständigen ESS Makrodatensatz und dessen Codebuch von der Webseite des ESS herunter. Schauen Sie sich den Datensatz an und machen Sie sich mit seinre Struktur vertraut. 
+
+
+```{r, echo=F, eval=F}
+library("knitr")
+knitr::purl("Mreg3.Rmd",
+            documentation=0)
+```
