@@ -2,6 +2,7 @@
 [dD]aten/
 [gG]rafiken
 *.html
+![dD]ocs/*.html
 
 # History files
 .Rhistory
