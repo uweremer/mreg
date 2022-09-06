@@ -1,6 +1,6 @@
 ---
 title: "Wie schätzt man eine Mehrebenenregression in R?"
-subtitle: "Videoserie Mehrebenenregression Teil 3/6"
+subtitle: "Videoserie Mehrebenenregression Teil 4/6"
 author: "Dr. Uwe Remer"
 date: "Juli 2022"
 output:
@@ -43,17 +43,12 @@ P.math {
     text-align: center;
     font-size: 2vw;
 }
-
-table {
-  width: 50%;
-}
-
 ```
 
 
 # Themenüberblick
 
-Hallo und herzlich Willkommen zum dritten Teil der Videoserie zum Thema Mehrebenenregression in R. 
+Hallo und herzlich Willkommen zum vierten Teil der Videoserie zum Thema Mehrebenenregression in R. 
 
 
 

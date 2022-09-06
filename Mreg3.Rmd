@@ -133,7 +133,7 @@ library(DescTools)
 Neben der abhängigen Variable benötigen wir auch noch die unabhängigen Variablen.
 
 
-### Bildung
+## Bildung
 
 Als erstes unsere Haupterklärungsvariable `Bildung`. 
 
@@ -150,7 +150,7 @@ ess$bildung <- ess$eisced
 # `0` und `55` auf `NA` setzten
 ess$bildung[ess$bildung %in% c(0,55)] <- NA
 
-Desc(ess$bildung)
+#Desc(ess$bildung)
 ```
 
 
@@ -163,7 +163,7 @@ Für unser Beispielfragestellung nutze ich die Variablen:
 - Soziales Vertrauen
 
 
-### Wahrgenommene politische Responsivität
+## Wahrgenommene politische Responsivität
 
 Mittelwertindex aus zwei Items 
 
@@ -188,11 +188,11 @@ ess$responsivitaet <- rowMeans(ess[,idx_vars],
 # Wertebreich rekodieren auf 0 bis 4
 ess$responsivitaet <- ess$responsivitaet - 1
 
-Desc(ess$responsivitaet)
+#Desc(ess$responsivitaet)
 ```
 
 
-### Zufriedenheit Wirtschaftslage
+## Zufriedenheit Wirtschaftslage
 
 *On the whole how satisfied are you with the present state of the economy in
 [country]?*
@@ -205,11 +205,11 @@ Desc(ess$responsivitaet)
 # "Zufriedenheit Wirtschaftslage"
 
 ess$zufr_wirtschaft <- ess$stfeco
-Desc(ess$zufr_wirtschaft)
+#Desc(ess$zufr_wirtschaft)
 ```
 
 
-### Soziales Vertrauen
+## Soziales Vertrauen
 
 *Generally speaking, would you say that most people can be trusted, or that you can't be too careful in dealing with people?*
 
@@ -221,27 +221,17 @@ Desc(ess$zufr_wirtschaft)
 # Soziales Vertrauen
 
 ess$soz_vertrauen <- ess$ppltrst
-Desc(ess$soz_vertrauen)
+#Desc(ess$soz_vertrauen)
 ```
 
 
-## Ebene 2 Prädiktoren 
-
-
-Auch als Kontextdatensatz verfügbar: https://ess-search.nsd.no/ 
-
-- Datensatz enthält alle Ebenen (Individual, Länder, NUTS Regionen, Größe: 2GB)
-- In ILIAS gibt es eine csv-Datei mit drei Makro-Variablen als Beispiel
-- Im R Code zur Sitzung, wird diese csv-Datei mit dem ESS Datensatz zusammengeführt (mit `merge()`).
-
-
-### Kontextdaten
+## Kontextdaten
 
 Wenn ma eine Mehrebenenregression rechnet, möchte man häufig auch Variablen der Makroebene nutzen. Wenn die Grupperiungsvariable Länder oder andere administrative Einheiten sind, gibt es diese Daten häufig bei den Statistischen Ämtern. Zum Beispiel Eurostat, das Statistischen Bundesamt,  der Weltbank, der OECD oder den Vereinten Nationen.
 
 Aber: wir sind in einre sehr komfortablen Situation, denn im Rahmen des ESS Programms wurden auch Makro-Datensätze erstellt, die Daten aus verschiedenen Qullen zusammentragen. Diese Datensätze enthalten neben den Individualdaten auch Kontextdaten. 
 
-Auch der Makrodatensatz ist nach Registrierung kostenlos verfügbar. Jedoch ist der Makrodatensatz über 1 GB groß. 
+Auch der Makrodatensatz ist nach Registrierung kostenlos verfügbar. Jedoch ist der Makrodatensatz etwa 2 GB groß. 
 Statt des ganzen Datensatzes, habe ich ihnen einen kleinen Ausschnitt davon als csv-Datei vorbereitet.
 
 Diese Datei enthält neben der Gruppierungsvariable `cntry` drei weitere Variablen:
@@ -309,7 +299,15 @@ ess <- na.omit(ess[,variablen_im_modell])
 
 ## Zentrieren
 
-In Mehrebenenmodellen ist es erforderlich, dass die unabhängigen Variablen auf Ebene 1 Mittelwertzentriert werden. Das sogenannte *Grand-Mean-Centering* sorgt dafür, dass die Referenzkategorie für den Intercept (alle X-Var bei 0) der Grand Mean der abhängien Variable ist.
+In Mehrebenenmodellen ist es erforderlich, dass die unabhängigen Variablen auf Ebene 1 mittelwertzentriert werden. Das sogenannte *Grand-Mean-Centering* sorgt dafür, dass der jeweilige Intercept eines Landes $\beta_{0j} als Abweichung vom Grand Mean interpretiert werden kann. 
+
+In unserem Beispiel haben wir nur metrische Variablen. Ich nutze die `scale()`-Funktion. Diese Funktion dient eigentlich zur z-Transformation: sie nimmt eine Variable, zieht den Mittelwert ab und teilt durch die Standardabweichung. Allerdings möchte ich nicht, dass durch die Standardabweichung geteilt wird, das teile ich der Funktion mittels `scale=FALSE` mit. 
+
+Diese Funktion kann ich direkt auf die relevanten Spalten des Datensatzes anwenden. Um herauszufinden welche das sind, schaue ich mir die `names()` an. 
+
+Unsere unabhängigen Variablen befinden sich in Spalte 2 bis 5 des Datensatzes. Jetzt kann ich mit der Indizierungsklammer die Spalten auswählen und mit `scale()` zentrieren.
+
+Das speichere ich im einem neuen Objekt und überschreibe danach die ursprünglichen Variablen 2 bis 5.
 
 ```{r zentrieren_L1_X-Vars}
 # Z_Transformation der Ebene 1 x-Variablen
@@ -322,27 +320,66 @@ ess_centered <- as.data.frame(scale(ess[,c(2:5)], scale=F))
 ess[,c(2:5)] <- ess_centered
 ```
 
+Wenn alles vorbereitet ist, können wir das erste Mehrebenenmodell schätzen.
 
-# Variierenden Intercepts mit Prädiktoren auf L1
+# Variierende Intercepts mit Prädiktoren auf L1
+
+Das erste Mehrebenenmodell ist ein Varying Intercept Modell mit Prädiktoren auf Ebene 1: 
+
+Die Form ist die selbe wie beim Nullmodell. Allerdings enthält die Formel nun auch die Ebene 1 Prädiktoren $x_1$ bis $x_4$.
+
+<p class=math> 
+$y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+
+mit 
+
+$\beta_{0j} = \gamma_{00} + u_{0j}$
+</p>
+
+Statt $x_1$ bis $x_4$ könnten wir auch die entsprechenden Variablen aufführen: `bildung`, `responsivitaet`, `zufr_wirtschaft` und `soz_vertrauen`. 
+
+
+Diese setzen wir auch in der Formel in der `lmer()`-Funktion ein:
+
 
 ```{r}
 library(lmerTest) 
-mreg0 <- lmer(pol_vertrauen ~ 1 + (1 | cntry),  
-              data=ess)
-
 mreg1 <- lmer(pol_vertrauen ~ 1 + bildung + 
                 responsivitaet + zufr_wirtschaft + soz_vertrauen + 
                 (1 | cntry),  
               data=ess)
+```
 
+
+Mit `summary()` können wir die Ergebnisse anzeigen lassen:
+
+```{r}
 summary(mreg1)
+```
+
+
+Bei den Fixed Effects sehen wir nun, dass es neben dem Intercept $\beta_{0j}$ nun auch weitere Koeffizienten gibt. Das sind die b-Koeffizienten für die unabhängigen Variablen, also $\beta_1$ bis $\beta_4$.
+
+
+```{r}
 #ranef(mreg1)
 #fixef(mreg1)
+
+```
+
+
+
+Hier nochmal das Nullmodell zum Vergleich:
+
+```{r}
+mreg0 <- lmer(pol_vertrauen ~ 1 + (1 | cntry),  
+              data=ess)
 ```
 
 
 ```{r}
 # Gütemaße 
+library(performance)
 model_performance(mreg1)
 r2(mreg1)
 
