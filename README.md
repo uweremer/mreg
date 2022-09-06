@@ -1,8 +1,6 @@
+![](https://www.r-project.org/logo/Rlogo.svg)
 
-<p style="max-width: 20%; float: right;">
-![](https://www.r-project.org/logo/Rlogo.svg "R Logo by The R Foundation, License: CC-BY-SA 4.0, see  https://www.r-project.org/logo/")
-</p>
-
+Vollständiges Script auch online auf der github.io Seite: https://uweremer.github.io/mreg/
 
 # Mehrebenenregression mit R
 

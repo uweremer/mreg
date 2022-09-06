@@ -405,7 +405,7 @@ Da wir zuvor alle unabhängigen Variablen an deren Grand Mean zentriert haben, s
 
 Für Belgien BE liegt der länderspezifische Intercept $\beta_{0~Belgien}$ also $0.39$ Skalenpunkte über dem fixierten Intercept bzw. Grand Mean $\gamma_{00}$ von $`r round(fixef(mreg1)[1], 2)`$.
 
-Für Ungarn HR, leigt er $0.56$ Saklenpunkte *unter* diesem Wert. 
+Für Kroatien HR, leigt er $0.56$ Saklenpunkte *unter* diesem Wert. 
 
 Analog kann man sich auch die fixierten Effekte ausgeben lassen.
 
@@ -419,45 +419,148 @@ Was uns nun noch interessiert ist, wie gut unser Modell die abhängige Variable 
 Beim OLS-Regressionsmodell betrachten wir dafür den Determinantionskoeffizienten $R^2$ als Maß für Varianzaufklärung. 
 Auch beim Mehrebenenmodell können wir prüfen, wie viel Varianz durch das Modell erklärt wird. 
 
-Im einachsten Fall können wir berechnen, wieviel der Varianz die in den Random Effects des Nullmodells steckt, durch ein Modell mit Prädiktoren erklärt wird.
+Im einfachsten Fall können wir berechnen, wieviel der Varianz die in den Random Effects des Nullmodells steckt, durch ein Modell mit Prädiktoren erklärt wird.
 
-
-
-
-([Nakagawa/Schielzeth 2012](https://doi.org/10.1111/j.2041-210x.2012.00261.x))
-
-Falls Sie noch die Zahlen vielleicht 
-
-fragen Sie sich jetzt: Moment: wieso ändert sich etwas an der
-
-
-
-```{r}
-1-(as.data.frame(VarCorr(mreg1),comp="Variance")[,4]/as.data.frame(VarCorr(mreg0),comp="Variance")[,4])
-```
-
-Hier nochmal das Nullmodell zum Vergleich:
+Berechnen wir also noch Mal auf das Nullmodell auf Basis der jetzt 25 Länder:
 
 ```{r}
 mreg0 <- lmer(pol_vertrauen ~ 1 + (1 | cntry),  
               data=ess)
+summary(mreg0)
 ```
 
 
+
+Auf Ebene 2, der Ebene der Länder haben wir eine Varianz von $1.11$. Auf Individualebene eine Varianz von $4.26$.
+
 ```{r}
-# Gütemaße 
+summary(mreg1)
+```
+
+In unserem Modell `mreg1` ist die Varianz der Intercepts nur noch bei $0.15$ und die Residualvarianz auf Individualebene bei $2.81$
+
+Also auf Ebene 1 bleiben nur noch $\frac{2.81}{4.26}=0.66$, also 66 Prozent der Varianz übrig.
+
+Oder anders ausgedrückt: Wir erklären 34 Prozent der Varianz auf Ebene 1.
+
+Das können wir auch allgemeiner ausdrücken:
+
+$R^2_{L1}=1-\frac{s^2_{L1_{Modell}}}{s^2_{L1_{Nullmodell}}}$  
+
+
+Und wir können auch für Ebene 2 berechnen, wieviel der im Nullmodell auf Ebene 2 vorhandenen Varianz durch unser Modell mit Prädiktoren erklärt wurde.
+
+$R^2_{L2}=1-\frac{s^2_{L2_{Modell}}}{s^2_{L2_{Nullmodell}}}$  
+
+Das sind $1-\frac{0.15}{1.11}=0.865$- also 86.5 Prozent der Varianz auf Ebene 2 werden durch unser Modell `mreg1` bereits erklärt. 
+
+"Moment!" werden Sie jetzt sagen! Wie soll das den gehen! Wir haben doch nur Prädiktoren der Individualebene im Modell! Wie können individuelle Merkmale von Befragten Varianz zwischen den Ländern erklären?
+
+Richtig! Das ist eine gute Frage. Drücken Sie Pause und nehmen Sie sich ein paar Minuten um zu überlegen, was der Grund sein könnte.
+
+Gut, hier kommt die Auflösung: Es handelt sich um sogenannte **Kompositionseffekte**. 
+
+Nehmen wir Beispielsweise unsere unabhängige Variable `Zufriedenheit mit der Wirtschaftslage`. Das ist eine Variable der Individualebene und die Befragten in den Ländern können unterschiedliche Werte auf dieser Variable einnehmen. Es ist kein Kontextmerkmal, dass für alle Befragten eines Landes gleich ist.
+
+Aber: Wenn viele oder im Extremfall alle Individuen eines Landes besonders hohe Werte auf dieser Variable einnehmen , dagegen in einem anderen Land viele Individuen eine sehr geringe Zufriedenheit mit der Witschaft aufweisen, dann wird - wenn diese Variable auch einen Einfluss auf das politische Vertrauen hat - allein durch die Zusammensetzung der Gruppen das durchschnittliche Niveau der abhängigen Variable in den Ländern beeinflusst.
+
+Also dadurch, dass sich die Länder hinsichtlich der Zusammensetzung der Individuen und ihrer Merkmale unterscheiden, wird bereits Varianz zwischen den Ländern erklärt. Denn mit durchschnittlich höherer Zufriedenheit mit der Wirtschaft geht ja auch durchschnittlich höheres politisches Vertrauen einher. 
+
+Somit kann also die Zusammensetzung der Individuen hinsichtlich ihrer Merkmale auf Ebene 1 als Kompositionseffekt Varianz auf Ebene 2, also zwischen den Ländern erklären.
+
+
+So simpel und klar die Berechnung und Interpretation dieser $R^2$ Maße für die beiden Ebenen auch ist: Wenn die Modelle komplexer werden und später mehr als nur ein Random Effect (also mehr als nur ein variierender Intercept) vorliegt, dann kann man diese ebenenspezifischen $R^2$ nicht mehr nutzen.
+
+[Nakagawa/Schielzeth 2012](https://doi.org/10.1111/j.2041-210x.2012.00261.x) haben noch weitere Nachteile angeführt und schlagen eine Alternative Berechnung für ein $R^2$ für Mehrebenenregressionen vor.
+
+Wir können $Nakagawa~R^2$ mit Hilfe des `performance`-Paketes und der Funktion `r2()` berechnen:
+
+```{r}
 library(performance)
-model_performance(mreg1)
 r2(mreg1)
+```
 
-icc(mreg1)
+Das marginale $R^2$ können wir dabei ignorieren, da es die Varianzen der Random Effects nicht berücksichtigt. Stattdessen betrachten wir das konditionale $R^2$.
 
-as.data.frame(VarCorr(mreg1),comp="Variance")[,4]
-```  
+Unser Modell erklärt also etwa 44 Prozent der Varianz in den Daten. 
+
+
+Darüber hinaus bietet das `performance`-Paket die Möglichkeit mit der Funktion `model_performance()` bei Bedarf weitere Goodness of Fit Maße zu berechnen:
+
+```{r}
+model_performance(mreg0)
+```
+
+
+
+Damit sind wir am Ende des dritten Videos. Sie sollten nunin der Lage sein ein erstes Mehrebenenmodell mit variierendem Intercept und Prädiktoren auf Ebene 1 schätzen und Interpretieren können.
+
+
+# Variierender Intercept mit Prädiktoren auf L1 und L2
+
+Ergänzen wir das Modell nun noch um einen Prädiktor auf Ebene 2. Da wir als weitere Forschungsfrage wissen wollen, ob das Ausmaß an Korruption in einem Land den Effekt von Bildung beeinflussen kann, müssen eine Varaible für Kooruption auf Ebene 2 ergänzen.
+
+Wir nehmen also den Koouptionsindex von Transparency International mit ins Model. Die Variable heißt `c_ticpi_2018` und sieht folgendermaßen aus:
+
+```{r}
+library(ggplot2)
+ggplot(ess_macro, aes(x=cntry, y=c_ticpi_2018)) +
+  geom_bar(stat="identity") +
+  scale_y_continuous(limits=c(0,100))
+```
+
+
+Da es eine Ebene 2 Variable ist, kann sie nur den länderpsezifischen Mittelwert der abhängigen Variable beeinflussen. Die länderspezifische Korruption muss also Teil der Gleichung des variierenden Intercepts $\beta_{0j}$ sein:
+
+<p class=math> 
+$y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+
+mit 
+
+$\beta_{0j} = \gamma_{00} + gamma_{01j} + u_{0j}$
+</p>
+
+$gamma_{01j}$ ist also Regressionskoeffizient für den Einfluss der Variable `c_ticpi_2018` auf den variierenden Intercept.
+
+Durch die Aufnahme dieser unabhängigen Variable auf Ebene 2 sollte zuvor unerklärte Varianz auf Ebene 2 geringer werden - also das Ebene 2 Residuum $u_{0j}$ geringer werden.
+
+Mal sehen, was empirisch rauskommt...
+
+Im R Befehl für die Mehrebeneregression müssen wir nicht explizit angeben, dass es sich um eine Kontextvariable handelt. Wir ergänzen sie einfach in der Formelm wie jede andere Variable auch.
+
+```{r}
+library(lmerTest) 
+mreg2 <- lmer(pol_vertrauen ~ 1 + bildung + 
+                responsivitaet + zufr_wirtschaft + soz_vertrauen + 
+                c_ticpi_2018 + 
+                (1 | cntry),  
+              data=ess)
+
+summary(mreg2)
+```
+
+Wie wir bei den Fixed Effects sehen könnne, hat also `c_ticpi_2018` einen kleinen aber - zumindest bei 10%iger Irrtumswahrscheinlichkeit - einen signifikanten positiven Effekt auf den variierenden Intercept. Also mit Zunahme des Korruptionsindex um einen Skalenpunnkt steigt das durchschnittliche politische Vertrauen in einem Land um $0.01$.
+
+Da der Korruptionsindex eine Skala von 0 bis 100 ist, ist das nicht wenig. Sehr korruptionsbelastete Länder haben einen Korruptionsindex von unter 50. Am anderen Ende stehen Länder mit einem Wert von 85. Bei 35 Skalenpunkten Unterschied ergibt sich also für die abhängige Variable politisches Vertrauen einen Unterschied von $0.35$ Punkten.
   
-# Variierenden Intercepts mit Prädiktoren auf L1 und L2
-# Variierenden Intercepts und variierenden Prädiktoren
-# Cross-Level-Interaktionen
+Und was sagt die Modellgüte?
+
+```{r}
+model_performance(mreg2)
+```
+
+Das konditional e$R^2$ erhöt sich minimal von $44.1$ auf $45.6$. 
+
+
+# Schluss
+
+Wir haben gesehen, wie man ein einfaches Mehrebenenmodell als Formel notiert und das Modell mit der `lmer()`-Funktion in R umsetzt. 
+
+Dabei haben wir zuerst ein variierendes Intercept Modell mit Prädiktoren auf Ebene 1 geschätzt und habe Kompositionseffekte kennengelernt. Danach haben wir das Modell um eine unabhängige Variable auf Ebene 2 ergänzt und interpretiert.
+
+Im nächsten Video Nummer 4 werden wir dann das Varying Slope Modell und das Modell mit Cross-Level Interaktion anschauen uns klären, wie man herausfindet, welches Modell das passende ist.
+
+Am Ende dieses Videos gibt es noch eine Aufgabe und zum Schluss die Literatur.
 
 
 # Aufgabe
@@ -465,6 +568,12 @@ as.data.frame(VarCorr(mreg1),comp="Variance")[,4]
 - Überlegen Sie sich eine eigene Fragestellung, die mit den Variablen des ESS als Mehrebenenmodell geschätzt werden kann (Variablenübersicht im Codebuch des ESS). Rechnen Sie verschiedene Varianten der Mehrebenenregression und interpretieren Sie die Ergebnisse.
 
 - Laden Sie den vollständigen ESS Makrodatensatz und dessen Codebuch von der Webseite des ESS herunter. Schauen Sie sich den Datensatz an und machen Sie sich mit seinre Struktur vertraut. 
+
+
+
+# Literatur
+
+- Nakagawa, S.; Schielzeth, H. (2013): A general and simple method for obtaining R2 from generalized linear mixed-effects models. Methods in Ecology and Evolution, 4(2), 133–142. DOI: https://doi.org/10.1111/j.2041-210x.2012.00261.x
 
 
 ```{r, echo=F, eval=F}
