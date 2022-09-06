@@ -21,8 +21,11 @@ w = 5
 h = 2.5
 s = 2.8
     
-knitr::opts_chunk$set(eval=TRUE, echo = FALSE, message = FALSE, warning = FALSE,
+knitr::opts_chunk$set(eval=TRUE, echo = T, message = FALSE, warning = FALSE,
                       fig.width=w, fig.height=h, fig.align='center')
+
+options(scipen=999)
+
 save <-  F
 save_fig <- function(filename, save = TRUE){
   if(save==TRUE){
@@ -198,7 +201,7 @@ ess$responsivitaet <- ess$responsivitaet - 1
 [country]?*
 
 - 0 Extremely dissatisfied
-- 1 Extremely satisfied
+- 10 Extremely satisfied
 
 ```{r Operationalisierung_X1}
 # Operationalisierung der unabh. Variable 
@@ -296,8 +299,12 @@ variablen_im_modell <- c("pol_vertrauen",
 ess <- na.omit(ess[,variablen_im_modell])
 ```
 
+Eim Hinweis: Da bei den Makrovariablen Daten für zwei Länder fehlen, liegen nach diesem Ausschluss fehlender Werte nur Daten für gut 40.000 Befragte aus 25 Ländern vor. 
+
 
 ## Zentrieren
+
+Kommen wir zu einem weiteren wichtigen Schritt der Datenvorbereitung.
 
 In Mehrebenenmodellen ist es erforderlich, dass die unabhängigen Variablen auf Ebene 1 mittelwertzentriert werden. Das sogenannte *Grand-Mean-Centering* sorgt dafür, dass der jeweilige Intercept eines Landes $\beta_{0j} als Abweichung vom Grand Mean interpretiert werden kann. 
 
@@ -357,17 +364,77 @@ Mit `summary()` können wir die Ergebnisse anzeigen lassen:
 summary(mreg1)
 ```
 
+Schauen wir als erstes auf die Fixed Effects. 
 
-Bei den Fixed Effects sehen wir nun, dass es neben dem Intercept $\beta_{0j}$ nun auch weitere Koeffizienten gibt. Das sind die b-Koeffizienten für die unabhängigen Variablen, also $\beta_1$ bis $\beta_4$.
+Wir sehen, dass es neben dem Intercept $\beta_{0j}$ nun auch weitere Koeffizienten gibt. Das sind die b-Koeffizienten für die unabhängigen Variablen, also $\beta_1$ bis $\beta_4$. 
 
+Wie bereits beim Nullmodell ist der Intercept der Mittelwert der variierenden Intercepts \$beta_{0j} - also das, was in der Regressionsgleichung mit $\gamma_{00}$ bezeichnet wurde.
+
+Die anderen Regressionsparameter sind nicht variierende Regressionsparamter, und sind wie ganz normale Regressionskoeffizienten zu interpretieren:
+
+Alle Variablen haben einen Signifikanten Einfluss, wie wir an der letzten Spalte sehen.
+
+Mit Zunahme von Bildung um einen Skalenpunkt, sinkt das politische Vertrauen um $`r round(fixef(mreg1)[2], 3)`$. 
+
+Die anderen Determinanten haben einen positiven Effekt auf politisches Vertrauen. Da die wahrgenommene politische Responsivität eine andere Saklenbreite aufweist, können wir die Effektstärken jedoch nicht direkt miteinander vergleichen. 
+
+Schauen wir uns nun die Random Effects an.
+
+Die Random Effects berichten die Varianz der Residuen der beiden Gleichungen:
+
+<p class=math> 
+$y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+
+mit 
+
+$\beta_{0j} = \gamma_{00} + u_{0j}$
+</p>
+
+
+Also: Wie groß ist die unerklärte Varianz auf Individualebene $r_{ij}$ - das finden wir in der Tabelle hier unter "Residual". Der Wert ist $`r round(as.data.frame(VarCorr(mreg1),comp="Variance")[,4][2],3)`$.
+
+Und wie groß ist die Varianz der variierenden Intercepts $u_{0j}$. Also: Wie sehr streuen die Ländermittelwerte $\beta_{0j}$ um den Grand Mean $\gamma_{00}$? Das sehen wir bei "cntry (Intercept)". Dieser Wert ist $`r round( as.data.frame(VarCorr(mreg1),comp="Variance")[,4][1], 3)`$.
+
+Wir können uns auch anschauen, wie diese Streuung um den Grand Mean ganz konkret aussieht. Dafür gibt es die Funktion `ranef()` - sie steht für random Effects und berichtet die Werte jedes einzelnen $\beta_{0j}$ - also den jeweiligen länderspezifischen Intercept:
 
 ```{r}
-#ranef(mreg1)
-#fixef(mreg1)
+ranef(mreg1)
+```
 
+Da wir zuvor alle unabhängigen Variablen an deren Grand Mean zentriert haben, sind diese länderspezifischen Intercepts als Abweichung vom Grand Mean zu interpretieren. 
+
+Für Belgien BE liegt der länderspezifische Intercept $\beta_{0~Belgien}$ also $0.39$ Skalenpunkte über dem fixierten Intercept bzw. Grand Mean $\gamma_{00}$ von $`r round(fixef(mreg1)[1], 2)`$.
+
+Für Ungarn HR, leigt er $0.56$ Saklenpunkte *unter* diesem Wert. 
+
+Analog kann man sich auch die fixierten Effekte ausgeben lassen.
+
+```{r}
+fixef(mreg1)
 ```
 
 
+Was uns nun noch interessiert ist, wie gut unser Modell die abhängige Variable erklärt. 
+
+Beim OLS-Regressionsmodell betrachten wir dafür den Determinantionskoeffizienten $R^2$ als Maß für Varianzaufklärung. 
+Auch beim Mehrebenenmodell können wir prüfen, wie viel Varianz durch das Modell erklärt wird. 
+
+Im einachsten Fall können wir berechnen, wieviel der Varianz die in den Random Effects des Nullmodells steckt, durch ein Modell mit Prädiktoren erklärt wird.
+
+
+
+
+([Nakagawa/Schielzeth 2012](https://doi.org/10.1111/j.2041-210x.2012.00261.x))
+
+Falls Sie noch die Zahlen vielleicht 
+
+fragen Sie sich jetzt: Moment: wieso ändert sich etwas an der
+
+
+
+```{r}
+1-(as.data.frame(VarCorr(mreg1),comp="Variance")[,4]/as.data.frame(VarCorr(mreg0),comp="Variance")[,4])
+```
 
 Hier nochmal das Nullmodell zum Vergleich:
 
