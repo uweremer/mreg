@@ -50,20 +50,65 @@ P.math {
 
 Hallo und herzlich Willkommen zum vierten Teil der Videoserie zum Thema Mehrebenenregression in R. 
 
+Wie findet man das passende Modell für die Mehrebenenregression?
+
+Im vorigen Video 3 haben wir das einfache Varying Intercept Modell geschätzt. Wir haben Prädiktoren auf Ebene 1 und 2 berücksichtigt und die Fixed Effects und die Random Effects interpretiert.
+
+In diesem Video wird es darum gehen, wie man das passende Modell aus den möglichen Varianten findet. 
+Dazu erweitern wir das Varying Intercept Modell zunächst um einen Varying Slope und danach um eine Cross Level Interaktion. 
+
+Wir schauen dann, anhand welcher Kriterien wir entscheiden können, welches der Modelle, das richtige ist.
+
+Die konkreten Lernziele sind, dass Sie...
+
+- Modelle mit variierenden Slopes und Cross Level Interaktionen 
+  - als Mehrebenengleichung formulieren können.
+  - in R umsetzen können.
+- Verschiedene empirische Modelle miteinander vergleichen können und entscheiden können, welche Modellvariante die passende ist. 
 
 
-Im vorigen Video haben wir gesehehn, wie man mit Hilfe des sogenannten Nullmodells berechnet, ob eine Mehrebenenregression überhaupt notwendig ist.
-Nur wenn dies der Fall ist, werden die eigentlich interessierenden Mehrebenenregressionsmodelle geschätzt.
-
-Und genau darum geht es in diesem ditten Video: Wie schätzt man eine Mehrebenenregression in R? 
-Und natürlich: wie interpretiert man die Ergebnisse?
 
 
-Sie sollen dabei lernen...
+# Variierende Intercepts und variierende Slopes
 
-- notwendigkeit des Zentrierens
-- Wie man die theoretischen Überlegungen zu variirenden Intercepts und variierenden Slopes und Cross-Level Interaktionen mit R modelliert
-- welche quantities of interest wichtig sind und wie sie interpretiert werden
+
+```{r}
+ess$soz_vertrauen <- ess$ppltrst
+
+# Einlesen der Makrodaten einlesen und mit merge() hinzuspielen
+ess_macro <- read.table("./Daten/ess2018_macro.csv",
+                        sep=";", header=T)
+head(ess_macro)
+ess_micro <- ess
+ess <- merge(ess_micro, ess_macro, # Die beiden Datensätze die zusammengespielt werden
+             by = "cntry", # Die Schlüsselvariable
+             all.x = T) # Das alle Fälle des x-Datensatzes (des erstgenannten) behalten werden
+
+# Missing Values ausschließen
+variablen_im_modell <- c("pol_vertrauen",
+                         "bildung",      
+                         "responsivitaet",                         
+                         "zufr_wirtschaft",
+                         "soz_vertrauen", 
+                         "cntry",
+                         "c_ticpi_2018")
+ess <- na.omit(ess[,variablen_im_modell])
+
+# Zentrieren
+ess_centered <- as.data.frame(scale(ess[,c(2:5)], scale=F))
+ess[,c(2:5)] <- ess_centered
+
+library(lmerTest) 
+mreg2 <- lmer(pol_vertrauen ~ 1 + bildung + 
+                responsivitaet + zufr_wirtschaft + soz_vertrauen + 
+                c_ticpi_2018 + 
+                (1 | cntry),  
+              data=ess)
+
+summary(mreg2)
+```
+
+Manchmal auch Random Intercept, Random Slope Modell gennant.
 
 
 ```{r}
@@ -92,3 +137,12 @@ Nach jeder Schätzun eines Modells müssen Sie prüfen, ob das Modell signifikan
 Sie berichten daher mehrere Mehrebenenmodelle, die aufeinander Aufbauen und immer komplexer werden. Für diese Interpretieren Sie die Signifikanz und Varianzaufklärung auf beiden Ebenen. Die eigentlche inhaltliche Interpretation der Regressionskoeffizienten (Intercepts und Slopes), nehmen Sie nur für das letzte Modell vor, dass noch eine signifikante Verbesserung darstellt!
 
 Wichtig: Sie können nicht in einem späteren Modell noch Variablen eines vorhergehenden Modells ändern. Wenn das notwendig wäre, müssen Sie wieder mit Schritt 1 beginnen.
+
+
+
+
+```{r, echo=F, eval=F}
+library("knitr")
+knitr::purl("Mreg4.Rmd",
+            documentation=0)
+```

@@ -319,3 +319,10 @@ Literatur zum Einstieg in die Mehrebenenregression (in aufsteigender Schwierigke
 - Pötschke, Manuela. (2020). Mehrebenenmodelle. In: Wagemann, Claudius; Goerres, Achim; Siewert, Markus B. (Hrsg.): Handbuch Methoden der Politikwissenschaft. Springer VS, Wiesbaden. https://doi.org/10.1007/978-3-658-16936-7_29 
 - Gelman, Andrew; Hill, Jennifer (2009): Data-Analysis Using regression and Multilevel/Hierachical Models. Cambridge: Cambridge University Press. Kap. 12 & 13. https://doi.org/10.1017/CBO9780511790942 
 
+
+
+```{r, echo=F, eval=F}
+library("knitr")
+knitr::purl("Mreg1.Rmd",
+            documentation=0)
+```

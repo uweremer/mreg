@@ -651,3 +651,12 @@ Literatur zur Beispielfragestellung (nach Aktualität sortiert):
 - van Ham, Caroline; Thomassen, Jaques. J.; Aarts, Kees; Andeweg, Rudy B. (Hrsg.)(2017): Myth and reality of the legitimacy crisis: Explaining trends and cross-national differences in established democracies. Oxford University Press. https://doi.org/10.1093/oso/9780198793717.001.0001 
 - Arzheimer, Kai (2002): Politikverdrossenheit. Bedeutung, Verwendung und empirische Relevanz eines politikwissenschaftlichen Begriffes. Wiesbaden: Westdeutscher Verlag. Volltext: https://www.kai-arzheimer.com/politikverdrossenheit.pdf 
 
+
+
+```{r, echo=F, eval=F}
+library("knitr")
+knitr::purl("Mreg2.Rmd",
+            documentation=0)
+```
+
+
