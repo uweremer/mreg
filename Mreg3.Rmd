@@ -24,7 +24,7 @@ s = 2.8
 knitr::opts_chunk$set(eval=TRUE, echo = TRUE, message = FALSE, warning = FALSE,
                       fig.width=w, fig.height=h, fig.align='center')
 
-options(scipen=999)
+options(scipen=999, digits=3)
 
 save <-  F
 save_fig <- function(filename, save = TRUE){
@@ -548,16 +548,18 @@ ggplot(ess, aes(x=cntry, y=bildung_agg)) +
 
 Da wir als weitere Forschungsfrage wissen wollen, ob das Ausmaß an Korruption in einem Land den Effekt von Bildung beeinflussen kann, müssen wir die Variable für Korruption auf Ebene 2 ergänzen.
 
-Wir nehmen also den Korruptionsindex von Transparency International mit ins Model. Die Variable heißt `c_ticpi_2018` und sieht folgendermaßen aus:
+Wir nehmen also den Corruption Perception Index (CPI) von Transparency International mit ins Model. Der CPI ist eine Skala von 0 'sehr korrupt' bis 100 'sehr auber'. Damit wir die Effekte später intuitiver Interpretieren können, drehen wir die Varable. Je höher der Wert, desto mehr Korruption.
+
+Die original Variable heißt `c_ticpi_2018`.
 
 ```{r}
+ess$korruption <- abs(ess$c_ticpi_2018-100)
 library(ggplot2)
-ggplot(ess_macro, aes(x=cntry, y=c_ticpi_2018)) +
-  geom_bar(stat="identity") +
+ggplot(ess, aes(x=cntry, y=korruption)) +
+  geom_bar(stat = "summary", fun.y = "mean") +
   scale_y_continuous(limits=c(0,100)) +
   theme(axis.text=element_text(size=6))
 ```
-
 
 Da beide Variablen auf Ebene 2 liegen, können sie nur den länderspezifischen Mittelwert der abhängigen Variable beeinflussen. 
 
@@ -573,7 +575,7 @@ $\beta_{0j} = \gamma_{00} + \gamma_{01j} + \gamma_{02j} + u_{0j}$
 </p>
 </div>
  
-$\gamma_{01j}$ ist also Regressionskoeffizient für den Einfluss der Variable `bildung_agg` auf den variierenden Intercept und $\gamma_{02j}$ der Einfluss der Variable `c_ticpi_2018`.
+$\gamma_{01j}$ ist also Regressionskoeffizient für den Einfluss der Variable `bildung_agg` auf den variierenden Intercept und $\gamma_{02j}$ der Einfluss der Variable `korruption`.
 
 Durch die Aufnahme dieser unabhängigen Variablen auf Ebene 2 sollte zuvor unerklärte Varianz auf Ebene 2 geringer werden - also das Ebene 2 Residuum $u_{0j}$ geringer werden.
 
@@ -585,16 +587,16 @@ Im R Befehl für die Mehrebeneregression müssen wir nicht explizit angeben, das
 library(lmerTest) 
 mreg2 <- lmer(pol_vertrauen ~ 1 + bildung + 
                 responsivitaet + zufr_wirtschaft + soz_vertrauen + 
-                c_ticpi_2018 + bildung_agg +
+                korruption + bildung_agg +
                 (1 | cntry),  
               data=ess)
 
 summary(mreg2)
 ```
 
-Wie wir bei den Fixed Effects sehen könnnen, hat also `c_ticpi_2018` einen kleinen aber - zumindest bei 10%iger Irrtumswahrscheinlichkeit - einen signifikanten positiven Effekt auf den variierenden Intercept. Also mit Zunahme des Korruptionsindex um einen Skalenpunkt steigt das durchschnittliche politische Vertrauen in einem Land um $0.01$.
+Wie wir bei den Fixed Effects sehen könnnen, hat also Korruption einen kleinen, aber signifikanten negativen Effekt auf den variierenden Intercept. Also mit Zunahme der Korruption um einen Skalenpunkt sinkt das durchschnittliche politische Vertrauen in einem Land um $`r fixef(mreg2)[6]`$
 
-Da der Korruptionsindex eine Skala von 0 bis 100 ist, ist das nicht wenig. Sehr korruptionsbelastete Länder haben einen Korruptionsindex von unter 50. Am anderen Ende stehen Länder mit einem Wert von 85. Bei 35 Skalenpunkten Unterschied ergibt sich also für die abhängige Variable politisches Vertrauen einen Unterschied von $0.35$ Punkten.
+Da der Korruptionsindex eine Skala von 0 bis 100 ist, ist das nicht wenig. Sehr korruptionsbelastete Länder haben einen Korruptionsindex von über 50. Am anderen Ende stehen Länder mit einem Wert von 15. Bei 35 Skalenpunkten Unterschied ergibt sich also für die abhängige Variable politisches Vertrauen einen Unterschied von $`r fixef(mreg2)[6]*35`$ Punkten.
   
 Das Bildungsniveau eines Landes hat dagegen keinen signifikanten Einfluss auf das durchschnittliche politische Vertrauen in einem Land. Bildung hat also nur einen Effekt auf Individualebene.
   
@@ -604,9 +606,9 @@ Und was sagt die Modellgüte?
 model_performance(mreg2)
 ```
 
-Das konditional e$R^2$ erhöt sich minimal von $44.1$ auf $46.7$. 
+Das konditionale $R^2$ erhöt sich minimal von $44.1$ auf $46.7$. 
 
-
+model_performance(mreg2)$R2_conditional
 # Schluss
 
 

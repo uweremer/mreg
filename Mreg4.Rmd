@@ -35,6 +35,8 @@ save_fig <- function(filename, save = TRUE){
     message("Saving skipped...")
   }
 }
+
+options(scipen=999, digits=3)
 ```
 
 ```{css, eval=F, echo=F}
@@ -163,7 +165,7 @@ Das führen wir aus und rufen die `summary()` auf:
 library(lmerTest) 
 mreg3 <- lmer(pol_vertrauen ~ 1 + bildung + 
                 responsivitaet + zufr_wirtschaft + soz_vertrauen + 
-                c_ticpi_2018 + bildung_agg +
+                korruption + bildung_agg +
                 (1 + bildung | cntry),  
               data=ess)
 
@@ -332,16 +334,23 @@ Schauen wir uns das im Modell an:
 Wir schätzen also unser neuen Modell, und für die Cross-Level Interaktion müssen wir nur einen ganz regulaären Interaktionseffekt in der Formel spezifizieren. R wei dann von ganz alleine, dass die eine Variable auf Ebene 1 ist und die andere Variable auf Ebene 2.
 
 ```{r cross_level_interaktion}
-mreg4 <- lmer(pol_vertrauen ~ 1 + bildung:c_ticpi_2018 + 
+mreg4 <- lmer(pol_vertrauen ~ 1 + bildung + 
                 responsivitaet + zufr_wirtschaft + soz_vertrauen + 
-                c_ticpi_2018 + bildung_agg +
+                korruption + bildung_agg +
+                bildung:korruption + 
                 (1 + bildung | cntry),  
-              data=ess,
-              REML=F)
+              data=ess)
 
 summary(mreg4)
 ```
 
+
+Wir sehen bei den fixed Effects nun einen signifikanten Interaktionseffekt von $`r fixef(mreg4)[8]`$.
+Das bedeutet, das mit Zunahme der Korruption um einen Skalenpunkt verändert sich der Effekt von Bilung um den Faktor $`r fixef(mreg4)[8]`$. Je höher die Korruption ist, desto größer, negativer wird der Effekt von Bildung. Und umgekehrt: je weniger Korruption in einem Land herrscht, desto positiver wird der Effekt von Bildung auf politisches Vertrauen.
+
+Da es sich bei Interaktionseffekten um bedingte Effekte handelt, dürfen wir auch den Haupteffekt von Bildung nur in Abhängigkeit der Korruptionsvariable interpretieren - der Haupteffetk von Bildung ist der Effekt den man beobachtet, wenn die Interaktionsvariable den Wert $0$ hat. Also: in einem ein Land, das sehr sauber ist, Bildung einen nicht signifikanten Effekt.  
+
+Man kann auch sagen: in Ländern mit hoher Korruption sorgt Bildung hohe Bildung dafür, dass man den poltischen Eliten weniger Vertraut. In Ländern mit wenig Korruption wirkt Bildung dagegen positiv auf das Vertrauen.
 
 # Schluss
 
@@ -361,8 +370,8 @@ anova(mreg3, mreg4)
 library(lmerTest) 
 mreg4 <- lmer(pol_vertrauen ~ 1 + bildung + 
                 responsivitaet + zufr_wirtschaft + soz_vertrauen +
-                c_ticpi_2018 + bildung_agg +
-                c_ticpi_2018:bildung +
+                korruption + bildung_agg +
+                korruption:bildung +
                 (1 + bildung | cntry),  
               data=ess)
 

@@ -139,16 +139,13 @@ ggplot(ess, aes(x=cntry, y=bildung_agg)) +
   scale_y_continuous(limits=c(-1,1)) +
   theme(axis.text=element_text(size=6))
 
-# Deskriptive Grafik zur Makrovariable "c_ticpi_2018" (Korruptionsindex)
-ggplot(ess_macro, aes(x=cntry, y=c_ticpi_2018)) +
-  geom_bar(stat="identity") +
-  scale_y_continuous(limits=c(0,100)) +
-  theme(axis.text=element_text(size=6))
-
+# Drehen der Makrovariable "c_ticpi_2018" (Korruptionsindex)
+ess$korruption <- abs(ess$c_ticpi_2018-100)
+# Deskriptive Grafik zur gedrehten Variable "korruption"
 library(lmerTest) 
 mreg2 <- lmer(pol_vertrauen ~ 1 + bildung + 
                 responsivitaet + zufr_wirtschaft + soz_vertrauen + 
-                c_ticpi_2018 + bildung_agg +
+                korruption + bildung_agg +
                 (1 | cntry),  
               data=ess)
 
