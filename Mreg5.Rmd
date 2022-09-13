@@ -1,0 +1,99 @@
+---
+title: "WWie lassen sich die Ergebnisse einer Mehrebenregression berichten?"
+subtitle: "Videoserie Mehrebenenregression Teil 5/6"
+author: "Dr. Uwe Remer"
+date: "Juli 2022"
+output:
+  html_document:
+    toc: yes
+    number_sections: yes
+    toc_depth: 2
+    toc_float:
+      collapsed: true
+    df_print: paged
+    highlight: tango
+    theme: spacelab
+---
+
+```{r setup, include=FALSE}
+# Figure size in inches
+w = 5
+h = 2.5
+s = 2.8
+    
+knitr::opts_chunk$set(eval=TRUE, echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.width=w, fig.height=h, fig.align='center')
+save <-  F
+save_fig <- function(filename, save = TRUE){
+  if(save==TRUE){
+    ggsave(paste0("./Grafiken/", filename), 
+         width = w, height = h,
+         #scale = s,       
+         unit = "in")
+  }
+  else{
+    message("Saving skipped...")
+  }
+}
+
+options(scipen=999, digits=3)
+```
+
+```{css, eval=F, echo=F}
+/* CSS Stil für Formeln unter Scatterplots */
+P.math {
+    text-align: center;
+    font-size: 2vw;
+}
+
+P.math_left {
+    text-align: left;
+    font-size: 1.5vw;
+}
+
+
+DIV.border {
+    padding:9.5px;
+    border-radius:4px;
+    border:1px solid #cccccc;
+    margin-top: 10px;
+    margin-bottom:10px;
+}
+```
+
+
+# Themenüberblick
+
+Hallo und herzlich Willkommen zum fünftem Teil der Videoserie zum Thema Mehrebenenregression in R. 
+ 
+Die Fragestellung für dieses Video lautet: Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?
+
+Im vorigen Video 3 haben wir das einfache Varying Intercept Modell geschätzt. Wir haben Prädiktoren auf Ebene 1 und 2 berücksichtigt und die Fixed Effects und die Random Effects interpretiert.
+
+In diesem Video wird es darum gehen, wie man das passende Modell aus den möglichen Varianten findet. 
+Dazu erweitern wir das Varying Intercept Modell zunächst um einen Varying Slope und danach um eine Cross Level Interaktion. 
+
+Wir schauen dann, anhand welcher Kriterien wir entscheiden können, welches der Modelle, das richtige ist.
+
+Die konkreten Lernziele sind, dass Sie...
+
+- Modelle mit variierenden Slopes und Cross Level Interaktionen... 
+  - als Mehrebenengleichung formulieren können.
+  - in R umsetzen können.
+- Verschiedene empirische Modelle miteinander vergleichen können und entscheiden können, welche Modellvariante die passende ist. 
+
+Dazu wechseln wir nun zu R.
+
+Bevor wir mit dem neuen Modell loslegen, führen Sie bitte das komplette RScript zu Video 4 aus `RScript_mreg4.R`. Mit der `source()`-Funktion können Sie das direkt aus R heraus laufen lassen. 
+
+Das Skript lädt dann alle Schritte der Operationalisierung aus Video 3, sowie die bisher geschätzten Mehrebenenmodelle. Diese benötigen wir um die Ergebnisse zu zu berichten.
+
+```{r}
+source("./RScript_mreg4.R") #Pfad zur Datei ggf. anpassen
+```
+
+```{r, echo=F, eval=F}
+library("knitr")
+knitr::purl("Mreg5.Rmd",
+            documentation=0)
+```

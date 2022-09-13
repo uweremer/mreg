@@ -331,7 +331,9 @@ Wenn $\gamma_{11j}$ tatsächlich einen Erklärungsbeitrag für die Variation des
 
 Schauen wir uns das im Modell an:
 
-Wir schätzen also unser neuen Modell, und für die Cross-Level Interaktion müssen wir nur einen ganz regulaären Interaktionseffekt in der Formel spezifizieren. R wei dann von ganz alleine, dass die eine Variable auf Ebene 1 ist und die andere Variable auf Ebene 2.
+Wir schätzen also unser neuen Modell, und für die Cross-Level Interaktion müssen wir nur einen ganz regulären Interaktionseffekt in der Formel spezifizieren. R weiß dann von ganz alleine, dass die eine Variable auf Ebene 1 ist und die andere Variable auf Ebene 2.
+
+Wir schätzen das Modell und schaeun dann mit der Anova, ob das Modell signifikant besser an die Daten angepasst ist als das vorige. Da sich die fixierten Effekte verändert haben, müssen wir die ML-basierte Anova nutzen.
 
 ```{r cross_level_interaktion}
 mreg4 <- lmer(pol_vertrauen ~ 1 + bildung + 
@@ -340,63 +342,39 @@ mreg4 <- lmer(pol_vertrauen ~ 1 + bildung +
                 bildung:korruption + 
                 (1 + bildung | cntry),  
               data=ess)
+anova(mreg3, mreg4, refit=T)
+```
 
+Wir sehen, das Modell ist signifikant besser. 
+
+Das konditionale $R^2$ liegt bei $0.467$.
+```{r}
+performance::r2(mreg4)
+```
+
+Schaen wir uns also die Ergebnisse an:
+
+```{r}
 summary(mreg4)
 ```
 
 
 Wir sehen bei den fixed Effects nun einen signifikanten Interaktionseffekt von $`r fixef(mreg4)[8]`$.
-Das bedeutet, das mit Zunahme der Korruption um einen Skalenpunkt verändert sich der Effekt von Bilung um den Faktor $`r fixef(mreg4)[8]`$. Je höher die Korruption ist, desto größer, negativer wird der Effekt von Bildung. Und umgekehrt: je weniger Korruption in einem Land herrscht, desto positiver wird der Effekt von Bildung auf politisches Vertrauen.
+Das bedeutet, das mit Zunahme der Korruption um einen Skalenpunkt verändert sich der Effekt von Bilung um den Faktor $`r fixef(mreg4)[8]`$. Je höher die Korruption ist, desto negativer wird der Effekt von Bildung. Und umgekehrt: je weniger Korruption in einem Land herrscht, desto positiver wird der Effekt von Bildung auf politisches Vertrauen.
 
-Da es sich bei Interaktionseffekten um bedingte Effekte handelt, dürfen wir auch den Haupteffekt von Bildung nur in Abhängigkeit der Korruptionsvariable interpretieren - der Haupteffetk von Bildung ist der Effekt den man beobachtet, wenn die Interaktionsvariable den Wert $0$ hat. Also: in einem ein Land, das sehr sauber ist, Bildung einen nicht signifikanten Effekt.  
+Da es sich bei Interaktionseffekten um bedingte Effekte handelt, dürfen wir auch den Haupteffekt von Bildung nur in Abhängigkeit der Korruptionsvariable interpretieren - der Haupteffetk von Bildung ist der Effekt den man beobachtet, wenn die Interaktionsvariable den Wert $0$ hat. Also: in einem ein Land, das keine Korruption hat, bzw. das sehr subaer ist, hat Bildung keinen signifikanten Effekt auf politisches Vertrauen.
 
-Man kann auch sagen: in Ländern mit hoher Korruption sorgt Bildung hohe Bildung dafür, dass man den poltischen Eliten weniger Vertraut. In Ländern mit wenig Korruption wirkt Bildung dagegen positiv auf das Vertrauen.
+Man kann auch sagen: in Ländern mit hoher Korruption sorgt hohe Bildung dafür, dass man den poltischen Eliten weniger Vertraut. In Ländern mit wenig Korruption wirkt Bildung dagegen positiv auf das Vertrauen. 
+
 
 # Schluss
 
+Wir haben unser Mehrebenenmodell um einen variierenden Slope ergänzt und haben gesehen, dass ein Teil der Unterschiede in der Varianz dieses random Effects mit einer Cross-Level Interaktion erklärt werden kann.
 
+Im nächsten Video 5 werden wir uns anschauen, wie man die Ergebnisse der unterschiedlichen Varianten der Mehrebenenregression am bestn aufbereitet und tabellarisch und grafisch darstellt. 
 
-Wichtig ist, dass man nicht beliebig die Ebene 1 Prädiktoren variieren lassen sollte. Nur wo es eine Relevanz für die Forschungsfrage hat und nur dann, wenn auch die Theorie eine begründete Hypothese zulässt, werden variierende Slopes im Modell spezifiziert.
+Noch ein Hinweis: Wichtig ist, dass man nicht einfach beliebige Ebene 1 Prädiktoren variieren lässt. Nur wo es eine Relevanz für die Forschungsfrage hat und nur dann, wenn auch die Theorie eine begründete Hypothese zulässt, nur dann werden variierende Slopes im Modell spezifiziert.
 
-
-
-```{r}
-anova(mreg3, mreg4)
-```
-
-
-
-```{r}
-library(lmerTest) 
-mreg4 <- lmer(pol_vertrauen ~ 1 + bildung + 
-                responsivitaet + zufr_wirtschaft + soz_vertrauen +
-                korruption + bildung_agg +
-                korruption:bildung +
-                (1 + bildung | cntry),  
-              data=ess)
-
-summary(mreg4)
-```
-
-```{r}
-anova(mreg2, mreg3, refit=F)
-anova(mreg0, mreg1, mreg2, mreg3, mreg4, refit=F, ddf="lme4")
-```
-
-
-## Sequentielle Schätzung von aufeinander aufbauenden Modellen
-
-Nach jeder Schätzun eines Modells müssen Sie prüfen, ob das Modell signifikant besser ist als das vorige Modell (AIC berichten und signifikanz der ANOVA). Nur wenn das der Fall ist, dürfen Sie das nächste Modell schätzen.
-
-Sie berichten daher mehrere Mehrebenenmodelle, die aufeinander Aufbauen und immer komplexer werden. Für diese Interpretieren Sie die Signifikanz und Varianzaufklärung auf beiden Ebenen. Die eigentlche inhaltliche Interpretation der Regressionskoeffizienten (Intercepts und Slopes), nehmen Sie nur für das letzte Modell vor, dass noch eine signifikante Verbesserung darstellt!
-
-Wichtig: Sie können nicht in einem späteren Modell noch Variablen eines vorhergehenden Modells ändern. Wenn das notwendig wäre, müssen Sie wieder mit Schritt 1 beginnen.
-
-
-# Literatur
-
-
-- Raudenbush, Stephen W.; Bryk, Anthony S. (2002): Hierarchical linear models: Applications and data analysis methods. Sage.
 
 
 ```{r, echo=F, eval=F}
