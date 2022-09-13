@@ -123,21 +123,36 @@ model_performance(mreg0)
 
 #### Variierende Intercepts mit L1 und L2 Prädiktoren ####
 
-# Deskriptive Grafik zur Makrovariable "c_ticpi_2018" (Korruptionsindex)
+# Bildungsvariable aggregieren
+bildung_agg <- aggregate(list(bildung_agg = ess$bildung), 
+                         by=list(cntry=ess$cntry), 
+                         FUN=mean, na.rm=T)
+
+ess <- merge(ess, bildung_agg,
+             by="cntry",
+             all.x = T)
+
+# Deskriptive Grafik zur Makrovariable "bildung_agg" 
 library(ggplot2)
+ggplot(ess, aes(x=cntry, y=bildung_agg)) +
+  geom_bar(stat="identity") +
+  scale_y_continuous(limits=c(-1,1)) +
+  theme(axis.text=element_text(size=6))
+
+# Deskriptive Grafik zur Makrovariable "c_ticpi_2018" (Korruptionsindex)
 ggplot(ess_macro, aes(x=cntry, y=c_ticpi_2018)) +
   geom_bar(stat="identity") +
   scale_y_continuous(limits=c(0,100)) +
   theme(axis.text=element_text(size=6))
 
-
 library(lmerTest) 
 mreg2 <- lmer(pol_vertrauen ~ 1 + bildung + 
                 responsivitaet + zufr_wirtschaft + soz_vertrauen + 
-                c_ticpi_2018 + 
+                c_ticpi_2018 + bildung_agg +
                 (1 | cntry),  
               data=ess)
 
 summary(mreg2)
 
 model_performance(mreg2)
+

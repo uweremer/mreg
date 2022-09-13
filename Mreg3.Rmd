@@ -21,7 +21,7 @@ w = 5
 h = 2.5
 s = 2.8
     
-knitr::opts_chunk$set(eval=TRUE, echo = T, message = FALSE, warning = FALSE,
+knitr::opts_chunk$set(eval=TRUE, echo = TRUE, message = FALSE, warning = FALSE,
                       fig.width=w, fig.height=h, fig.align='center')
 
 options(scipen=999)
@@ -45,6 +45,20 @@ save_fig <- function(filename, save = TRUE){
 P.math {
     text-align: center;
     font-size: 2vw;
+}
+
+P.math_left {
+    text-align: left;
+    font-size: 1.5vw;
+}
+
+
+DIV.border {
+    padding:9.5px;
+    border-radius:4px;
+    border:1px solid #cccccc;
+    margin-top: 10px;
+    margin-bottom:10px;
 }
 ```
 
@@ -75,7 +89,7 @@ Lernziele für dieses Video sind…
 - dass Sie die Variablen für das Mehrebenenmodell vorbereiten können:
   - dass Sie wissen wie man Datensätze zusammenspielt
   - dass Sie verstehen, warum die unabhängigen Variablen zentriert werden müssen und wissen, wie Sie das in R umsetzen können
-- dass Sie ein eifaches Mehrebenenmodell als Formel ausdrücken können
+- dass Sie ein einfaches Mehrebenenmodell als Formel ausdrücken können
 - dass Sie wissen, wie man diese unterschiedlichen Varianten in R umsetzt
 - dass Sie die relevanten Quantities of Interest kennen und interpretieren können.
 
@@ -335,13 +349,15 @@ Das erste Mehrebenenmodell ist ein Varying Intercept Modell mit Prädiktoren auf
 
 Die Form ist dieselbe wie beim Nullmodell. Allerdings enthält die Formel nun auch die Ebene 1 Prädiktoren $x_1$ bis $x_4$.
 
-<p class=math> 
+<div class=border>
+<p class=math_left> 
 $y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
-
+</p>
 mit 
-
+<p class=math_left> 
 $\beta_{0j} = \gamma_{00} + u_{0j}$
 </p>
+</div>
 
 Statt $x_1$ bis $x_4$ könnten wir auch die entsprechenden Variablen aufführen: `bildung`, `responsivitaet`, `zufr_wirtschaft` und `soz_vertrauen`. 
 
@@ -376,20 +392,23 @@ Alle Variablen haben einen signifikanten Einfluss, wie wir an der letzten Spalte
 
 Mit Zunahme von Bildung um einen Skalenpunkt, sinkt das politische Vertrauen um $`r round(fixef(mreg1)[2], 3)`$. 
 
+Eine vorläufige Antwort auf unsere Forschungsfrage lautet also: Bildung beeinflusst das 
+
 Die anderen Determinanten haben einen positiven Effekt auf politisches Vertrauen. Da die wahrgenommene politische Responsivität eine andere Skalenbreite aufweist, können wir die Effektstärken jedoch nicht direkt miteinander vergleichen. 
 
 Schauen wir uns nun die Random Effects an.
 
 Die Random Effects berichten die Varianz der Residuen der beiden Gleichungen:
 
-<p class=math> 
+<div class=border>
+<p class=math_left> 
 $y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
-
+</p>
 mit 
-
+<p class=math_left> 
 $\beta_{0j} = \gamma_{00} + u_{0j}$
 </p>
-
+</div>
 
 Also: Wie groß ist die unerklärte Varianz auf Individualebene $r_{ij}$ - das finden wir in der Tabelle hier unter "Residual". Der Wert ist $`r round(as.data.frame(VarCorr(mreg1),comp="Variance")[,4][2],3)`$.
 
@@ -405,7 +424,7 @@ Da wir zuvor alle unabhängigen Variablen an deren Grand Mean zentriert haben, s
 
 Für Belgien BE liegt der länderspezifische Intercept $\beta_{0~Belgien}$ also $0.39$ Skalenpunkte über dem fixierten Intercept bzw. Grand Mean $\gamma_{00}$ von $`r round(fixef(mreg1)[1], 2)`$.
 
-Für Kroatien HR, leigt er $0.56$ Saklenpunkte *unter* diesem Wert. 
+Für Kroatien HR, liegt er $0.56$ Saklenpunkte *unter* diesem Wert. 
 
 Analog kann man sich auch die fixierten Effekte ausgeben lassen.
 
@@ -493,12 +512,41 @@ model_performance(mreg0)
 
 
 
-Damit sind wir am Ende des dritten Videos. Sie sollten nunin der Lage sein ein erstes Mehrebenenmodell mit variierendem Intercept und Prädiktoren auf Ebene 1 schätzen und Interpretieren können.
-
 
 # Variierende Intercepts mit Prädiktoren auf L1 und L2
 
-Ergänzen wir das Modell nun noch um einen Prädiktor auf Ebene 2. Da wir als weitere Forschungsfrage wissen wollen, ob das Ausmaß an Korruption in einem Land den Effekt von Bildung beeinflussen kann, müssen eine Variable für Korruption auf Ebene 2 ergänzen.
+Ergänzen wir das Modell nun noch um Prädiktoren auf Ebene 2. 
+
+Als erste unabhängige Variable auf Ebene 2 nehmen wir das durchschnitlliche Bildungsniveau der Länder mit in das Modell auf.
+
+Dazu berechnen wir aus den Individualdaten den Mittelwert der Variable Bildung je Land mit Hilfe der `aggregate()`-Funktion. 
+
+
+```{r}
+bildung_agg <- aggregate(list(bildung_agg = ess$bildung), 
+                         by=list(cntry=ess$cntry), 
+                         FUN=mean, na.rm=T)
+```
+Dann spielen diese Variable mit der `merge()`-Funktion in den Datensatz ein.
+
+```{r}
+ess <- merge(ess, bildung_agg,
+             by="cntry",
+             all.x = T)
+```
+
+Da wir die Bildungsvariable am Grand Mean zentriert hatten, erhalten wir als Ergebnis die Abweichung eines Landes vom Bildungsmittelwert der 25 Länder.
+
+```{r}
+library(ggplot2)
+ggplot(ess, aes(x=cntry, y=bildung_agg)) +
+  geom_bar(stat="identity") +
+  scale_y_continuous(limits=c(-1,1)) +
+  theme(axis.text=element_text(size=6))
+```
+
+
+Da wir als weitere Forschungsfrage wissen wollen, ob das Ausmaß an Korruption in einem Land den Effekt von Bildung beeinflussen kann, müssen wir die Variable für Korruption auf Ebene 2 ergänzen.
 
 Wir nehmen also den Korruptionsindex von Transparency International mit ins Model. Die Variable heißt `c_ticpi_2018` und sieht folgendermaßen aus:
 
@@ -511,20 +559,23 @@ ggplot(ess_macro, aes(x=cntry, y=c_ticpi_2018)) +
 ```
 
 
-Da es eine Ebene 2 Variable ist, kann sie nur den länderspezifischen Mittelwert der abhängigen Variable beeinflussen. Die länderspezifische Korruption muss also Teil der Gleichung des variierenden Intercepts $\beta_{0j}$ sein. Wir ergänzen dafür den Koeffizienten $\gamma_{01j}$ in der zweiten Zeile der Gleichung:
+Da beide Variablen auf Ebene 2 liegen, können sie nur den länderspezifischen Mittelwert der abhängigen Variable beeinflussen. 
 
-<p class=math> 
+Die länderspezifische Korruption und die länderspezifische durchschnittliche Bildung muss also Teil der Gleichung des variierenden Intercepts $\beta_{0j}$ sein. Wir ergänzen dafür die Koeffizienten $\gamma_{01j}$ und $\gamma_{02j}$ in der zweiten Zeile der Gleichung:
+
+<div class=border>
+<p class=math_left> 
 $y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
-
-mit 
-
-$\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}$
 </p>
-
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + \gamma_{01j} + \gamma_{02j} + u_{0j}$
+</p>
+</div>
  
-$\gamma_{01j}$ ist also Regressionskoeffizient für den Einfluss der Variable `c_ticpi_2018` auf den variierenden Intercept.
+$\gamma_{01j}$ ist also Regressionskoeffizient für den Einfluss der Variable `bildung_agg` auf den variierenden Intercept und $\gamma_{02j}$ der Einfluss der Variable `c_ticpi_2018`.
 
-Durch die Aufnahme dieser unabhängigen Variable auf Ebene 2 sollte zuvor unerklärte Varianz auf Ebene 2 geringer werden - also das Ebene 2 Residuum $u_{0j}$ geringer werden.
+Durch die Aufnahme dieser unabhängigen Variablen auf Ebene 2 sollte zuvor unerklärte Varianz auf Ebene 2 geringer werden - also das Ebene 2 Residuum $u_{0j}$ geringer werden.
 
 Mal sehen, was empirisch rauskommt...
 
@@ -534,7 +585,7 @@ Im R Befehl für die Mehrebeneregression müssen wir nicht explizit angeben, das
 library(lmerTest) 
 mreg2 <- lmer(pol_vertrauen ~ 1 + bildung + 
                 responsivitaet + zufr_wirtschaft + soz_vertrauen + 
-                c_ticpi_2018 + 
+                c_ticpi_2018 + bildung_agg +
                 (1 | cntry),  
               data=ess)
 
@@ -545,16 +596,21 @@ Wie wir bei den Fixed Effects sehen könnnen, hat also `c_ticpi_2018` einen klei
 
 Da der Korruptionsindex eine Skala von 0 bis 100 ist, ist das nicht wenig. Sehr korruptionsbelastete Länder haben einen Korruptionsindex von unter 50. Am anderen Ende stehen Länder mit einem Wert von 85. Bei 35 Skalenpunkten Unterschied ergibt sich also für die abhängige Variable politisches Vertrauen einen Unterschied von $0.35$ Punkten.
   
+Das Bildungsniveau eines Landes hat dagegen keinen signifikanten Einfluss auf das durchschnittliche politische Vertrauen in einem Land. Bildung hat also nur einen Effekt auf Individualebene.
+  
 Und was sagt die Modellgüte?
 
 ```{r}
 model_performance(mreg2)
 ```
 
-Das konditional e$R^2$ erhöt sich minimal von $44.1$ auf $45.6$. 
+Das konditional e$R^2$ erhöt sich minimal von $44.1$ auf $46.7$. 
 
 
 # Schluss
+
+
+Damit sind wir am Ende des dritten Videos. 
 
 Wir haben gesehen, wie man ein einfaches Mehrebenenmodell als Formel notiert und das Modell mit der `lmer()`-Funktion in R umsetzt. 
 

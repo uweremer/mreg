@@ -1,5 +1,5 @@
 ---
-title: "Wie schätzt man eine Mehrebenenregression in R?"
+title: "Wie findet man das passende Modell für die Mehrebenenregression?"
 subtitle: "Videoserie Mehrebenenregression Teil 4/6"
 author: "Dr. Uwe Remer"
 date: "Juli 2022"
@@ -21,7 +21,7 @@ w = 5
 h = 2.5
 s = 2.8
     
-knitr::opts_chunk$set(eval=TRUE, echo = FALSE, message = FALSE, warning = FALSE,
+knitr::opts_chunk$set(eval=TRUE, echo = TRUE, message = FALSE, warning = FALSE,
                       fig.width=w, fig.height=h, fig.align='center')
 save <-  F
 save_fig <- function(filename, save = TRUE){
@@ -37,11 +37,25 @@ save_fig <- function(filename, save = TRUE){
 }
 ```
 
-```{css, eval=T}
+```{css, eval=F, echo=F}
 /* CSS Stil für Formeln unter Scatterplots */
 P.math {
     text-align: center;
     font-size: 2vw;
+}
+
+P.math_left {
+    text-align: left;
+    font-size: 1.5vw;
+}
+
+
+DIV.border {
+    padding:9.5px;
+    border-radius:4px;
+    border:1px solid #cccccc;
+    margin-top: 10px;
+    margin-bottom:10px;
 }
 ```
 
@@ -49,8 +63,8 @@ P.math {
 # Themenüberblick
 
 Hallo und herzlich Willkommen zum vierten Teil der Videoserie zum Thema Mehrebenenregression in R. 
-
-Wie findet man das passende Modell für die Mehrebenenregression?
+ 
+Die Fragestellung für dieses Video lautet: Wie findet man das passende Modell für die Mehrebenenregression?
 
 Im vorigen Video 3 haben wir das einfache Varying Intercept Modell geschätzt. Wir haben Prädiktoren auf Ebene 1 und 2 berücksichtigt und die Fixed Effects und die Random Effects interpretiert.
 
@@ -61,73 +75,304 @@ Wir schauen dann, anhand welcher Kriterien wir entscheiden können, welches der 
 
 Die konkreten Lernziele sind, dass Sie...
 
-- Modelle mit variierenden Slopes und Cross Level Interaktionen 
+- Modelle mit variierenden Slopes und Cross Level Interaktionen... 
   - als Mehrebenengleichung formulieren können.
   - in R umsetzen können.
 - Verschiedene empirische Modelle miteinander vergleichen können und entscheiden können, welche Modellvariante die passende ist. 
 
+Dazu wechseln wir nun zu R.
 
+Bevor wir mit dem neuen Modell loslegen, führen Sie bitte das komplette RScript zu Video 3 aus `RScript_mreg3.R`. Mit der `source()`-Funktion können Sie das direkt aus R heraus laufen lassen. 
+
+```{r}
+source("./RScript_mreg3.R") #Pfad zur Datei ggf. anpassen
+```
+
+Wir sehen zwar keinen Output, aber den benötigen wir auch nicht. Wir wollen nur die Objekte im Environment haben, insbesondere, den fertig vorbereiteten ESS Datensatz. 
+
+Unsere erste Forschungsfrage lautet ja: 
+
+> Welchen Einfluss hat Bildung auf politisches Vertrauen?
+
+Im letzten Video haben das Grundmodell mit variierenden Intercepts geschätzt. Und eine vorläufige Antwort auf die Forschungsfrage war: Bildung hat auf Individualebene einen negativen Effekt auf politisches Vertrauen. Das Bildungsniveau eines Landes beeeinflusst dessen Niveau an politischem Vertrauen jedoch nicht.
+
+Aber: Wir haben ja bereits gesehen, dass der datengenerierende Prozess Kontextabhängig ist. SO könnte es auch sein, dass der Effekt der Variable `bildung` nicht in allen Ländern gleich wirkt!
+
+Es wäre ja denkbar, dass der negative Effekt in manchen Ländern stärker und in anderen schwächer ausfällt.
+
+Genau das können wir mit eine Varying Intercept, Varying Slope Modell testen.
 
 
 # Variierende Intercepts und variierende Slopes
 
+Das Varying Intercept, Varying Slope Modell wird manchmal auch Random Intercept, Random Slope Modell gennant. 
+
+Die Idee ist, dass der Effekt eines Ebene 1 Prädiktors zwischen den Kontexteinheiten variieren darf. 
+
+Was heißt das für unser Mehrebenenmodell?
+
+Dieses Modell war unser Varying Intercept Modell:
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} +$
+<font color=blue>$\beta_{1}$</font>
+$x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + \gamma_{01j} + \gamma_{02j} + u_{0j}$
+</p>
+</div>
+
+Wenn wir jetzt den Slope $\beta_{1}$ variieren lassen wollen, ergänzen wir zunächst einen Index $j$, also $\beta_{1j}$.
+
+Außerdem müssen wir eine Regressionsgleichung für diesen variierenden Slope ergänzen. 
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} +$ 
+<font color=blue>$\beta_{1}$</font><font color=red>$_{j}$</font>
+$x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + \gamma_{01j} + \gamma_{02j} + u_{0j}$
+</p>
+und jetzt zusätzlich
+<p class=math_left>
+<font color=red>$\beta_{1j} = \gamma_{10} + u_{1j}$</font>
+</p>
+</div>
+
+
+Sie erkennen: die Form ist analog zur Gleichung des variierenden Intercepts. $\gamma_{10}$ ist der Ebene 2 Intercept, also der durchschnittliche Effekt - der fixed Effect - für den Ebene 1 Bildungseffekt $\beta_{1j}$.
+
+Und das Residuum $u_{1j}$ enthält die Varianz, also die Streuung der länderspezifischen Bildungseffekte um den Wert $\gamma_{10}$. 
+
+Im Unterschied zur Gleichung für den variierenden Intercept, haben wir hier noch keine Determinanten für den variierenden Slope in der Gleichung. Das kommt später. 
+
+Das setzen wir nun auch in der `lmer()`-Formel in R um: 
+
+In der Klammer haben wir bisher gesagt: "Lasse den Intercept `1` variieren nach `cntry`".
+
+Das ergänzen wir so, dass nun auch `bildung` nach `cntry` variieren darf.
+Das führen wir aus und rufen die `summary()` auf:
 
 ```{r}
-ess$soz_vertrauen <- ess$ppltrst
-
-# Einlesen der Makrodaten einlesen und mit merge() hinzuspielen
-ess_macro <- read.table("./Daten/ess2018_macro.csv",
-                        sep=";", header=T)
-head(ess_macro)
-ess_micro <- ess
-ess <- merge(ess_micro, ess_macro, # Die beiden Datensätze die zusammengespielt werden
-             by = "cntry", # Die Schlüsselvariable
-             all.x = T) # Das alle Fälle des x-Datensatzes (des erstgenannten) behalten werden
-
-# Missing Values ausschließen
-variablen_im_modell <- c("pol_vertrauen",
-                         "bildung",      
-                         "responsivitaet",                         
-                         "zufr_wirtschaft",
-                         "soz_vertrauen", 
-                         "cntry",
-                         "c_ticpi_2018")
-ess <- na.omit(ess[,variablen_im_modell])
-
-# Zentrieren
-ess_centered <- as.data.frame(scale(ess[,c(2:5)], scale=F))
-ess[,c(2:5)] <- ess_centered
-
 library(lmerTest) 
-mreg2 <- lmer(pol_vertrauen ~ 1 + bildung + 
+mreg3 <- lmer(pol_vertrauen ~ 1 + bildung + 
                 responsivitaet + zufr_wirtschaft + soz_vertrauen + 
-                c_ticpi_2018 + 
-                (1 | cntry),  
+                c_ticpi_2018 + bildung_agg +
+                (1 + bildung | cntry),  
               data=ess)
 
-summary(mreg2)
+summary(mreg3)
 ```
 
-Manchmal auch Random Intercept, Random Slope Modell gennant.
+
+
+Wir sehen nun bei den Random Effects, dass eine neue Zeile hinzugekommen ist: der <font color=red>Random Effect für Bildung.</font>
+Dessen Beitrag an der Gesamtvarianz ist mit einer Varianz von <font color=red>$0.002$</font> aber recht gering. 
+
+Bevor wir das Modell also inhaltlich interpretieren, müssen wir prüfen, ob dieser variierende Slope tatsächlich gerechtfertigt ist. Oder anders ausgedrückt: Ist die Annahme eines zwischen den Ländern variierenden Regressionskoeffizienten für Bildung überhaupt empirisch haltbar? 
+
+Was uns also interessiert ist, ob wir überhaupt einen signifkanten Random Effect für Bildung haben. Oder ob dem datengenerierenden Prozess nicht eher ein einheitlicher Bildungseffekt zu Grunde liegt.
+
+Um das festzustellen prüfen wir, ob das Modell mit dem variirenden Intercept - `mreg3`- besser zu den Daten passt, als das Modell ohne diesen variirenden Intercept (Modell `mreg2`).  
+
+
+## Modellvergleich mittels Anova 
+
+Üblicherweise vergleichen wir zwei Modelle mit der `anova()`-Funktion. 
+
+Die Anova testet die Nullhypothese, dass die beiden Modelle gleich gut oder schlecht zu den Daten passen. Ist der Test signifikant, wird die Nullhypothese also zurückgeweisen, wissen wir, dass das eine Modell eine bessere Anpassung an die Daten hat.
+
+Werden zwei OLS Modelle verglichen, basiert die Anova auf einem F-Test der Fehlerqaudrate der beiden Modelle.
+
+Für Modelle die auf einem Maximum Likelihood Schätzer basieren- z.B. bei der logistischen Regression, aber auch das Mehrebenenmodell - dann nutzt die Anova einen $\chi^2$-Test (Chi quadrat) auf Basis der Likelihood-Funktion der Modelle.
+
+
+Leider ist das bei Mehrebenenmodellen nicht ohne größere Vorsicht möglich. 
+
+Und um das zu verstehen müssen wir kurz über den Schätzalgorithmus sprechen.
+
+Bisher haben wir unsere Mehrebenenregression mit der `lmer()`-Funktion geschätzt, ohne explizit anzugeben, welcher Schätzer genutzt werden soll.
+
+`lmer()` nutzt dabei als Voreinstellung automatisch den sogenannten *REML*-Schätzer (**Re**stricted **M**aximum **L**ikelihood).
+
+Der `lmer()` Befehl ergänzt also implizit `REML=TRUE`:
+
+```{r, eval=F}
+# Nicht ausführen
+mreg <- lmer(y ~ 1 + x + (1 + grp), 
+             data = df, 
+             REML = TRUE)
+```
+
+Wenn man `REML=FALSE` angibt, wird statt des REML-Schätzers der einfache ML-Schätzer genutzt.
+
+Der ML-Schätzer wählt dabei diejenigen Werte für die  Modellparamter, bei denen die Wahscheinlichkeit (Likelihood) am größten ist, die Werte der Daten zu beobachten. Wähle das Modell, beim dem $p(Daten|Modell)$ am größten ist.
+
+Dabei können aber die Varianzparameter unterschätzt werden.
+
+Beim REML-Schätzer werden nur die Parameter der Varianzkomponenten, also die Random Effects des Modells über den ML-Schätzer gewählt. Die anderen Modellparamter werden als gegeben angenommen (sie werden zuvor automatisch seperat geschätzt). Die Schätzung des REML Schätzers ist also restricted auf die Varianzkomponenten. Und soll dadurch e eine unverzerrte Schätzung der Varianzkomponenten erlauben.
+
+ABER: Je größer die SP, desto weniger ist die Schätzung der Vaianzkomponenten mittels ML-Schätzer verzerrt.
+Diese Eigenschaft ist dann wichtig, wenn Sie folgende Fehlermeldung bei der Schätzung ihres Modells erhalten. 
+Dann lässt sich das Modell nicht mit dem REML Schätzer berechnen. Bei ausreichend größeren Fallzahlen können Sie versuchen dass Modell mit dem ML Schätzer zu fitten, also `REML=FALSE`.
+
+
+OK, kurz durchatmrn, dann kommen wir zurück zur einfachen Anwendung. 
+
+Kommen wir zurück zum Modellvergleich mit der Anova.
+
+Durch die Eigenschaft der REML-Schätzung darf die log-Likelihood zwischen Modellen mit unterschiedlichen fixed Effects nicht verglichen werden - und damit darf auch die Devianz, also die Differenz zwischen zwei Modellen, nicht berechnet werden. Diese ist abre die Grundlage für den $\chi^2$-Test der Anova.
+
+Sollen zwei Modelle mit unterschiedlichen fixed Effects verglichen werden, müssen diese Modelle mit dem ML-Schätzer gefittet sein. 
+
+Die Modelle `mreg1` und `mreg2` sind zwei Modelle, die sich nur hinsichtlich der fixed Effects unterscheiden. Aber wir hatten sie mit dem REML-Schätzer gefittet, da dieser ja die default Einstellung ist.
+
+Was passiert, wenn wir mit diesen Modellen die Anova rechnen?
+
+```{r}
+# Per default werden die Modelle mit ML refittet:
+anova(mreg1, mreg2)
+#anova(mreg1, mreg2, refit=T)
+```
+
+Die Anova schätzt automatisch beide Modelle erneut mit dem ML Schätzer. So können wir also direkt die Anova interpretieren:
+
+Modell 2 ist also signifikant besser an die Daten angepasst als Modell 1.
+
+Und was ist mit dem Vergleich von `mreg2` und `mreg3`? Hier unterscheiden sich die random Effects, die fixed Effects sind aber identisch spezifiziert. Wir müssen also beide Modelle mit dem REML-Schätzer vergleichen. 
+
+Auch hier würde die Anova mit dem ML-Schätzer refitten. Dann dürften wir die Anova aber nicht interpretieren.
+Wir müssen der Anova also sagen, dass sie nicht refitten soll: das geschieht mit dem Argument `refit=FALSE`:
+
+```{r}
+anova(mreg2, mreg3, refit=F)
+```
+
+Auch hier sehen wir, dass die log-Likelihodd im zweiten Modell geringer ist - also besser ist - und zwar so viel, dass der $\chi^2$-Test bei zwei Freiheitsgraden signifikant ist. `mreg3` ist also signifikant besser als`mreg2` - wir haben also signifikante Varianz im random Slope für Bildung und können das Modell nun auch inhaltlich interpretieren!
+
+
+## Interpretation des Varying Slope Modells
+
+Der Fixed Effect für Bildung sagt uns nun wie groß der durchschnittliche Bildungseffekt $\gamma_{10}$ ist: $-0.034$. Dieser Effekt ist signifikant. Also haben wir über ale Länder hinweg einen leicht negativen Effekt für Bildung. 
+
+Interessant ist nun aber, wie stark sich die Effekte zwischen den Länder unterscheiden. Denn: wir haben ja einen variierenden Effekt, dessen Varianz bei $0.002$ liegt!
+
+Mit der Funktion `ranef()` können wir uns Ausgeben lassen, wie stark die Länder vom durchschnittliche Bildungseffekt, dem fixed Effect $\gamma_{10}$ abweichen:
+
+```{r}
+ranef(mreg3)
+```
+
+Tatsächlich reichen diese Abweichungen von $-0.074$ bis $0.072$. 
+
+Um das anschaulicher zu machen, addieren wir den fixed Effect für Bildung:
 
 
 ```{r}
-library(foreign)
-ess <- read.spss("./Daten/ESS9e02.sav", 
-                 use.value.labels = FALSE,
-                 to.data.frame = TRUE,
-                 reencode = TRUE)
+re_bildung <- ranef(mreg3)$cntry[,2]
+names(re_bildung) <- row.names(ranef(mreg3)$cntry)
+
+#re_bildung+fixef(mreg2)[2]
+sort(re_bildung+fixef(mreg2)[2])
+```
+
+Addiert man den fixed Effect für Bildung $\gamma_{10}$ zeigt sich, das der variierende Slope für Bildung $\beta_{1j}$ von $-0.1$ in Polen bis $0.05$ in Schweden reicht:
 
 
 
-idx_vars <- c("trstprl","trstplt","trstprt")
-ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
-                              na.rm = F)
-ess$zufr_wirtschaft <- ess$stfeco
 
+
+# Cross Level Interaktionen
+
+Wir sehen also, der Effekt von Bildung variiert also zwischen den Ländern: in manchen wirkt Bildung negativ, in anderen Ländern aber auch positiv auf das politische Vertrauen!
+
+Die Frage die sich hier stellt: Warum ist das so? Und wir haben ja schon eine Hypothese, denn als zweite Forschungsfrage hatten wir formuliert: 
+
+> Wie beeinflusst Korruption die Wirkung von Bildung auf politisches Vertrauen?
+
+Könnte es also sein, dass das Ausmaß an Korruption in einem Land diese Variation des Random Slope erklären kann?
+
+Der Effekt des Individualmerklmals Bildung ist ein Effekt auf Ebene 1 - auch wenn die größe dieses Ebene 1 Effektes zwischen den Ländern variiert.
+
+Korruption messen wir dabei als Kontextmerkmal auf Ebene 2. Wir haben für jedes Land einen Wert für den Transparency International Korruptiosindex.
+
+Wenn diese Ebene 2 Variable also einen Effekt auf Ebene 1 beeiflusst ist das ein sogenannter Cross-Level Interaktionseffekt. Interatkion deshalb, weil ein Effekt einen anderen Effekt beeinflusst, alsi mit ihm interagiert.
+
+
+Das ergänzen wir nun in der Regressionsgleichung für diesen variierenden Slope ergänzen. 
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} + \beta_{1j}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + \gamma_{01j} + \gamma_{02j} + u_{0j}$
+</p>
+und jetzt zusätzlich
+<p class=math_left>
+$\beta_{1j} = \gamma_{10} +$
+<font color=red>$\gamma_{11j}$</font> 
+$+u_{1j}$
+</p>
+</div>
+
+<font color=red>$\gamma_{11j}$</font> ist dabei der Regressionskoeffizient der Variable "Korruptionsindex", also der Einfluss der Variable "Korruptionsindesx" auf den variierende Slope der Variable Bildung $\beta_{1j}$.
+
+Wenn $\gamma_{11j}$ tatsächlich einen Erklärungsbeitrag für die Variation des random Effects der Variable Bildung hat, dann müsste auch die Residualvarianz $u_{1j}$ geringer werden.
+
+Schauen wir uns das im Modell an:
+
+Wir schätzen also unser neuen Modell, und für die Cross-Level Interaktion müssen wir nur einen ganz regulaären Interaktionseffekt in der Formel spezifizieren. R wei dann von ganz alleine, dass die eine Variable auf Ebene 1 ist und die andere Variable auf Ebene 2.
+
+```{r cross_level_interaktion}
+mreg4 <- lmer(pol_vertrauen ~ 1 + bildung:c_ticpi_2018 + 
+                responsivitaet + zufr_wirtschaft + soz_vertrauen + 
+                c_ticpi_2018 + bildung_agg +
+                (1 + bildung | cntry),  
+              data=ess,
+              REML=F)
+
+summary(mreg4)
 ```
 
 
+# Schluss
+
+
+
+Wichtig ist, dass man nicht beliebig die Ebene 1 Prädiktoren variieren lassen sollte. Nur wo es eine Relevanz für die Forschungsfrage hat und nur dann, wenn auch die Theorie eine begründete Hypothese zulässt, werden variierende Slopes im Modell spezifiziert.
+
+
+
+```{r}
+anova(mreg3, mreg4)
+```
+
+
+
+```{r}
+library(lmerTest) 
+mreg4 <- lmer(pol_vertrauen ~ 1 + bildung + 
+                responsivitaet + zufr_wirtschaft + soz_vertrauen +
+                c_ticpi_2018 + bildung_agg +
+                c_ticpi_2018:bildung +
+                (1 + bildung | cntry),  
+              data=ess)
+
+summary(mreg4)
+```
+
+```{r}
+anova(mreg2, mreg3, refit=F)
+anova(mreg0, mreg1, mreg2, mreg3, mreg4, refit=F, ddf="lme4")
+```
 
 
 ## Sequentielle Schätzung von aufeinander aufbauenden Modellen
@@ -139,6 +384,10 @@ Sie berichten daher mehrere Mehrebenenmodelle, die aufeinander Aufbauen und imme
 Wichtig: Sie können nicht in einem späteren Modell noch Variablen eines vorhergehenden Modells ändern. Wenn das notwendig wäre, müssen Sie wieder mit Schritt 1 beginnen.
 
 
+# Literatur
+
+
+- Raudenbush, Stephen W.; Bryk, Anthony S. (2002): Hierarchical linear models: Applications and data analysis methods. Sage.
 
 
 ```{r, echo=F, eval=F}
