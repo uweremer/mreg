@@ -67,8 +67,6 @@ DIV.border {
 
 Hallo und herzlich Willkommen zum dritten Teil der Videoserie zum Thema Mehrebenenregression in R. 
 
-
-
 Im vorigen Video haben wir gesehen, wie man mit Hilfe des sogenannten Nullmodells berechnet, ob eine Mehrebenenregression überhaupt notwendig ist.
 Nur wenn dies der Fall ist, werden die eigentlich interessierenden Mehrebenenmodelle geschätzt.
 
@@ -608,7 +606,7 @@ model_performance(mreg2)
 
 Das konditionale $R^2$ erhöt sich minimal von $44.1$ auf $46.7$. 
 
-model_performance(mreg2)$R2_conditional
+
 # Schluss
 
 

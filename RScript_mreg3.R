@@ -24,7 +24,7 @@ ess$pol_vertrauen <- rowMeans(ess[,idx_vars],
                               na.rm = F)
 #table(ess$pol_vertrauen, useNA = "always")
 library(DescTools)
-#Desc(ess$pol_vertrauen)
+Desc(ess$pol_vertrauen)
 
 # Operationalisierung der unabh. Variable 
 # Bildung
@@ -34,7 +34,7 @@ ess$bildung <- ess$eisced
 # `0` und `55` auf `NA` setzten
 ess$bildung[ess$bildung %in% c(0,55)] <- NA
 
-#Desc(ess$bildung)
+Desc(ess$bildung)
 
 # Operationalisierung der unabh. Variable 
 # Wahrgenommene politische Responsivität 
@@ -47,13 +47,13 @@ ess$responsivitaet <- rowMeans(ess[,idx_vars],
 # Wertebreich rekodieren auf 0 bis 4
 ess$responsivitaet <- ess$responsivitaet - 1
 
-#Desc(ess$responsivitaet)
+Desc(ess$responsivitaet)
 
 # Operationalisierung der unabh. Variable 
 # "Zufriedenheit Wirtschaftslage"
 
 ess$zufr_wirtschaft <- ess$stfeco
-#Desc(ess$zufr_wirtschaft)
+Desc(ess$zufr_wirtschaft)
 
 # Operationalisierung der unabh. Variable 
 # Soziales Vertrauen
@@ -84,9 +84,12 @@ ess <- na.omit(ess[,variablen_im_modell])
 
 # Zentrieren der Ebene 1 x-Variablen
 # Diese sind an 2. bis 5. und 7. Stelle im Datensatz
-#names(ess)
-#ess[,c(2:5)]
-#scale(ess[,c(2:5)], scale=F)
+
+names(ess)
+ess[,c(2:5)]
+scale(ess[,c(2:5)], scale=F)
+
+
 ess_centered <- as.data.frame(scale(ess[,c(2:5)], scale=F))
 ess[,c(2:5)] <- ess_centered
 
@@ -102,8 +105,10 @@ mreg1 <- lmer(pol_vertrauen ~ 1 + bildung +
 
 summary(mreg1)
 
+#Zeigt die Random Effects
 ranef(mreg1)
 
+#Zeigt die Fixed Effects
 fixef(mreg1)
 
 
@@ -127,7 +132,7 @@ model_performance(mreg0)
 bildung_agg <- aggregate(list(bildung_agg = ess$bildung), 
                          by=list(cntry=ess$cntry), 
                          FUN=mean, na.rm=T)
-
+bildung_agg
 ess <- merge(ess, bildung_agg,
              by="cntry",
              all.x = T)
@@ -142,6 +147,13 @@ ggplot(ess, aes(x=cntry, y=bildung_agg)) +
 # Drehen der Makrovariable "c_ticpi_2018" (Korruptionsindex)
 ess$korruption <- abs(ess$c_ticpi_2018-100)
 # Deskriptive Grafik zur gedrehten Variable "korruption"
+ggplot(ess, aes(x=cntry, y=korruption)) +
+  geom_bar(stat = "summary", fun.y = "mean") +
+  scale_y_continuous(limits=c(0,100)) +
+  theme(axis.text=element_text(size=6))
+
+
+
 library(lmerTest) 
 mreg2 <- lmer(pol_vertrauen ~ 1 + bildung + 
                 responsivitaet + zufr_wirtschaft + soz_vertrauen + 

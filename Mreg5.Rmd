@@ -64,33 +64,90 @@ DIV.border {
 
 # Themenüberblick
 
-Hallo und herzlich Willkommen zum fünftem Teil der Videoserie zum Thema Mehrebenenregression in R. 
+Hallo und herzlich Willkommen zum fünften Teil der Videoserie zum Thema Mehrebenenregression in R. 
  
-Die Fragestellung für dieses Video lautet: Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?
+In diesem Video beschäftigen wir uns mit der Frage: Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?
 
-Im vorigen Video 3 haben wir das einfache Varying Intercept Modell geschätzt. Wir haben Prädiktoren auf Ebene 1 und 2 berücksichtigt und die Fixed Effects und die Random Effects interpretiert.
+In den vergangenen Videos haben wir nacheinander verschiedene Varianten des Mehrebenenmodells geschätzt und interpretiert. Mithilfe der Anova haben wir geprüft, ob die aufeinander aufbauenden Modelle jeweils besser an die Daten angepast ist.
 
-In diesem Video wird es darum gehen, wie man das passende Modell aus den möglichen Varianten findet. 
-Dazu erweitern wir das Varying Intercept Modell zunächst um einen Varying Slope und danach um eine Cross Level Interaktion. 
+In diesem Video wird es darum gehen, wie man die Ergebnisse dieser Modelle berichtet und die relevanten Quantites of Interest grafisch aufbereitet.
 
-Wir schauen dann, anhand welcher Kriterien wir entscheiden können, welches der Modelle, das richtige ist.
+Die konkreten Lernziele sind, dass Sie mit R in der Lage sind...
 
-Die konkreten Lernziele sind, dass Sie...
+- die Regressionsergebnisse tabellarisch gegebüberzustellen
+- die fixed Effects als Forrestplot grafisch darzustellen
+- die variierenden Intercepts und Slopes grafisch darzustellen
+- Cross-Level Interaktionen mit Effekt-Plots ggrafisch darzustellen
 
-- Modelle mit variierenden Slopes und Cross Level Interaktionen... 
-  - als Mehrebenengleichung formulieren können.
-  - in R umsetzen können.
-- Verschiedene empirische Modelle miteinander vergleichen können und entscheiden können, welche Modellvariante die passende ist. 
 
 Dazu wechseln wir nun zu R.
 
-Bevor wir mit dem neuen Modell loslegen, führen Sie bitte das komplette RScript zu Video 4 aus `RScript_mreg4.R`. Mit der `source()`-Funktion können Sie das direkt aus R heraus laufen lassen. 
+
+# Vorbereitung der Daten und Modelle
+
+Bevor wir mit dem neuen Modell loslegen, führen Sie bitte das komplette RScript aus Video 4 aus `RScript_mreg4.R`. Mit der `source()`-Funktion können Sie das direkt aus R heraus laufen lassen. 
 
 Das Skript lädt dann alle Schritte der Operationalisierung aus Video 3, sowie die bisher geschätzten Mehrebenenmodelle. Diese benötigen wir um die Ergebnisse zu zu berichten.
 
 ```{r}
 source("./RScript_mreg4.R") #Pfad zur Datei ggf. anpassen
 ```
+
+
+# Tabellen zu den Regressionsmodellen
+
+Um die Ergebnisse der Regressionen tabellarisch aufzubereiten nutzen wir die das `texreg`-Paket.
+
+Das Paket enthält mehrere Funktionen, um die Ergebnisse unterschiedlicher Regressionsmodelle automatisch aufzubereiten und als Tabelle auszugeben.
+
+Dabei unterscheiden sich die Funktionen, je nach dem, in welchem Format die Tabellen formatiert werden sollen:
+
+- `screenreg()` gibt die Tabelle auf dem Bildschirm in der RConsole aus.
+- `htmlreg()` erstellt die Taeblle im html-Format
+- `texreg()` gibt die Tabelle im Latex Format aus.
+- `wordreg()` erstellt die Tabelle in einem Microsoft Word Format
+
+
+```{r, results='asis'}
+library(texreg)
+screenreg(list(mreg3,mreg4))
+htmlreg(list(mreg3,mreg4))
+texreg(list(mreg3,mreg4))
+wordreg(list(mreg3,mreg4)),
+        file = "tabelle.doc")
+```
+
+Alternativ kann man die `tab_model()`-Funktion aus dem `sjPlot`-Paket nutzen. Auch diese Funktion erstellt für unterschiedlichste Regressionsmodelle die passenden Tabellen. Zudem lassen sich die Tabellen sehr kleinteilig den eigenen Bedürfnissen anpassen. 
+
+Hilfe und Erläuterungen gibt es auch in der Vignette zum Paket: https://strengejacke.github.io/sjPlot/articles/tab_mixed.html   
+
+```{r sjt_tabellen, results='asis'}
+library(sjPlot)
+?tab_model
+# Gibt Tabdelleim RStudio Viewe 
+tab_model(mreg3,mreg4, 
+           p.style = "stars",
+          use.viewer = F)
+
+# Oder man kann die Tabelle in einer Datei speichern
+tab_model(mreg3,mreg4, 
+           p.style = "stars",
+          use.viewer = F,
+          file = "tabelle.html")
+```
+
+
+# Fixed Effects grafisch darstellen
+
+```{r grafiken_1}
+sjPlot::plot_model(mreg4,
+                   show.values=T)
+sjPlot::plot_model(mreg4, type="re", sort.est = "bildung")
+sjPlot::plot_model(mreg4, type="int")
+
+```
+
+
 
 ```{r, echo=F, eval=F}
 library("knitr")
