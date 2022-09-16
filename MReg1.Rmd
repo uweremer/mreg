@@ -43,6 +43,7 @@ P.math {
     text-align: center;
     font-size: 2vw;
 }
+
 ```
 
 #	Begrüßung und Themenüberblick
@@ -54,10 +55,11 @@ Diese Videoserie besteht aus sechs aufeinander aufbauenden Teilen:
 
 - Teil 1: „Was ist eine Mehrebenenregression?“
 - Teil 2: „Wann ist eine Mehrebenenregression angebracht?“ 
-- Teil 3: „Wie schätzt man eine Mehrebenenregression in R?“ 
-- Teil 4: „Wie findet man das passende Modell für die Mehrebenenregression?“ 
-- Teil 5: „Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?“
-- Teil 6: „Warum ist die Mehrebenenregression das bessere Modell?"
+- Teil 3: „Wie werden die Daten für eine Mehrebenregression vorbereitet?“ 
+- Teil 4: „Wie schätzt man eine Mehrebenenregression in R?“ 
+- Teil 5: „Wie schätz man variierende Slopes und Cross-Level Interaktionen?“
+- Teil 6: „Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?"
+
 
 Zu allen Videos gibt es den R Code als Datei zum Download, hier unter dem Video. Außerdem gibt es das ganze Skript zu den Videos auf meiner Github Seite:
 
@@ -116,7 +118,7 @@ Sie liefern Annahmen darüber, warum eine Befragte den ein oder anderen Wert auf
 Mit dem statistischen Modell versuchen wir dann diese Theorie über den datengenerierenden Prozess mathematisch/statistisch auszudrücken. 
 
 
-## Kontext und hierarchische Daten 03:19 / 10:30
+## Kontext und hierarchische Daten
 
 In aller Regel laufen solche datengenerierende Prozesse aber kontextabhängig ab. Die Mechanismen die wirken, können je nach Kontext einen stärkeren oder schwächeren Effekt haben, keinen Effekt haben, oder sogar einen umgekehrten Effekt aufweisen. 
 
@@ -147,7 +149,7 @@ Hier ein konkretes Beispiel.
 
 Die Daten stammen aus dem 9. European Social Survey, - kurz ESS - aus dem Jahr 2018.^[ESS Round 9: European Social Survey Round 9 Data (2018). Data file edition 3.1. Sikt - Norwegian Agency for Shared Services in Education and Research, Norway – Data Archive and distributor of ESS data for ESS ERIC. doi:10.21338/NSD-ESS9-2018] 
 
-Sie benötigen die ESS Daten umin späteren Videos den R Code aus R-Script-Dateien ausführen zu können. Die Daten können Sie über die Webseite des ESS herunterladen:
+Sie benötigen die ESS Daten um in späteren Videos den R Code aus R-Script-Dateien ausführen zu können. Die Daten können Sie über die Webseite des ESS herunterladen:
 
 https://www.europeansocialsurvey.org/ 
 
@@ -241,15 +243,17 @@ Mit Hilfe der Mehrebenenregression lässt sich ein Modell spezifizieren, dass di
 
 
 
-Starten wir bei einem klassischen OLS Regressionsmodell, hier ein einfaches bivariates Beispiel. Das kennen Sie. A
+Starten wir bei einem klassischen OLS Regressionsmodell, hier ein einfaches bivariates Beispiel. Das kennen Sie. 
 
-**HIER Bild Gelman entwickeln**
+![](./Grafiken/varianten_1.png)
 
 Es gibt ein Intercept und ein Steigungsparameter b.
 
 Aber: Wir berücksichtigen *keine* Mehrebenenstruktur:
 
 Und hier ein einfaches Mehrebenenmodell:
+
+![](./Grafiken/varianten_2.png)
 
 - Wir können den Intercept zwischen den Kontexteinheiten variieren lassen! Wir können also berücksichtigen, dass es unterschiedliche Durchschnittswerte der abhängigen Variable in den verschiedenen Kontexteinheiten gibt. *Varying Intercept Model* - weil der Intercept variiert.
 
@@ -258,6 +262,8 @@ Und hier ein einfaches Mehrebenenmodell:
 Wir können also, erlauben, dass der Zusammenhang zwischen abhängiger Variable und unabhängiger Variable in den Ländern unterschiedlich stark sein kann. Das ennt sich dann *Varying Intercept, Varying Slope Model*.
 
 Und wir können tatsächlich auch prüfen, ob und wie stark Merkmale auf der Kontextebene dafür verantwortlich sind, dass diese Unterschiede auftreten. Das wäre dann das Modell mit einer *Cross-Level Interaction*.
+
+![](./Grafiken/varianten_3.png)
 
 Man könnte es auch so formulieren:
 
@@ -286,7 +292,7 @@ Wir können also folgende Fragestellungen beantworten:
 - Unterscheiden sich die Effekte eines Prädiktors der Ebene 1 zwischen Einheiten der Ebene 2
 - Können Prädiktoren der Ebene 2 erklären, warum sich Effekte von Prädiktoren der Ebene 1 zwischen den Ebene 2 Einheiten unterscheiden?
 
-Diese Modelle schauen wir uns in Teil 3 der Videoserie noch einmal genauer an und setzen sie mit R um... Zuvor werden wir uns im nächsten Video Nummer zwei anschauen, wann denn eine Mehrebenenregression genutzt werden sollte.
+Diese Modelle schauen wir uns in Teil 4 und 5 der Videoserie noch einmal genauer an und setzen sie mit R um... Zuvor werden wir uns im nächsten Video Nummer zwei anschauen, wann denn eine Mehrebenenregression genutzt werden sollte.
 
 
 Damit wären wir am Ende des ersten Videos anfgelangt. 

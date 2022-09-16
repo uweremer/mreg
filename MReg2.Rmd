@@ -611,9 +611,17 @@ Das ist ziemlich guter Wert für eine abhängige Variable aus dem Bereich der po
 
 Somit wissen wir: Eine Mehrebenenregression ist unbedingt einer einfachen OLS Regression vorzuziehen, wenn wir korrekte Ergebnisse erhalten wollen, denen wir auch trauen können.
 
-Was unter 'korrekten Ergebnissen' zu verstehen ist, wie sich die Ergebnisse einer Mehrebenenregression von denen einer OLS Regression unterscheiden und welche Rolle dabei Fallzahlen spielen, besprechen wir im sechsten und letzten Video dieser Videoreihe, da es sich um weiterführende Themen handelt.
+Tun wir das nicht, korreleiren die Fehler der Individualebene mit einem Kontextmerkmal, nämlich der Länderzugehörigkeit der Befragten. Wir nehmen an, die Befragten wären unabhängig voneinander, was sie in Wahrheit nicht sind.
 
-Bevor wir dorthin kommen, werden wir nächsten Video Nummer drei uns damit beschäftigen, wie die unterschiedlichen Varianten der Mehrebenenregression mit R umgesetzt werden und wie man die Ergebnisse interpretiert.  
+Unter anderem werden die Standardfehler der Regressionskoeffizienten im einfachen OLS Modell auf Basis der gesamten Stichprobe berechnet. Es wird nicht berücksichtigt, dass die Varianzen und Fallzahlen in den Gruppen unterschiedlich sind. Als Folge werden die Standardfehler unterschätzt.
+
+Wenn die Standardfehler aber kleiner sind, als sie sein müssten, wird auch die Irrtumswahrscheinlichkeit beim Signifikanztest unterschätzt.
+
+Im schlechtesten Fall gehen Sie also von signifikanten Effekten aus, wo in Wahrheit kein Zusammenhang zu finden ist.
+
+Sie sehen, wenn die Daten eie Mehrebenenstruktur aufweisen, sollten Sie auch unbedingt ein Mehrebenenmodell schätzen!
+
+Im nächsten Video Nummer drei werden wir uns aber zunächst mit der Operationalisierung, also der Vorbereitung der Daten für die Mehrebenenregression beschäftigen. 
 
 
 # Aufgabe

@@ -1,3 +1,9 @@
+
+V2: 
+Was unter 'korrekten Ergebnissen' zu verstehen ist, wie sich die Ergebnisse einer Mehrebenenregression von denen einer OLS Regression unterscheiden und welche Rolle dabei Fallzahlen spielen, besprechen wir im siebten und letzten Video dieser Videoreihe, da es sich um weiterführende Themen handelt.
+
+
+
 mit an und schreiben explizit, dass wir den `REML`-Schätzer verwenden wollen (**RE**stricted, **M**aximum **L**ikelihood). Dazu später mehr. 
 
 
