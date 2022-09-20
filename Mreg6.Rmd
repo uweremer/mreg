@@ -64,20 +64,20 @@ DIV.border {
 
 # Themenüberblick
 
-Hallo und herzlich Willkommen zum fünften Teil der Videoserie zum Thema Mehrebenenregression in R. 
+Hallo und herzlich Willkommen zum sechsten Teil der Videoserie zum Thema Mehrebenenregression in R. 
  
 In diesem Video beschäftigen wir uns mit der Frage: Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?
 
 In den vergangenen Videos haben wir nacheinander verschiedene Varianten des Mehrebenenmodells geschätzt und interpretiert. Mithilfe der Anova haben wir geprüft, ob die aufeinander aufbauenden Modelle jeweils besser an die Daten angepast ist.
 
-In diesem Video wird es darum gehen, wie man die Ergebnisse dieser Modelle berichtet und die relevanten Quantites of Interest grafisch aufbereitet.
+In diesem Video wird es darum gehen, wie man die Ergebnisse dieser Modelle berichtet und wie man die relevanten Quantites of Interest grafisch aufbereitet.
 
 Die konkreten Lernziele sind, dass Sie mit R in der Lage sind...
 
-- die Regressionsergebnisse tabellarisch gegebüberzustellen
-- die fixed Effects als Forrestplot grafisch darzustellen
-- die variierenden Intercepts und Slopes grafisch darzustellen
-- Cross-Level Interaktionen mit Effekt-Plots ggrafisch darzustellen
+- die Regressionsergebnisse tabellarisch gegenüberzustellen.
+- die fixed Effects als Forrestplot grafisch darzustellen.
+- die variierenden Intercepts und variierende Slopes grafisch darzustellen.
+- Cross-Level Interaktionen mit Effekt-Plots grafisch darzustellen.
 
 
 Dazu wechseln wir nun zu R.
@@ -85,12 +85,10 @@ Dazu wechseln wir nun zu R.
 
 # Vorbereitung der Daten und Modelle
 
-Bevor wir mit dem neuen Modell loslegen, führen Sie bitte das komplette RScript aus Video 4 aus `RScript_mreg4.R`. Mit der `source()`-Funktion können Sie das direkt aus R heraus laufen lassen. 
-
-Das Skript lädt dann alle Schritte der Operationalisierung aus Video 3, sowie die bisher geschätzten Mehrebenenmodelle. Diese benötigen wir um die Ergebnisse zu zu berichten.
+Wie auch schon zuvor, müssen wir das komplette RScript aus dem vorigen Video 5 mit der `source()`-Funktion ausühren, um die Daten zu laden (`RScript_mreg5.R`). 
 
 ```{r}
-source("./RScript_mreg4.R") #Pfad zur Datei ggf. anpassen
+source("./RScript_mreg5.R") #Pfad zur Datei ggf. anpassen
 ```
 
 
@@ -148,6 +146,21 @@ sjPlot::plot_model(mreg4, type="int")
 ```
 
 
+# Aufgabe
+
+- Stellen Sie zu Ihrer eigenen Fragestellung die Regressionsergebnisse der verschiedenen Modelle vergleichend als Tabelle dar.
+
+- Bereiten Sie die Quantites of Interest der Mehrebenenmodelle (Variierende Intercepts, variierende Slopes, Cross-Level Interaktionseffekte) grafisch auf. 
+
+#	Lernzielabgleich
+
+Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernziele erreicht haben: 
+
+
+- die Regressionsergebnisse tabellarisch gegenüberzustellen.
+- die fixed Effects als Forrestplot grafisch darzustellen.
+- die variierenden Intercepts und variierende Slopes grafisch darzustellen.
+- Cross-Level Interaktionen mit Effekt-Plots grafisch darzustellen.
 
 ```{r, echo=F, eval=F}
 library("knitr")

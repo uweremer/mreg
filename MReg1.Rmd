@@ -57,7 +57,7 @@ Diese Videoserie besteht aus sechs aufeinander aufbauenden Teilen:
 - Teil 2: „Wann ist eine Mehrebenenregression angebracht?“ 
 - Teil 3: „Wie werden die Daten für eine Mehrebenregression vorbereitet?“ 
 - Teil 4: „Wie schätzt man eine Mehrebenenregression in R?“ 
-- Teil 5: „Wie schätz man variierende Slopes und Cross-Level Interaktionen?“
+- Teil 5: „Wie schätzt man variierende Slopes und Cross-Level Interaktionen?“
 - Teil 6: „Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?"
 
 

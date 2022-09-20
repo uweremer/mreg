@@ -8,6 +8,7 @@
 # Der Vollständigkeit wegen wird dieser Code dennoch dokumentiert.
 
 
+
 library(foreign)
 ess <- read.spss("./Daten/ESS9e02.sav", 
                  use.value.labels = FALSE,

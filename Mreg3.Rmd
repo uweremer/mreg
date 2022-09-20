@@ -109,7 +109,8 @@ Da wir nun wissen, was wir untersuchen wollen, wechseln wir in R.
 
 # Operationalisierung
 
-Noch ein kurzer Hinweis: Ich nutze in dieser Videoreihe bei der Operationalisierung "base R". das Umbenennen von Variablen, recodieren oder transformieren von Variablen kann man natürlich auch mit Funktionen des `dplyr`-Paketes oder mit `sjmisc` umsetzen und im "tidyverse"-Stil mit dem Pipe-Operator schreiben.
+Noch ein kurzer Hinweis: Ich nutze in dieser Videoreihe bei der Operationalisierung "base R". 
+Das Umbenennen von Variablen, recodieren oder transformieren von Variablen kann man natürlich auch mit Funktionen des `dplyr`-Paketes oder mit `sjmisc` umsetzen und im "tidyverse"-Stil mit dem Pipe-Operator schreiben.
 
 Bevor wir also unsere Modelle schätzen können, müssen die Variablen operationalisiert werden. Als Datensatz nutzen wir den ESS 9. Informationen zum Datensatz finden Sie im ersten Video.
 
@@ -141,14 +142,18 @@ library(DescTools)
 
 Neben der abhängigen Variablen benötigen wir auch noch die unabhängigen Variablen.
 
+Sie sollten die Variablen natürlich auf Basis theoretischer Überlegungen wählen. Passend zu unserer Fragestellung habe ich hier zwei Literaturvorschläge: [Jiang & Zhang (2021)](https://doi.org/10.1093/ijpor/edab008) und [Van der Meer & Hakhverdian (2017)](https://doi.org/10.1177/0032321715607514).
+
 
 ## Bildung
 
-Als erstes unsere Haupterklärungsvariable `Bildung`. 
+Als erstes operationalisiere ich unsere Haupterklärungsvariable `Bildung`.
 
-Messung über die "International Standard Classification of Education" - EISCED.
+Die Messung erfolgt über die "International Standard Classification of Education" - `eisced`, welche die nationalen Bildungabschlüsse in eine vergleichbare Skala überführt. 
 
-Skala aus Variable `eisced`:
+Die numerischen Merkmalsausprägungen reichen von $1$ *less than lower secondary* bis $7$ *higher tertiary education*.
+
+Streng genommen handelt es sich um eine ordinale Skala, aus didaktischen Gründen nutze ich sie für dieses Beispiel als metrische Skala.
 
 
 ```{r Operationalisierung_X5}
@@ -157,7 +162,7 @@ Skala aus Variable `eisced`:
 ess$bildung <- ess$eisced 
 
 # NAs definieren:
-# `0` und `55` auf `NA` setzten
+# `0` (nicht harmonisierbar) und `55` (andere) auf `NA` setzten
 ess$bildung[ess$bildung %in% c(0,55)] <- NA
 
 #Desc(ess$bildung)
@@ -180,11 +185,12 @@ Mittelwertindex aus zwei Items
 *How much would you say the political system in [country] allows people like 
 you to have a say in what the government does?*
 
-*And how much would you say that the political system in [country] allows
-people like you to have an influence on politics?*
+*And how much would you say that the political system in [country] allows people like you to have an influence on politics?*
 
-- 1 Not at all
-- 5 A great deal
+Die Antwortskala umfasst eine 5er Skala:
+
+- $1$ Not at all
+- $5$ A great deal
 
 ```{r Operationalisierung_X2}
 # Operationalisierung der unabh. Variable 
@@ -195,20 +201,17 @@ idx_vars <- c("psppsgva","psppipla")
 ess$responsivitaet <- rowMeans(ess[,idx_vars], 
                                na.rm = F)
 
-# Wertebreich rekodieren auf 0 bis 4
-ess$responsivitaet <- ess$responsivitaet - 1
-
 #Desc(ess$responsivitaet)
 ```
 
 
 ## Zufriedenheit Wirtschaftslage
 
-*On the whole how satisfied are you with the present state of the economy in
-[country]?*
+*On the whole how satisfied are you with the present state of the economy in [country]?*
 
-- 0 Extremely dissatisfied
-- 10 Extremely satisfied
+
+- $0$ Extremely dissatisfied
+- $10$ Extremely satisfied
 
 ```{r Operationalisierung_X1}
 # Operationalisierung der unabh. Variable 
@@ -221,28 +224,57 @@ ess$zufr_wirtschaft <- ess$stfeco
 
 ## Soziales Vertrauen
 
+Soziales Vertrauen messen wir mit Hilfe der Social Trust Scale. Informationen zu dieser Skala finden Sie beim GESIS in der Zusammenstellung sozialwissenschaftlicher Items und Skalen (ZIS) [(Breyer 2015)](https://doi.org/10.6102/zis235). 
+
+Der Index wurde ursprünglich von [Rosenberg (1956)](https://doi.org/10.1177/002200275700100403) vorgeschlagen. Er besteht aus den drei Items: 
+
+- Vertrauenswürdigkeit `ppltrst`
+- Fairness `pplfair`  
+- Hilfsbereitschaft `pplhlp`
+
+
 *Generally speaking, would you say that most people can be trusted, or that you can't be too careful in dealing with people?*
 
-- 0 You can't be too careful
-- 10 Most people can be trusted
+Auch hier liegt für jedes Item eine 10er Skala vor, z.B. für Vertrauen lauten die ANtwortkategorien: 
+
+- $0$ You can't be too careful
+- $10$ Most people can be trusted
+
+Hohe Werte bedeuten positive Einstellungen.
 
 ```{r Operationalisierung_sozVertrauen}
 # Operationalisierung der unabh. Variable 
 # Soziales Vertrauen
 
-ess$soz_vertrauen <- ess$ppltrst
+idx_vars <- c("ppltrst", "pplfair", "pplhlp")
+
+ess$soz_vertrauen <- rowMeans(ess[,idx_vars], 
+                               na.rm = F)
 #Desc(ess$soz_vertrauen)
 ```
 
 
 ## Kontextdaten
 
-Wenn man eine Mehrebenenregression rechnet, möchte man häufig auch Variablen der Makroebene nutzen. Wenn die Gruppierungsvariable Länder oder andere administrative Einheiten sind, gibt es diese Daten häufig bei den Statistischen Ämtern. Zum Beispiel Eurostat, das Statistische Bundesamt, der Weltbank, der OECD oder den Vereinten Nationen.
+Wenn man eine Mehrebenenregression rechnet, möchte man häufig auch Variablen der Makroebene nutzen. Wenn die Gruppierungsvariable Länder oder andere administrative Einheiten sind, gibt es diese Daten häufig bei den statistischen Ämtern. Zum Beispiel Eurostat, dem Statistischen Bundesamt, der Weltbank, der OECD oder den Vereinten Nationen.
 
-Aber: wir sind in einer sehr komfortablen Situation, denn im Rahmen des ESS Programms wurden auch Makro-Datensätze erstellt, die Daten aus verschiedenen Quellen zusammentragen. Diese Datensätze enthalten neben den Individualdaten auch Kontextdaten. 
+Aber: wir sind in einer sehr komfortablen Situation, denn im Rahmen des ESS Programms wurden auch Makro-Datensätze erstellt, in denen Daten aus verschiedenen Quellen zusammengetragen wurden. Diese Datensätze enthalten neben den Individualdaten auch Kontextdaten. 
 
 Auch der Makrodatensatz ist nach Registrierung kostenlos verfügbar. Jedoch ist der Makrodatensatz etwa 2 GB groß. 
+
 Statt des ganzen Datensatzes, habe ich ihnen einen kleinen Ausschnitt davon als csv-Datei vorbereitet.
+
+Die csv-Datei finden Sie als Download unter dem Video. Lesen wir zuerst den vorbereiteten Makrodatensatz ein: 
+
+```{r read_macro, echo=T}
+# Einlesen Makrodaten einlesen und mit merge() hinzuspielen
+# ggf. Daetipfad anpassen
+ess_macro <- read.table("./Daten/ess2018_macro.csv",
+                        sep=";", header=T)
+head(ess_macro)
+#View(ess_macro)
+``` 
+
 
 Diese Datei enthält neben der Gruppierungsvariable `cntry` drei weitere Variablen:
 
@@ -250,22 +282,12 @@ Diese Datei enthält neben der Gruppierungsvariable `cntry` drei weitere Variabl
 - `c_gini_2018` GINI Index^[Eurostat, http://ec.europa.eu/eurostat/data/database?node_code=ilc_di12]
 - `c_tensys_2018` System Tenure^[The World Bank - Database of Political Institutions (DPI), http://dx.doi.org/10.18235/0003049]
 
-Mit dieser csv-Datei haben wir gleich auch die Gelegenheit einen typischen Schritt der Datenvorbereitung umzusetzen: das **mergen** von Datensätzen.
+
+Mit diesem Datensatz haben wir gleich auch die Gelegenheit einen typischen Schritt der Datenvorbereitung umzusetzen: das **mergen** von Datensätzen.
 
 Megren heißt, dass man zwei Datensätze anhand einer Schlüsselvariable zusammenspielt.
 
 Probieren wir es aus:
-
-Die csv-Datei finden Sie als Download unter dem Video. Lesen wir zuerst den Makrodatensatz ein: 
-
-
-
-```{r read_macro, echo=T}
-# Einlesen Makrodaten einlesen und mit merge() hinzuspielen
-ess_macro <- read.table("./Daten/ess2018_macro.csv",
-                        sep=";", header=T)
-head(ess_macro)
-``` 
 
 Wir sehen im Environment Fenster in R, dass der Datensatz 4 Variablen mit 29 Beobachtungen enthält.
 Die `head()`-Funktion gibt uns einen ersten Blick auf die Daten. Wir sehen, dass jede Beobachtung, also jeder Fall ein Land ist. 
@@ -292,7 +314,7 @@ Von den drei Kontextvariablen nutzen wir in unserem Beispiel nur die Korruptions
 
 ## Missing Values ausschließen
 
-Um einen Datensatz zu erhalten, der in über alle Modelle die gleiche Fallzahl aufweist, werden diejenigen Fälle ausgeschlossen, die auf mindestens einer der für die Analysen genutzten variablen fehlende Werte aufweist ("Listenweise Fallausschluss").
+Um einen Datensatz zu erhalten, der in über alle Modelle die gleiche Fallzahl aufweist, werden diejenigen Fälle ausgeschlossen, die auf mindestens einer der für die Analysen genutzten vVariablen fehlende Werte aufweisen ("Listenweiser Fallausschluss").
 
 ```{r Missing_values_ausschließen}
 # Missing Values ausschließen
@@ -313,7 +335,7 @@ Ein Hinweis: Da bei den Makrovariablen Daten für zwei Länder fehlen, liegen na
 
 Kommen wir zu einem weiteren wichtigen Schritt der Datenvorbereitung.
 
-In Mehrebenenmodellen ist es häufig üblich, dass die unabhängigen Variablen auf Ebene 1 mittelwertzentriert werden. Das sogenannte *Grand-Mean-Centering* sorgt dafür, dass der jeweilige Intercept eines Landes $\beta_{0j} als Abweichung vom Grand Mean interpretiert werden kann. 
+In Mehrebenenmodellen ist es häufig üblich, dass die unabhängigen Variablen auf Ebene 1 mittelwertzentriert werden. Das sogenannte *Grand-Mean-Centering* sorgt dafür, dass der jeweilige Intercept eines Landes $\beta_{0j}$ als Abweichung vom Grand Mean interpretiert werden kann. 
 
 Eine andere Möglichkeit ist es, die Variablen auf einen vergleichbaren Wertebereich, zum Beispiel zwischen 0 und 1 zu standardisieren. 
 
@@ -321,7 +343,7 @@ Wie man sich auch entscheidet, wichtig ist, dass man an folgendes denkt:  der In
 
 Oder anders: Der Wert der Regressionsgeraden für $X=0$, wo die Regressionsgerade die Y-Achse schneidet.
 
-Wenn Ihre unabhängigen Variablen den Wertebereich 0 gar nicht enthält, kann man auch den Intercept inhaltlich nicht interpretieren.
+Wenn Ihre unabhängigen Variablen den Wertebereich $0$ gar nicht enthält, kann man auch den Intercept inhaltlich nicht interpretieren.
 
 In unserem Beispiel entscheide ich mich für das Mittelwertzentrieren. Wir haben nur metrische Variablen im Beispiel daher nutze die `scale()`-Funktion. Diese Funktion dient eigentlich zur z-Transformation: sie nimmt eine Variable, zieht den Mittelwert ab und teilt durch die Standardabweichung. Allerdings möchte ich nicht, dass durch die Standardabweichung geteilt wird, das teile ich der Funktion mittels `scale=FALSE` mit. 
 
@@ -348,9 +370,9 @@ ess[,c(2:5)] <- ess_centered
 
 Damit sind wir am Ende des dritten Videos. 
 
-Wir haben jetzt alle Variablen vorbereitet und Kontextvariablen in den Datensatz mit `merge()` hinzugefügt.
+Wir haben jetzt alle Variablen auf Individualebene operationalisiert und die Kontextvariablen in den Datensatz mit `merge()` hinzugefügt.
 
-Im den nächsten Videos 4 und 5 werden wir dann die unterschiedlichen Modellvarianten der Mehrebenenregression in R schätzen.  das heißt die 
+Im den nächsten Videos 4 und 5 werden wir dann die unterschiedlichen Modellvarianten der Mehrebenenregression in R schätzen. 
 
 Am Ende dieses Videos gibt es noch eine Aufgabe und zum Schluss die Literatur.
 
@@ -370,6 +392,15 @@ Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernzi
   - Sie verstehen, warum die unabhängigen Variablen zentriert werden und wissen, wie Sie das in R umsetzen können.
 
 
+# Literatur
+
+- Breyer, Bianka (2015): Social Trust Scale (ESS). In: Zusammenstellung sozialwissenschaftlicher Items und Skalen (ZIS). DOI: https://doi.org/10.6102/zis235 
+
+- Jiang, Anli; Zhang, Tony Huiquan (2021): Political Trust in East and Southeast Asia: The Joint Effects of Education, Corruption Perception, and Urbanization. In: International Journal of Public Opinion Research 33(4): 911-926. DOI: https://doi.org/10.1093/ijpor/edab008
+
+- Van der Meer, Tom; Hakhverdian,  Armen (2017): Political trust as the evaluation of process and performance: A cross-national study of 42 European countries. In: Political Studies 65(1): 81-102.  DOI: https://doi.org/10.1177/0032321715607514
+
+- Rosenberg, Morris (1956): Misanthropy and Political Ideology. In: American Sociological Review, 216: 690-695. DOI: https://doi.org/10.1177/002200275700100403
 
 ```{r, echo=F, eval=F}
 library("knitr")

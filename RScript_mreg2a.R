@@ -4,6 +4,7 @@
 # Dr. Uwe Remer
 
 
+
 # Dieses erste RScript zu Video 2 "RScript_mreg2a.R" enthält nur den RCode zu den 
 # Grafiken, die in der ersten Hälfte des Videos gezeigt wurden.
 # Dieser Code ist nicht Gegenstand der Lernziele und daher nicht didaktisch aufbereitet.

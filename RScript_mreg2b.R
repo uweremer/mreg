@@ -7,7 +7,6 @@
 
 #### Einelesen und Vorbereiten der Daten ####
 
-
 # Einlesen des Datensatzes
 library(foreign)
 ess <- read.spss("./Daten/ESS9e02.sav", 

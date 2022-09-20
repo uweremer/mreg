@@ -611,7 +611,7 @@ Das ist ziemlich guter Wert für eine abhängige Variable aus dem Bereich der po
 
 Somit wissen wir: Eine Mehrebenenregression ist unbedingt einer einfachen OLS Regression vorzuziehen, wenn wir korrekte Ergebnisse erhalten wollen, denen wir auch trauen können.
 
-Tun wir das nicht, korreleiren die Fehler der Individualebene mit einem Kontextmerkmal, nämlich der Länderzugehörigkeit der Befragten. Wir nehmen an, die Befragten wären unabhängig voneinander, was sie in Wahrheit nicht sind.
+Tun wir das nicht, korrelieren die Fehler der Individualebene mit einem Kontextmerkmal, nämlich der Länderzugehörigkeit der Befragten. Wir nehmen an, die Befragten wären unabhängig voneinander, was sie in Wahrheit nicht sind.
 
 Unter anderem werden die Standardfehler der Regressionskoeffizienten im einfachen OLS Modell auf Basis der gesamten Stichprobe berechnet. Es wird nicht berücksichtigt, dass die Varianzen und Fallzahlen in den Gruppen unterschiedlich sind. Als Folge werden die Standardfehler unterschätzt.
 
@@ -619,7 +619,7 @@ Wenn die Standardfehler aber kleiner sind, als sie sein müssten, wird auch die 
 
 Im schlechtesten Fall gehen Sie also von signifikanten Effekten aus, wo in Wahrheit kein Zusammenhang zu finden ist.
 
-Sie sehen, wenn die Daten eie Mehrebenenstruktur aufweisen, sollten Sie auch unbedingt ein Mehrebenenmodell schätzen!
+Sie sehen, wenn die Daten eine Mehrebenenstruktur aufweisen, sollten Sie auch unbedingt ein Mehrebenenmodell schätzen!
 
 Im nächsten Video Nummer drei werden wir uns aber zunächst mit der Operationalisierung, also der Vorbereitung der Daten für die Mehrebenenregression beschäftigen. 
 

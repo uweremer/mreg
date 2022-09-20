@@ -1,63 +1,83 @@
 # Videoserie Mehrebenenregression mit R 
 # Teil 4/6 
-# Wie findet man das passende Modell für die Mehrebenenregression?
+# Wie schätzt man eine Mehrebenenregression in R?
 # Dr. Uwe Remer
 
 
+# R Skript aus Video 3 ausführen lassen, damit Daten und
+# vorbereitete Variablen vorhanden sind:
+source("./RScript_mreg3.R") 
+options(scipen=999, digits=3)
 
 
-# Ausführen des Scriptes aus Video 3
-# Das enthält die Vorbereitung der Daten
-source("./RScript_mreg3.R") #Pfad zur Datei ggf. anpassen
+#### Schätzen der Mehrebenenmodelle ####
+
+#### Variierende Intercepts mit L1 Prädiktoren ####
+library(lmerTest) 
+mreg1 <- lmer(pol_vertrauen ~ 1 + bildung + 
+                responsivitaet + zufr_wirtschaft + soz_vertrauen + 
+                (1 | cntry),  
+              data=ess)
+
+summary(mreg1)
+
+#Zeigt die Random Effects
+ranef(mreg1)
+
+#Zeigt die Fixed Effects
+fixef(mreg1)
 
 
+# Zum Vergleich: das Nullmodell
+mreg0 <- lmer(pol_vertrauen ~ 1 + (1 | cntry),  
+              data=ess)
+
+summary(mreg0)
+summary(mreg1)
+
+# Gütemaße 
+library(performance)
+r2(mreg1)
+
+model_performance(mreg0)
 
 
-#### Varying Intercept, Varying Slope Modell ####
+#### Variierende Intercepts mit L1 und L2 Prädiktoren ####
+
+# Bildungsvariable aggregieren
+bildung_agg <- aggregate(list(bildung_agg = ess$bildung), 
+                         by=list(cntry=ess$cntry), 
+                         FUN=mean, na.rm=T)
+bildung_agg
+ess <- merge(ess, bildung_agg,
+             by="cntry",
+             all.x = T)
+
+# Deskriptive Grafik zur Makrovariable "bildung_agg" 
+library(ggplot2)
+ggplot(ess, aes(x=cntry, y=bildung_agg)) +
+  geom_bar(stat="identity") +
+  scale_y_continuous(limits=c(-1,1)) +
+  theme(axis.text=element_text(size=6))
+
+# Drehen der Makrovariable "c_ticpi_2018" (Korruptionsindex)
+ess$korruption <- abs(ess$c_ticpi_2018-100)
+# Deskriptive Grafik zur gedrehten Variable "korruption"
+ggplot(ess, aes(x=cntry, y=korruption)) +
+  geom_bar(stat = "summary", fun="mean") +
+  scale_y_continuous(limits=c(0,100)) +
+  theme(axis.text=element_text(size=6))
+
+
 
 library(lmerTest) 
-mreg3 <- lmer(pol_vertrauen ~ 1 + bildung + 
+mreg2 <- lmer(pol_vertrauen ~ 1 + bildung + 
                 responsivitaet + zufr_wirtschaft + soz_vertrauen + 
                 korruption + bildung_agg +
-                (1 + bildung | cntry),     #Hier wird der variierende Slope spezifiziert
+                (1 | cntry),  
               data=ess)
 
-summary(mreg3)
+summary(mreg2)
 
-## # Nicht ausführen
-## mreg <- lmer(y ~ 1 + x + (1 + grp),
-##              data = df,
-##              REML = TRUE)
+model_performance(mreg2)
 
-
-# Per default werden die Modelle mit ML refittet:
-anova(mreg1, mreg2)
-#anova(mreg1, mreg2, refit=T)
-
-anova(mreg2, mreg3, refit=F)
-
-# Anzeigen der random effects
-ranef(mreg3)
-
-
-# Berechnen der variierenden Intercepts
-re_bildung <- ranef(mreg3)$cntry[,2]
-names(re_bildung) <- row.names(ranef(mreg3)$cntry)
-
-#re_bildung+fixef(mreg2)[2]
-sort(re_bildung+fixef(mreg2)[2])
-
-
-#### Cross Level Interaktion #### 
-
-mreg4 <- lmer(pol_vertrauen ~ 1 + bildung + 
-                responsivitaet + zufr_wirtschaft + soz_vertrauen + 
-                korruption + bildung_agg +
-                bildung:korruption + #Hier wird die Cross-Level Interaktion speifiziert
-                (1 + bildung | cntry),  
-              data=ess)
-anova(mreg3, mreg4, refit=T)
-
-performance::r2(mreg4)
-
-summary(mreg4)

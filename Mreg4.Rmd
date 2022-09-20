@@ -40,7 +40,7 @@ save_fig <- function(filename, save = TRUE){
 }
 ```
 
-```{css, eval=T, echo=F}
+```{css, eval=F, echo=F}
 /* CSS Stil für Formeln unter Scatterplots */
 P.math {
     text-align: center;
@@ -65,291 +65,52 @@ DIV.border {
 
 # Themenüberblick
 
-Hallo und herzlich Willkommen zum dritten Teil der Videoserie zum Thema Mehrebenenregression in R. 
+Hallo und herzlich Willkommen zum vierten Teil der Videoserie zum Thema Mehrebenenregression in R. 
 
-Im vorigen Video haben wir gesehen, wie man mit Hilfe des sogenannten Nullmodells berechnet, ob eine Mehrebenenregression überhaupt notwendig ist.
-Nur wenn dies der Fall ist, werden die eigentlich interessierenden Mehrebenenmodelle geschätzt.
+In den vorigen Videos haben wir gesehen, wie man mit Hilfe des sogenannten Nullmodells berechnet, ob eine Mehrebenenregression überhaupt notwendig ist und wie man die Daten für die Mehrebenenregression vorbereitet.
 
-Und genau darum geht es in diesem dritten Video: Wie schätzt man eine Mehrebenenregression in R? 
+In diesem vierten Video geht es nun darum: Wie schätzt man eine Mehrebenenregression in R? 
+
 Und natürlich: wie interpretiert man die Ergebnisse?
 
-Dazu schauen wir uns zu Beginn die Operationalisierung der Variablen an.
-Danach schätzen wir zunächst zwei grundlegende Modelle:
+
+Dazu schätzen wir zwei grundlegende Modelle:
 
 - Ein Modell mit variierenden Intercepts mit Prädiktoren auf L1
 - Ein Modell mit variierenden Intercepts mit Prädiktoren auf L1 und L2
 
-In Video 4 erweitern wir dann diese Modelle um variierenden Slopes und Cross-Level-Interaktionen.
+In Video 5 erweitern wir dann diese Modelle um variierenden Slopes und Cross-Level-Interaktionen.
 
 
 Lernziele für dieses Video sind…
 
-- dass Sie die Variablen für das Mehrebenenmodell vorbereiten können:
-  - dass Sie wissen wie man Datensätze zusammenspielt
-  - dass Sie verstehen, warum die unabhängigen Variablen zentriert werden müssen und wissen, wie Sie das in R umsetzen können
 - dass Sie ein einfaches Mehrebenenmodell als Formel ausdrücken können
-- dass Sie wissen, wie man diese unterschiedlichen Varianten in R umsetzt
+- dass Sie wissen, wie man das einfache Mehrebenenmodell in R umsetzt
 - dass Sie die relevanten Quantities of Interest kennen und interpretieren können.
 
 Das alles schauen wir uns direkt in R an...
 
-Bevor es losgeht, benötigen wir aber noch eine Forschungsfrage. 
 
-Wenn wir nicht wissen, welche Frage wir eigentlich beantworten wollen, können wir auch nicht entscheiden, welche Variablen im Modell berücksichtigt werden müssen.
-
-Für die Beispielfragestellung bleiben wir beim politischen Vertrauen aus dem letzten Video 2 und Fragen:
-
-> Welchen Einfluss hat Bildung auf politisches Vertrauen?
-
-An dieser Stelle können Sie ja Mal kurz auf Pause drücken und für sich selbst überlegen, welche Mechanismen  Bildung  und politisches Vertrauen verbinden und ob Bildung einen positiven oder einen negativen Effekt auf politisches Vertrauen hat.
-
-Auch wenn es für beide Richtungen Argumente gibt, zeigt sich, dass üblicherweise höhere Bildung mit Eliten-kritischeren Einstellungen einhergeht. Bildung also einen negativen Effekt auf politisches Vertrauen hat.
-
-Ob das so ist und ob dieser Effekt in allen europäischen Ländern zu finden ist, wollen wir untersuchen.
-
-Und um richtig zeigen zu können, was die Mehrebenenregression kann, ergänzen wir die Fragestellung noch folgendermaßen:
-
-> Wie beeinflusst Korruption die Wirkung von Bildung auf politisches Vertrauen?
-
-Diese zweite Fragestellung beinhaltet explizit ein Effekt der von der Kontextebene auf einen Effekt der Individualebene. 
-
-Da wir nun wissen, was wir untersuchen wollen, wechseln wir in R.
-
-
-# Operationalisierung
-
-Bevor wir unsere Modelle schätzen können, müssen die Variablen operationalisiert werden. Als Datensatz nutzen wir den ESS 9. Informationen zum Datensatz finden Sie im ersten Video.
-
-Bereits im letzten Video 2 haben wir die abhängige Variable für unser Beispiel kennengelernt: das politische Vertrauen. 
-
-Den ersten Teil des R-Codes können wir direkt noch Mal nutzen. 
-
-```{r}
-# Importieren des Datensatz
-library(foreign)
-ess <- read.spss("./Daten/ESS9e02.sav", 
-                 use.value.labels = FALSE,
-                 to.data.frame = TRUE,
-                 reencode = TRUE)
-
-
-
-# Operationalisierung der abh. Variable 
-# "Politisches Vertrauen"
-# Mittelwertindex aus drei Items:
-idx_vars <- c("trstprl","trstplt","trstprt")
-ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
-                              na.rm = F)
-#table(ess$pol_vertrauen, useNA = "always")
-library(DescTools)
-#Desc(ess$pol_vertrauen)
-```
-
-Neben der abhängigen Variable benötigen wir auch noch die unabhängigen Variablen.
-
-
-## Bildung
-
-Als erstes unsere Haupterklärungsvariable `Bildung`. 
-
-Messung über die "International Standard Classification of Education" - EISCED.
-
-Skala aus Variable `eisced`:
-
-```{r Operationalisierung_X5}
-# Operationalisierung der unabh. Variable 
-# Bildung
-ess$bildung <- ess$eisced 
-
-# NAs definieren:
-# `0` und `55` auf `NA` setzten
-ess$bildung[ess$bildung %in% c(0,55)] <- NA
-
-#Desc(ess$bildung)
-```
-
-
-Neben der abhängigen und der uns interessierenden unabhängigen Variable, müssen wir noch weitere Variablen im Modell berücksichtigen - die sogenannten Kontrollvariablen.
-
-Für unser Beispielfragestellung nutze ich die Variablen:
-
-- Wahrgenommene politische Responsivität
-- Zufriedenheit mit der Wirtschaftslage
-- Soziales Vertrauen
-
-
-## Wahrgenommene politische Responsivität
-
-Mittelwertindex aus zwei Items 
-
-*How much would you say the political system in [country] allows people like 
-you to have a say in what the government does?*
-
-*And how much would you say that the political system in [country] allows
-people like you to have an influence on politics?*
-
-- 1 Not at all
-- 5 A great deal
-
-```{r Operationalisierung_X2}
-# Operationalisierung der unabh. Variable 
-# Wahrgenommene politische Responsivität 
-# Mittelwertindex aus zwei Items 
-
-idx_vars <- c("psppsgva","psppipla")
-ess$responsivitaet <- rowMeans(ess[,idx_vars], 
-                               na.rm = F)
-
-# Wertebreich rekodieren auf 0 bis 4
-ess$responsivitaet <- ess$responsivitaet - 1
-
-#Desc(ess$responsivitaet)
-```
-
-
-## Zufriedenheit Wirtschaftslage
-
-*On the whole how satisfied are you with the present state of the economy in
-[country]?*
-
-- 0 Extremely dissatisfied
-- 10 Extremely satisfied
-
-```{r Operationalisierung_X1}
-# Operationalisierung der unabh. Variable 
-# "Zufriedenheit Wirtschaftslage"
-
-ess$zufr_wirtschaft <- ess$stfeco
-#Desc(ess$zufr_wirtschaft)
-```
-
-
-## Soziales Vertrauen
-
-*Generally speaking, would you say that most people can be trusted, or that you can't be too careful in dealing with people?*
-
-- 0 You can't be too careful
-- 10 Most people can be trusted
-
-```{r Operationalisierung_sozVertrauen}
-# Operationalisierung der unabh. Variable 
-# Soziales Vertrauen
-
-ess$soz_vertrauen <- ess$ppltrst
-#Desc(ess$soz_vertrauen)
-```
-
-
-## Kontextdaten
-
-Wenn man eine Mehrebenenregression rechnet, möchte man häufig auch Variablen der Makroebene nutzen. Wenn die Grupperiungsvariable Länder oder andere administrative Einheiten sind, gibt es diese Daten häufig bei den Statistischen Ämtern. Zum Beispiel Eurostat, das Statistische Bundesamt,  der Weltbank, der OECD oder den Vereinten Nationen.
-
-Aber: wir sind in einer sehr komfortablen Situation, denn im Rahmen des ESS Programms wurden auch Makro-Datensätze erstellt, die Daten aus verschiedenen Quellen zusammentragen. Diese Datensätze enthalten neben den Individualdaten auch Kontextdaten. 
-
-Auch der Makrodatensatz ist nach Registrierung kostenlos verfügbar. Jedoch ist der Makrodatensatz etwa 2 GB groß. 
-Statt des ganzen Datensatzes, habe ich ihnen einen kleinen Ausschnitt davon als csv-Datei vorbereitet.
-
-Diese Datei enthält neben der Gruppierungsvariable `cntry` drei weitere Variablen:
-
-- `c_ticpi_2018` Corruption Perceptions Index^[Transparency International, https://www.transparency.org/en/cpi/2018]
-- `c_gini_2018` GINI Index^[Eurostat, http://ec.europa.eu/eurostat/data/database?node_code=ilc_di12]
-- `c_tensys_2018` System Tenure^[The World Bank - Database of Political Institutions (DPI), http://dx.doi.org/10.18235/0003049]
-
-Mit dieser csv-Datei haben wir gleich auch die Gelegenheit einen typischen Schritt der Datenvorbereitung umzusetzen: das **mergen** von Datensätzen.
-
-Megren heißt, dass man zwei Datensätze anhand einer Schlüsselvariable zusammenspielt.
-
-Probieren wir es aus:
-
-Die csv-Datei finden Sie als Download unter dem Video. Lesen wir zuerst den Makrodatensatz ein: 
-
-
-
-```{r read_macro, echo=T}
-# Einlesen Makrodaten einlesen und mit merge() hinzuspielen
-ess_macro <- read.table("./Daten/ess2018_macro.csv",
-                        sep=";", header=T)
-head(ess_macro)
-``` 
-
-Wir sehen im Environment Fenster in R, dass der Datensatz 4 Variablen mit 29 Beobachtungen enthält.
-Die `head()`-Funktion gibt uns einen ersten Blick auf die Daten. Wir sehen, dass jede Beobachtung, also jeder Fall ein Land ist. 
-
-Der ESS-Datensatz den wir vorhin eingelesen hatten, hat als Beobachtungseinheit Individuen.
-
-Trotzdem können wir beide Datensätze zusammenspielen. Dafür nutzen wir die `cntry`-Variable als Schlüsselvariable.
-Jeder Befragte eines Landes, bekommt den jeweiligen Wert des Landes aus dem Makrodatensatz zugespielt.
-
-Dafür nutzen wir die `merge()`-Funktion: 
-
-
-```{r}
-ess_micro <- ess
-ess <- merge(ess_micro, ess_macro, # Die beiden Datensätze die zusammengespielt werden
-             by = "cntry", # Die Schlüsselvariable
-             all.x = T) # Das alle Fälle des x-Datensatzes (des erstgenannten) behalten werden
-```
-
-Der neue ESS Datensatz enthält wie der Mikro-Datensatz die gut 47.000 Befragten, aber drei zusätzliche Variablen aus dem Makrodatensatz. Die vierte Variable aus dem Makrodatensatz muss ja nicht übernommen werden, denn die `cntry`Variable war ja auch vorher schon ein Merkmal im Mikro-Datensatz.
-
-Von den drei Kontextvariablen nutzen wir in unserem Beispiel nur die Korruptionsvariable. Die anderen beiden können Sie für selbstständiges Üben nutzen.
-
-
-## Missing Values ausschließen
-
-Um einen Datensatz zu erhalten, der in über alle Modelle die gleiche Fallzahl aufweist, werden diejenigen Fälle ausgeschlossen, die auf mindestens einer der für die Analysen genutzten variablen fehlende Werte aufweist ("Listenweise Fallausschluss").
-
-```{r Missing_values_ausschließen}
-# Missing Values ausschließen
-variablen_im_modell <- c("pol_vertrauen",
-                         "bildung",      
-                         "responsivitaet",                         
-                         "zufr_wirtschaft",
-                         "soz_vertrauen", 
-                         "cntry",
-                         "c_ticpi_2018")
-ess <- na.omit(ess[,variablen_im_modell])
-```
-
-Ein Hinweis: Da bei den Makrovariablen Daten für zwei Länder fehlen, liegen nach diesem Ausschluss fehlender Werte nur Daten für gut 40.000 Befragte aus 25 Ländern vor. 
-
-
-## Zentrieren
-
-Kommen wir zu einem weiteren wichtigen Schritt der Datenvorbereitung.
-
-In Mehrebenenmodellen ist es erforderlich, dass die unabhängigen Variablen auf Ebene 1 mittelwertzentriert werden. Das sogenannte *Grand-Mean-Centering* sorgt dafür, dass der jeweilige Intercept eines Landes $\beta_{0j} als Abweichung vom Grand Mean interpretiert werden kann. 
-
-In unserem Beispiel haben wir nur metrische Variablen. Ich nutze die `scale()`-Funktion. Diese Funktion dient eigentlich zur z-Transformation: sie nimmt eine Variable, zieht den Mittelwert ab und teilt durch die Standardabweichung. Allerdings möchte ich nicht, dass durch die Standardabweichung geteilt wird, das teile ich der Funktion mittels `scale=FALSE` mit. 
-
-Diese Funktion kann ich direkt auf die relevanten Spalten des Datensatzes anwenden. Um herauszufinden welche das sind, schaue ich mir die `names()` an. 
-
-Unsere unabhängigen Variablen befinden sich in Spalte 2 bis 5 des Datensatzes. Jetzt kann ich mit der Indizierungsklammer die Spalten auswählen und mit `scale()` zentrieren.
-
-Das speichere ich in einem neuen Objekt und überschreibe danach die ursprünglichen Variablen 2 bis 5.
-
-```{r zentrieren_L1_X-Vars}
-# Zentrieren der Ebene 1 x-Variablen
-# Diese sind an 2. bis 5. und 7. Stelle im Datensatz
-
-#names(ess)
-#ess[,c(2:5)]
-#scale(ess[,c(2:5)], scale=F)
-ess_centered <- as.data.frame(scale(ess[,c(2:5)], scale=F))
-ess[,c(2:5)] <- ess_centered
-```
-
-Wenn alles vorbereitet ist, können wir das erste Mehrebenenmodell schätzen.
 
 # Variierende Intercepts mit Prädiktoren auf L1
 
-Das erste Mehrebenenmodell ist ein Varying Intercept Modell mit Prädiktoren auf Ebene 1: 
+Bevor wir mit dem ersten Modell loslegen, führen Sie bitte das komplette RScript zu Video 3 aus `RScript_mreg3.R`. Mit der `source()`-Funktion können Sie das direkt aus dem neuen Script heraus aufrufen, ohne die Datei öffnen zu müssen. 
+
+```{r}
+source("./RScript_mreg3.R") #Pfad zur Datei ggf. anpassen
+```
+
+Wir sehen zwar keinen Output, aber den benötigen wir auch nicht. Wir wollen nur die Objekte im Environment haben, insbesondere, den fertig vorbereiteten ESS Datensatz. 
+
+Kommen wir nun zum ersten Modell. Das erste Mehrebenenmodell ist ein Varying Intercept Modell mit Prädiktoren auf Ebene 1: 
 
 Die Form ist dieselbe wie beim Nullmodell. Allerdings enthält die Formel nun auch die Ebene 1 Prädiktoren $x_1$ bis $x_4$.
 
 <div class=border>
 <p class=math_left> 
-$y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+$y_{ij} = \beta_{0j} +$ 
+<font color=red>$\beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij}$</font>
+$+ r_{ij}$
 </p>
 mit 
 <p class=math_left> 
@@ -384,13 +145,13 @@ Wir sehen, dass es neben dem Intercept $\beta_{0j}$ nun auch weitere Koeffizient
 
 Wie bereits beim Nullmodell ist der Intercept der Mittelwert der variierenden Intercepts \$beta_{0j} - also das, was in der Regressionsgleichung mit $\gamma_{00}$ bezeichnet wurde.
 
-Die anderen Regressionsparameter sind nicht variierende Regressionsparamter, und sind wie ganz normale Regressionskoeffizienten zu interpretieren:
+Die anderen Regressionsparameter sind nicht variierende Regressionsparameter, und sind wie ganz normale Regressionskoeffizienten zu interpretieren:
 
 Alle Variablen haben einen signifikanten Einfluss, wie wir an der letzten Spalte sehen.
 
 Mit Zunahme von Bildung um einen Skalenpunkt, sinkt das politische Vertrauen um $`r round(fixef(mreg1)[2], 3)`$. 
 
-Eine vorläufige Antwort auf unsere Forschungsfrage lautet also: Bildung beeinflusst das 
+Eine vorläufige Antwort auf unsere Forschungsfrage lautet also: Bildung beeinflusst das negativ.
 
 Die anderen Determinanten haben einen positiven Effekt auf politisches Vertrauen. Da die wahrgenommene politische Responsivität eine andere Skalenbreite aufweist, können wir die Effektstärken jedoch nicht direkt miteinander vergleichen. 
 
@@ -420,9 +181,9 @@ ranef(mreg1)
 
 Da wir zuvor alle unabhängigen Variablen an deren Grand Mean zentriert haben, sind diese länderspezifischen Intercepts als Abweichung vom Grand Mean zu interpretieren. 
 
-Für Belgien BE liegt der länderspezifische Intercept $\beta_{0~Belgien}$ also $0.39$ Skalenpunkte über dem fixierten Intercept bzw. Grand Mean $\gamma_{00}$ von $`r round(fixef(mreg1)[1], 2)`$.
+Für Belgien BE liegt der länderspezifische Intercept $\beta_{0~Belgien}$ also $`r ranef(mreg1)$cntry$'(Intercept)'[2]`$ Skalenpunkte über dem fixierten Intercept bzw. Grand Mean $\gamma_{00}$ von $`r round(fixef(mreg1)[1], 2)`$.
 
-Für Kroatien HR, liegt er $0.56$ Saklenpunkte *unter* diesem Wert. 
+Für Deutschland DE liegt er $`r ranef(mreg1)$cntry$'(Intercept)'[7]`$ Skalenpunkte *unter* diesem Wert. 
 
 Analog kann man sich auch die fixierten Effekte ausgeben lassen.
 
@@ -444,21 +205,29 @@ Berechnen wir also noch Mal auf das Nullmodell auf Basis der jetzt 25 Länder:
 mreg0 <- lmer(pol_vertrauen ~ 1 + (1 | cntry),  
               data=ess)
 summary(mreg0)
+as.data.frame(VarCorr(mreg0))[,4]
 ```
 
+```{r, include=F}
+vm0 <- as.data.frame(VarCorr(mreg0))
+```
 
-
-Auf Ebene 2, der Ebene der Länder haben wir eine Varianz von $1.11$. Auf Individualebene eine Varianz von $4.26$.
+Auf Ebene 2, der Ebene der Länder haben wir eine Varianz von $`r vm0[1,4]`$. Auf Individualebene eine Varianz von $`r vm0[2,4]`$.
 
 ```{r}
 summary(mreg1)
 ```
 
-In unserem Modell `mreg1` ist die Varianz der Intercepts nur noch bei $0.15$ und die Residualvarianz auf Individualebene bei $2.81$
 
-Also auf Ebene 1 bleiben nur noch $\frac{2.81}{4.26}=0.66$, also 66 Prozent der Varianz übrig.
+```{r, include=F}
+vm1 <- as.data.frame(VarCorr(mreg1))
+```
 
-Oder anders ausgedrückt: Wir erklären 34 Prozent der Varianz auf Ebene 1.
+In unserem Modell `mreg1` ist die Varianz der Intercepts nur noch bei $`r vm1[1,4]`$ und die Residualvarianz auf Individualebene bei $`r vm1[2,4]`$
+
+Also auf Ebene 1 bleiben nur noch $\frac{`r vm1[2,4]`}{`r vm0[2,4]`}=`r vm1[2,4]/vm0[2,4]`$, also `r round(vm1[2,4]/vm0[2,4]*100,  1)` Prozent der Varianz übrig.
+
+Oder anders ausgedrückt: Wir erklären `r round((1-vm1[2,4]/vm0[2,4])*100,  1)` Prozent der Varianz auf Ebene 1.
 
 Das können wir auch allgemeiner ausdrücken:
 
@@ -469,7 +238,7 @@ Und wir können auch für Ebene 2 berechnen, wieviel der im Nullmodell auf Ebene
 
 $R^2_{L2}=1-\frac{s^2_{L2_{Modell}}}{s^2_{L2_{Nullmodell}}}$  
 
-Das sind $1-\frac{0.15}{1.11}=0.865$- also 86.5 Prozent der Varianz auf Ebene 2 werden durch unser Modell `mreg1` bereits erklärt. 
+Das sind $1-\frac{`r vm1[1,4]`}{`r vm0[1,4]`}=`r 1-vm1[1,4]/vm0[1,4]`$- also `r round((1-vm1[1,4]/vm0[1,4])*100, 1)` Prozent der Varianz auf Ebene 2 werden durch unser Modell `mreg1` bereits erklärt. 
 
 "Moment!" werden Sie jetzt sagen! Wie soll das denn gehen! Wir haben doch nur Prädiktoren der Individualebene im Modell! Wie können individuelle Merkmale von Befragten Varianz zwischen den Ländern erklären?
 
@@ -477,7 +246,7 @@ Richtig! Das ist eine gute Frage. Drücken Sie Pause und nehmen Sie sich ein paa
 
 Gut, hier kommt die Auflösung: Es handelt sich um sogenannte **Kompositionseffekte**. 
 
-Nehmen wir Beispielsweise unsere unabhängige Variable `Zufriedenheit mit der Wirtschaftslage`. Das ist eine Variable der Individualebene und die Befragten in den Ländern können unterschiedliche Werte auf dieser Variable einnehmen. Es ist kein Kontextmerkmal, dass für alle Befragten eines Landes gleich ist.
+Nehmen wir Beispielsweise unsere unabhängige Variable *Zufriedenheit mit der Wirtschaftslage*. Das ist eine Variable der Individualebene und die Befragten in den Ländern können unterschiedliche Werte auf dieser Variable einnehmen. Es ist kein Kontextmerkmal, dass für alle Befragten eines Landes gleich ist.
 
 Aber: Wenn viele oder im Extremfall alle Individuen eines Landes besonders hohe Werte auf dieser Variable einnehmen , dagegen in einem anderen Land viele Individuen eine sehr geringe Zufriedenheit mit der Wirtschaft aufweisen, dann wird - wenn diese Variable auch einen Einfluss auf das politische Vertrauen hat - allein durch die Zusammensetzung der Gruppen das durchschnittliche Niveau der abhängigen Variable in den Ländern beeinflusst.
 
@@ -486,7 +255,7 @@ Also dadurch, dass sich die Länder hinsichtlich der Zusammensetzung der Individ
 Somit kann also die Zusammensetzung der Individuen hinsichtlich ihrer Merkmale auf Ebene 1 als Kompositionseffekt Varianz auf Ebene 2, also zwischen den Ländern erklären.
 
 
-So simpel und klar die Berechnung und Interpretation dieser $R^2$ Maße für die beiden Ebenen auch ist: Wenn die Modelle komplexer werden und später mehr als nur ein Random Effect (also mehr als nur ein variierender Intercept) vorliegt, dann kann man diese ebenenspezifischen $R^2$ nicht mehr nutzen.
+So simpel und klar die Berechnung und Interpretation dieser $R^2$ Maße für die beiden Ebenen auch ist: Wenn die Modelle komplexer werden und später mehr als nur ein random Effect (also mehr als nur ein variierender Intercept) vorliegt, dann kann man diese ebenenspezifischen $R^2$ nicht mehr nutzen.
 
 [Nakagawa/Schielzeth 2012](https://doi.org/10.1111/j.2041-210x.2012.00261.x) haben noch weitere Nachteile angeführt und schlagen eine Alternative Berechnung für ein $R^2$ für Mehrebenenregressionen vor.
 
@@ -499,7 +268,7 @@ r2(mreg1)
 
 Das marginale $R^2$ können wir dabei ignorieren, da es die Varianzen der Random Effects nicht berücksichtigt. Stattdessen betrachten wir das konditionale $R^2$.
 
-Unser Modell erklärt also etwa 44 Prozent der Varianz in den Daten. 
+Unser Modell erklärt also etwa `r round(r2(mreg1)$R2_conditional*100, 1)` Prozent der Varianz in den Daten. 
 
 
 Darüber hinaus bietet das `performance`-Paket die Möglichkeit mit der Funktion `model_performance()` bei Bedarf weitere Goodness of Fit Maße zu berechnen:
@@ -515,7 +284,7 @@ model_performance(mreg0)
 
 Ergänzen wir das Modell nun noch um Prädiktoren auf Ebene 2. 
 
-Als erste unabhängige Variable auf Ebene 2 nehmen wir das durchschnitlliche Bildungsniveau der Länder mit in das Modell auf.
+Als erste unabhängige Variable auf Ebene 2 nehmen wir das durchschnittliche Bildungsniveau der Länder mit in das Modell auf.
 
 Dazu berechnen wir aus den Individualdaten den Mittelwert der Variable Bildung je Land mit Hilfe der `aggregate()`-Funktion. 
 
@@ -546,7 +315,7 @@ ggplot(ess, aes(x=cntry, y=bildung_agg)) +
 
 Da wir als weitere Forschungsfrage wissen wollen, ob das Ausmaß an Korruption in einem Land den Effekt von Bildung beeinflussen kann, müssen wir die Variable für Korruption auf Ebene 2 ergänzen.
 
-Wir nehmen also den Corruption Perception Index (CPI) von Transparency International mit ins Model. Der CPI ist eine Skala von 0 'sehr korrupt' bis 100 'sehr auber'. Damit wir die Effekte später intuitiver Interpretieren können, drehen wir die Varable. Je höher der Wert, desto mehr Korruption.
+Wir nehmen also den *Corruption Perception Index* (CPI) von Transparency International mit ins Model. Der CPI ist eine Skala von 0 'sehr korrupt' bis 100 'sehr sauber'. Damit wir die Effekte später intuitiver Interpretieren können, drehen wir die Variable. Je höher der Wert, desto mehr Korruption.
 
 Die original Variable heißt `c_ticpi_2018`.
 
@@ -554,7 +323,7 @@ Die original Variable heißt `c_ticpi_2018`.
 ess$korruption <- abs(ess$c_ticpi_2018-100)
 library(ggplot2)
 ggplot(ess, aes(x=cntry, y=korruption)) +
-  geom_bar(stat = "summary", fun.y = "mean") +
+  geom_bar(stat = "summary", fun = "mean") +
   scale_y_continuous(limits=c(0,100)) +
   theme(axis.text=element_text(size=6))
 ```
@@ -569,7 +338,9 @@ $y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + 
 </p>
 mit 
 <p class=math_left> 
-$\beta_{0j} = \gamma_{00} + \gamma_{01j} + \gamma_{02j} + u_{0j}$
+$\beta_{0j} = \gamma_{00} +$
+<font color=red>$\gamma_{01j} + \gamma_{02j}$</font>
+$+ u_{0j}$
 </p>
 </div>
  
@@ -579,7 +350,7 @@ Durch die Aufnahme dieser unabhängigen Variablen auf Ebene 2 sollte zuvor unerk
 
 Mal sehen, was empirisch rauskommt...
 
-Im R Befehl für die Mehrebeneregression müssen wir nicht explizit angeben, dass es sich um eine Kontextvariable handelt. Wir ergänzen sie einfach in der Formel wie jede andere Variable auch.
+Im R Befehl für die Mehrebenenregression müssen wir nicht explizit angeben, dass es sich um eine Kontextvariable handelt. Wir ergänzen sie einfach in der Formel wie jede andere Variable auch.
 
 ```{r}
 library(lmerTest) 
@@ -592,7 +363,7 @@ mreg2 <- lmer(pol_vertrauen ~ 1 + bildung +
 summary(mreg2)
 ```
 
-Wie wir bei den Fixed Effects sehen könnnen, hat also Korruption einen kleinen, aber signifikanten negativen Effekt auf den variierenden Intercept. Also mit Zunahme der Korruption um einen Skalenpunkt sinkt das durchschnittliche politische Vertrauen in einem Land um $`r fixef(mreg2)[6]`$
+Wie wir bei den Fixed Effects sehen können, hat also Korruption einen kleinen, aber signifikanten negativen Effekt auf den variierenden Intercept. Also mit Zunahme der Korruption um einen Skalenpunkt sinkt das durchschnittliche politische Vertrauen in einem Land um $`r fixef(mreg2)[6]`$
 
 Da der Korruptionsindex eine Skala von 0 bis 100 ist, ist das nicht wenig. Sehr korruptionsbelastete Länder haben einen Korruptionsindex von über 50. Am anderen Ende stehen Länder mit einem Wert von 15. Bei 35 Skalenpunkten Unterschied ergibt sich also für die abhängige Variable politisches Vertrauen einen Unterschied von $`r fixef(mreg2)[6]*35`$ Punkten.
   
@@ -604,7 +375,7 @@ Und was sagt die Modellgüte?
 model_performance(mreg2)
 ```
 
-Das konditionale $R^2$ erhöt sich minimal von $44.1$ auf $46.7$. 
+Das konditionale $R^2$ erhöht sich minimal von `r round(r2(mreg1)$R2_conditional*100, 1)` auf `r round(r2(mreg2)$R2_conditional*100, 1)`. 
 
 
 # Schluss
@@ -613,34 +384,27 @@ Das konditionale $R^2$ erhöt sich minimal von $44.1$ auf $46.7$.
 Damit sind wir am Ende des dritten Videos. 
 
 
-
-
-genau damit beschäftigen: Wie wird eine einfache Mehrebenenregression mit R umgesetzt und wie werden die Ergebnisse interpretiert.  
 Wir haben gesehen, wie man ein einfaches Mehrebenenmodell als Formel notiert und das Modell mit der `lmer()`-Funktion in R umsetzt. 
 
 Dabei haben wir zuerst ein variierendes Intercept Modell mit Prädiktoren auf Ebene 1 geschätzt und habe Kompositionseffekte kennengelernt. Danach haben wir das Modell um eine unabhängige Variable auf Ebene 2 ergänzt und interpretiert.
 
-Im nächsten Video Nummer 4 werden wir dann das Varying Slope Modell und das Modell mit Cross-Level Interaktion anschauen uns klären, wie man herausfindet, welches Modell das passende ist.
+Im nächsten Video Nummer 5 werden wir dann das Varying Slope Modell und das Modell mit Cross-Level Interaktion anschauen uns klären, wie man herausfindet, welches Modell das passende ist.
 
 Am Ende dieses Videos gibt es noch eine Aufgabe und zum Schluss die Literatur.
 
-
 # Aufgabe
 
-- Überlegen Sie sich eine eigene Fragestellung, die mit den Variablen des ESS als Mehrebenenmodell geschätzt werden kann (Variablenübersicht im Codebuch des ESS). Rechnen Sie verschiedene Varianten der Mehrebenenregression und interpretieren Sie die Ergebnisse.
+- Rechnen Sie zu einer eigenen Fragestellung ein Mehrebenenmodell mit Prädiktoren auf Ebene 1. Prüfen Sie, wie stark Kompositionseffekte die Varianz auf Ebene 2 im Vergleich zum Nullmodell verringern. 
 
-- Laden Sie den vollständigen ESS Makrodatensatz und dessen Codebuch von der Webseite des ESS herunter. Schauen Sie sich den Datensatz an und machen Sie sich mit seiner Struktur vertraut. 
+- Ergänzen Sie das Mehrebenenmodell um Prädiktoren auf Ebene 2. Wie viel Varianz können Sie auf den beiden Ebenen jeweils für sich genommen erklären?  
+
 
 #	Lernzielabgleich
 
 Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernziele erreicht haben: 
 
-
-- Sie können die Variablen für das Mehrebenenmodell vorbereiten:
-  - Sie wissen wie man Datensätze zusammenspielt.
-  - Sie verstehen, warum die unabhängigen Variablen zentriert werden müssen und wissen, wie Sie das in R umsetzen können.
 - Sie können ein einfaches Mehrebenenmodell als Formel ausdrücken.
-- Sie wissen, wie man diese unterschiedlichen Varianten in R umsetzt.
+- Sie wissen, wie man das einfache Mehrebenenmodell in R umsetzt.
 - Sie kennen die relevanten Quantities of Interest und können sie interpretieren. 
 
 
