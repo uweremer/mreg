@@ -1,7 +1,9 @@
 ---
-title: "Was ist eine Mehrebenenregression"
+title: "1 Was ist eine Mehrebenenregression"
 subtitle: "Videoserie Mehrebenenregression Teil 1/6"
-author: "Dr. Uwe Remer"
+author:
+  - name: Dr. Uwe Remer
+    email: uwe.remer@sowi.uni-stuttgart.de
 date: "Juli 2022"
 output:
   html_document:
@@ -48,17 +50,17 @@ P.math {
 
 #	Begrüßung und Themenüberblick
 
-Hallo und herzlich Willkommen zu dieser Videoserie zum Thema Mehrebenenregression in R. 
+Hallo und herzlich willkommen zu dieser Videoserie zum Thema Mehrebenenregression in R. 
 Damit Sie den Inhalten folgen können, sollten Sie Vorkenntnisse zur linearen OLS Regression haben, sowie Grundlagen in R beherrschen. Ideal wäre es, wenn Sie auch schon einen Lehrbuchtext zur Mehrebenenregression gelesen haben. Eine Auswahl an geeigneten Texten finden Sie am Ende des Videos.
 
 Diese Videoserie besteht aus sechs aufeinander aufbauenden Teilen:  
 
-- Teil 1: „Was ist eine Mehrebenenregression?“
-- Teil 2: „Wann ist eine Mehrebenenregression angebracht?“ 
-- Teil 3: „Wie werden die Daten für eine Mehrebenregression vorbereitet?“ 
-- Teil 4: „Wie schätzt man eine Mehrebenenregression in R?“ 
-- Teil 5: „Wie schätzt man variierende Slopes und Cross-Level Interaktionen?“
-- Teil 6: „Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?"
+- Teil 1: Was ist eine Mehrebenenregression?
+- Teil 2: [Wann ist eine Mehrebenenregression angebracht?](MReg2.html)
+- Teil 3: [Wie werden die Daten für eine Mehrebenregression vorbereitet?](Mreg3.html)
+- Teil 4: [Wie schätzt man eine Mehrebenenregression in R?](MReg4.html)
+- Teil 5: [Wie schätzt man variierende Slopes und Cross-Level Interaktionen?](MReg5.html)
+- Teil 6: [Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?](MReg6.html)
 
 
 Zu allen Videos gibt es den R Code als Datei zum Download, hier unter dem Video. Außerdem gibt es das ganze Skript zu den Videos auf meiner Github Seite:

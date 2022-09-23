@@ -1,5 +1,5 @@
 ---
-title: "WWie lassen sich die Ergebnisse einer Mehrebenregression berichten?"
+title: "6 Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?"
 subtitle: "Videoserie Mehrebenenregression Teil 6/6"
 author: "Dr. Uwe Remer"
 date: "Juli 2022"
@@ -23,7 +23,7 @@ s = 2.8
     
 knitr::opts_chunk$set(eval=TRUE, echo = TRUE, message = FALSE, warning = FALSE,
                       fig.width=w, fig.height=h, fig.align='center')
-save <-  F
+save <-  T
 save_fig <- function(filename, save = TRUE){
   if(save==TRUE){
     ggsave(paste0("./Grafiken/", filename), 
@@ -64,11 +64,11 @@ DIV.border {
 
 # Themenüberblick
 
-Hallo und herzlich Willkommen zum sechsten Teil der Videoserie zum Thema Mehrebenenregression in R. 
+Hallo und herzlich willkommen zum sechsten Teil der Videoserie zum Thema Mehrebenenregression in R. 
  
 In diesem Video beschäftigen wir uns mit der Frage: Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?
 
-In den vergangenen Videos haben wir nacheinander verschiedene Varianten des Mehrebenenmodells geschätzt und interpretiert. Mithilfe der Anova haben wir geprüft, ob die aufeinander aufbauenden Modelle jeweils besser an die Daten angepast ist.
+In den vergangenen [Videos 4](Mreg4.html) und [5](Mreg5.html) haben wir nacheinander verschiedene Varianten des Mehrebenenmodells geschätzt und interpretiert. Mithilfe der Anova haben wir geprüft, ob die aufeinander aufbauenden Modelle jeweils besser an die Daten angepast ist.
 
 In diesem Video wird es darum gehen, wie man die Ergebnisse dieser Modelle berichtet und wie man die relevanten Quantites of Interest grafisch aufbereitet.
 
@@ -94,34 +94,41 @@ source("./RScript_mreg5.R") #Pfad zur Datei ggf. anpassen
 
 # Tabellen zu den Regressionsmodellen
 
-Um die Ergebnisse der Regressionen tabellarisch aufzubereiten nutzen wir die das `texreg`-Paket.
+Um die Ergebnisse der Regressionen tabellarisch aufzubereiten, nutzen wir das [`texreg`](https://cran.r-project.org/web/packages/texreg/vignettes/texreg.pdf)-Paket.
 
 Das Paket enthält mehrere Funktionen, um die Ergebnisse unterschiedlicher Regressionsmodelle automatisch aufzubereiten und als Tabelle auszugeben.
 
 Dabei unterscheiden sich die Funktionen, je nach dem, in welchem Format die Tabellen formatiert werden sollen:
 
 - `screenreg()` gibt die Tabelle auf dem Bildschirm in der RConsole aus.
-- `htmlreg()` erstellt die Taeblle im html-Format
-- `texreg()` gibt die Tabelle im Latex Format aus.
-- `wordreg()` erstellt die Tabelle in einem Microsoft Word Format
 
-
-```{r, results='asis'}
+```{r}
 library(texreg)
 screenreg(list(mreg3,mreg4))
-htmlreg(list(mreg3,mreg4))
-texreg(list(mreg3,mreg4))
-wordreg(list(mreg3,mreg4)),
-        file = "tabelle.doc")
 ```
 
-Alternativ kann man die `tab_model()`-Funktion aus dem `sjPlot`-Paket nutzen. Auch diese Funktion erstellt für unterschiedlichste Regressionsmodelle die passenden Tabellen. Zudem lassen sich die Tabellen sehr kleinteilig den eigenen Bedürfnissen anpassen. 
+- `wordreg()` erstellt die Tabelle in einem Microsoft Word Format. Dafür muss nur die Zieldatei als `file`-Argument angegeben werden. 
+
+```{r, eval=F}
+wordreg(list(mreg3,mreg4),
+        file = "./Docs/tabelle.doc")
+```
+
+
+Aber der Königsweg ist natürlich, die Tabellen über RMarkdown direkt in html- oder Latex-Dokumenten erstellen zu lassen.
+
+- `htmlreg()` erstellt die Tabelle im html-Format.
+- `texreg()` gibt die Tabelle im Latex Format aus.
+
+Das probieren wir kurz aus...
+
+Alternativ kann man die `tab_model()`-Funktion aus dem [`sjPlot`](https://strengejacke.github.io/sjPlot/)-Paket nutzen. Auch diese Funktion erstellt für unterschiedlichste Regressionsmodelle die passenden Tabellen. Zudem lassen sich die Tabellen sehr kleinteilig den eigenen Bedürfnissen anpassen. 
 
 Hilfe und Erläuterungen gibt es auch in der Vignette zum Paket: https://strengejacke.github.io/sjPlot/articles/tab_mixed.html   
 
 ```{r sjt_tabellen, results='asis'}
 library(sjPlot)
-?tab_model
+#?tab_model
 # Gibt Tabdelleim RStudio Viewe 
 tab_model(mreg3,mreg4, 
            p.style = "stars",
@@ -144,6 +151,19 @@ sjPlot::plot_model(mreg4, type="re", sort.est = "bildung")
 sjPlot::plot_model(mreg4, type="int")
 
 ```
+
+
+# Schluss
+
+Damit sind wir am Ende des letzten Videos der Videoreihe Mehrebenenregression in R.
+
+Sie wissen nun, was eine Mehrebenenregression ist. Sie können beurteilen, wann eine Mehrebenenrgression notwendig ist, sie kennen die verschiedenen Varianten und können diese mit R rechnen und entscheiden, welches Modell das passende ist. Und Sie können die Ergebnisse tabellarisch und mit Grafiken aufbereiten.
+
+Für die praktische Anwendung sind Sie bereits gut gerüstet. Trotzdem lassen sich zahlreiche Aspekte vertiefen. So können Sie sich zum Beispiel noch mit der Regressionsdiagnostik in Mehrebenenmodellen vertraut machen (z.B. mit dem Paket [`HLMdiag`](https://cran.rstudio.com/web/packages/HLMdiag/index.html) oder dem Paket [`DHARMa`](https://cran.r-project.org/web/packages/DHARMa/vignettes/DHARMa.html)). Oder Sie können Generalsierte Mehrebenenmodelle betrachten, die dann für nicht-metrische abhängige Variablen geeignet sind.
+
+Wenn Sie die Mehrebenenregression von Grundauf verstehen möchsten, dann empfehle ich Ihnen das Buch Raudenbush & Bryk (2002): Hierarchical Linear Models Applications and Data Analysis Methods. Sage.
+
+Am Ende des Videos gibt es wie immer noch eine kleine Aufgabe.
 
 
 # Aufgabe

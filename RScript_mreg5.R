@@ -6,8 +6,8 @@
 
 # Ausführen des Scriptes aus Video 4
 # Das enthält die Vorbereitung der Daten
-source("./RScript_mreg4.R") #Pfad zur Datei ggf. anpassen
-
+# Pfad zur Datei ggf. anpassen
+source("./RScript_mreg4.R") 
 
 
 
@@ -16,9 +16,19 @@ source("./RScript_mreg4.R") #Pfad zur Datei ggf. anpassen
 library(lmerTest) 
 mreg3 <- lmer(pol_vertrauen ~ 1 + bildung + 
                 responsivitaet + zufr_wirtschaft + soz_vertrauen + 
-                korruption + bildung_agg +
+                korruption +
                 (1 + bildung | cntry),     #Hier wird der variierende Slope spezifiziert
               data=ess)
+# Produziert Warnmeldung! Das Modell ist nicht konvergiert.
+
+
+# Lösung: Modell mit alternativem Optimizer schätzen:
+mreg3 <- lmer(pol_vertrauen ~ 1 + bildung + 
+                responsivitaet + zufr_wirtschaft + soz_vertrauen + 
+                korruption +
+                (1 + bildung | cntry),  
+              data=ess,
+              control=lmerControl(optimizer="bobyqa")) #Hier wird der alternativ Optimizer angefordert
 
 summary(mreg3)
 
@@ -42,15 +52,17 @@ ranef(mreg3)
 re_bildung <- ranef(mreg3)$cntry[,2]
 names(re_bildung) <- row.names(ranef(mreg3)$cntry)
 
-#re_bildung+fixef(mreg2)[2]
-sort(re_bildung+fixef(mreg2)[2])
+#re_bildung+fixef(mreg3)[2]
+fixef(mreg3)
+fixef(mreg3)[2]
+sort(re_bildung+fixef(mreg3)[2])
 
 
 #### Cross Level Interaktion #### 
 
 mreg4 <- lmer(pol_vertrauen ~ 1 + bildung + 
                 responsivitaet + zufr_wirtschaft + soz_vertrauen + 
-                korruption + bildung_agg +
+                korruption + 
                 bildung:korruption + #Hier wird die Cross-Level Interaktion speifiziert
                 (1 + bildung | cntry),  
               data=ess)

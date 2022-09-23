@@ -1,7 +1,8 @@
 ---
-title: "Wie werden die Daten für eine Mehrebenregression vorbereitet?"
-subtitle: "Videoserie Mehrebenenregression Teil 3/6"
-author: "Dr. Uwe Remer"
+title: "3 Wie werden die Daten für eine Mehrebenregression vorbereitet?"
+author:
+  - name: Dr. Uwe Remer
+    email: uwe.remer@sowi.uni-stuttgart.de
 date: "Juli 2022"
 output:
   html_document:
@@ -65,9 +66,9 @@ DIV.border {
 
 # Themenüberblick
 
-Hallo und herzlich Willkommen zum dritten Teil der Videoserie zum Thema Mehrebenenregression in R. 
+Hallo und herzlich willkommen zum dritten Teil der Videoserie zum Thema Mehrebenenregression in R. 
 
-Im vorigen Video haben wir gesehen, wie man mit Hilfe des sogenannten Nullmodells berechnet, ob eine Mehrebenenregression überhaupt notwendig ist.
+Im vorigen [Video 2](Mreg2.html) haben wir gesehen, wie man mit Hilfe des sogenannten Nullmodells berechnet, ob eine Mehrebenenregression überhaupt notwendig ist.
 Nur wenn dies der Fall ist, werden die eigentlich interessierenden Mehrebenenmodelle geschätzt.
 
 Bevor wir aber das Nullmodell um unabhängige Variablen ergänzen können und somit ein einfaches Mehrebenenmodell schätzen können, müssen wir die Daten entsprechend vorbereiten, also operationalisieren. 
@@ -109,8 +110,8 @@ Da wir nun wissen, was wir untersuchen wollen, wechseln wir in R.
 
 # Operationalisierung
 
-Noch ein kurzer Hinweis: Ich nutze in dieser Videoreihe bei der Operationalisierung "base R". 
-Das Umbenennen von Variablen, recodieren oder transformieren von Variablen kann man natürlich auch mit Funktionen des `dplyr`-Paketes oder mit `sjmisc` umsetzen und im "tidyverse"-Stil mit dem Pipe-Operator schreiben.
+Noch ein kurzer Hinweis: Ich nutze in dieser Videoreihe bei der Operationalisierung "*base R*". 
+Das Umbenennen von Variablen, recodieren oder transformieren von Variablen kann man natürlich auch mit Funktionen des [`dplyr`](https://dplyr.tidyverse.org/)-Paketes oder mit [`sjmisc`](https://strengejacke.github.io/sjmisc/) umsetzen und im "tidyverse"-Stil mit dem Pipe-Operator schreiben.
 
 Bevor wir also unsere Modelle schätzen können, müssen die Variablen operationalisiert werden. Als Datensatz nutzen wir den ESS 9. Informationen zum Datensatz finden Sie im ersten Video.
 
@@ -372,7 +373,7 @@ Damit sind wir am Ende des dritten Videos.
 
 Wir haben jetzt alle Variablen auf Individualebene operationalisiert und die Kontextvariablen in den Datensatz mit `merge()` hinzugefügt.
 
-Im den nächsten Videos 4 und 5 werden wir dann die unterschiedlichen Modellvarianten der Mehrebenenregression in R schätzen. 
+Im den nächsten [Videos 4](Mreg4.html) und [5](Mreg5.html) werden wir dann die unterschiedlichen Modellvarianten der Mehrebenenregression in R schätzen. 
 
 Am Ende dieses Videos gibt es noch eine Aufgabe und zum Schluss die Literatur.
 

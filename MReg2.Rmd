@@ -1,6 +1,9 @@
 ---
-title: "Wann ist eine Mehrebenenregression angebracht?"
-author: "Dr. Uwe Remer"
+title: "2 Wann ist eine Mehrebenenregression angebracht?"
+subtitle: "Videoserie Mehrebenenregression Teil 2/6"
+author:
+  - name: Dr. Uwe Remer
+    email: uwe.remer@sowi.uni-stuttgart.de
 date: "Juli 2022"
 output:
   html_document:
@@ -12,7 +15,6 @@ output:
     df_print: paged
     highlight: tango
     theme: spacelab
-subtitle: Videoserie Mehrebenenregression Teil 2/6
 ---
 
 ```{r setup, include=FALSE}
@@ -37,7 +39,7 @@ save_fig <- function(filename, save = TRUE){
 }
 ```
 
-```{css, eval=T}
+```{css, eval=T, echo=F}
 /* CSS Stil für Formeln unter Scatterplots */
 P.math {
     text-align: center;
@@ -48,7 +50,7 @@ P.math {
 
 # Themenüberblick
 
-Hallo und herzlich Willkommen zum zweiten Teil der Videoserie zum Thema Mehrebenenregression in R. 
+Hallo und herzlich willkommen zum zweiten Teil der Videoserie zum Thema Mehrebenenregression in R. 
 
 Im ersten Video haben Sie das Grundprinzip der Mehrebenenregression kennengelernt. Wir hatten gesagt, dass eine Mehrebenenregression das geeignete statistische Verfahren ist, wenn Ihre Daten eine hiererchische Struktur aufweisen.
 
@@ -506,7 +508,7 @@ werden. Es ist ein Random Intercept Modell ohne Prädiktoren.
 
 Das Nullmodell ist immer der erste Schritt bei einer Mehrebenenanalyse. Es liefert uns die Informationen, wie viel Varianz auf welcher Ebene zu finden ist - und damit, ob es sich überhaupt lohnt, weitere komplexere Mehrebenenmodelle zu schätzen.
 
-Bevor wir dieses Nullmodell berechnen können, müssen wir aber zunächst die Daten einlesen und vorbereiten. Ich nutze das `foreign`-Paket mit der Funktion `read.spss()` um den ESS Datensatz den ich heruntergeladen habe einzulesen. Information und Link zum Datensatz finden Sie im ersten Video.
+Bevor wir dieses Nullmodell berechnen können, müssen wir aber zunächst die Daten einlesen und vorbereiten. Ich nutze das  [`foreign`](https://cran.r-project.org/web/packages/foreign/index.html)-Paket mit der Funktion `read.spss()` um den ESS Datensatz den ich heruntergeladen habe einzulesen. Information und Link zum Datensatz finden Sie im ersten Video.
 
 
 ```{r}
@@ -536,7 +538,7 @@ ess$pol_vertrauen <- rowMeans(ess[,idx_vars],
 Wir haben nun also die Variable `pol_vertrauen` als abhängige Variable und die Variable `cntry` als L2 Gruppierungsvariable.
 Da wir für das Nullmodell noch keine weiteren Prädiktoren benötigen, können wir direkt im nächsten Schritt das Nullmodell schätzen.
 
-Für die Mehrebenenregression nutzen wir das Paket `lme4` von [Bates et al. (2015)](https://doi.org/10.18637/jss.v067.i01 ). Darauf aufbauend gibt es noch das Paket `lmerTest`, welches zusätzlich Signifikanztests mit ausgibt.
+Für die Mehrebenenregression nutzen wir das Paket [`lme4`](https://cran.r-project.org/web/packages/lme4/index.html) von [Bates et al. (2015)](https://doi.org/10.18637/jss.v067.i01 ). Darauf aufbauend gibt es noch das Paket [`lmerTest`](https://www.jstatsoft.org/article/view/v082i13), welches zusätzlich Signifikanztests mit ausgibt.
 
 
 ```{r}
@@ -598,7 +600,7 @@ Mit diesen beiden Zahlen lässt sich nun der $ICC$ berechnen.
 
 $\frac{`r round(c(unlist( lapply(VarCorr(mreg.0), diag) ), attr(VarCorr(mreg.0),"sc")^2)[1],2)`}{`r round(c(unlist( lapply(VarCorr(mreg.0), diag) ), attr(VarCorr(mreg.0),"sc")^2)[1],2)` + `r round(c(unlist( lapply(VarCorr(mreg.0), diag) ), attr(VarCorr(mreg.0),"sc")^2)[2],2)`}= `r round(c(unlist( lapply(VarCorr(mreg.0), diag) ), attr(VarCorr(mreg.0),"sc")^2)[1] / (sum(unlist( lapply(VarCorr(mreg.0), diag) ), attr(VarCorr(mreg.0),"sc")^2)) ,2)`$
 
-Um das nicht von Hand erledigen zu müssen, gibt es im Paket `performance` die Funktion `icc()`, die man auf das Nullmodell anwendet:
+Um das nicht von Hand erledigen zu müssen, gibt es im Paket [`performance`](https://cran.r-project.org/web/packages/performance/index.html) die Funktion `icc()`, die man auf das Nullmodell anwendet:
 
 ```{r}
 library(performance)
