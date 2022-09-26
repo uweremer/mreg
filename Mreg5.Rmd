@@ -41,7 +41,7 @@ save_fig <- function(filename, save = TRUE){
 options(scipen=999, digits=3)
 ```
 
-```{css, eval=F, echo=F}
+```{css, eval=T, echo=F}
 /* CSS Stil für Formeln unter Scatterplots */
 P.math {
     text-align: center;
@@ -204,10 +204,10 @@ summary(mreg3)
 vm3 <- as.data.frame(VarCorr(mreg3))
 ```
 
-Wir sehen nun bei den Random Effects, dass eine neue Zeile hinzugekommen ist: der <font color=red>Random Effect für Bildung.</font>
-Dessen Beitrag an der Gesamtvarianz ist mit einer Varianz von <font color=red>$`r vm3[2,4]`$</font> aber recht gering. 
+Wir sehen nun bei den Random Effects, dass eine neue Zeile hinzugekommen ist: der <font color=red>Random Effect für Bildung.</font> Dessen Varianz liegt bei <font color=red>$`r vm3[2,4]`$</font>. 
+Was nun außerdem hinzugekommen ist, ist diese letzte Spalte. Sie berichtet, wie stark der Random Slope für Bildung mit dem Random Intercept korreliert. Wir sehen also, daas in Ländern mit im Schnitt höherem politischen Vertrauen der Effekt von Bildung im höher ist als in Ländern mit niedrigem politischem Vertrauen. 
 
-Bevor wir das Modell also inhaltlich interpretieren, müssen wir prüfen, ob dieser variierende Slope tatsächlich gerechtfertigt ist. Oder anders ausgedrückt: Ist die Annahme eines zwischen den Ländern variierenden Regressionskoeffizienten für Bildung überhaupt empirisch haltbar? 
+Der Beitrag des Random Effect für Bildung an der Gesamtvarianz ist mit einer Varianz von nur $`r vm3[2,4]`$ recht gering. Bevor wir das Modell also inhaltlich interpretieren, müssen wir prüfen, ob dieser variierende Slope tatsächlich gerechtfertigt ist. Oder anders ausgedrückt: Ist die Annahme eines zwischen den Ländern variierenden Regressionskoeffizienten für Bildung überhaupt empirisch haltbar? 
 
 Was uns also interessiert ist, ob wir überhaupt einen signifikanten Random Effect für Bildung haben. Oder ob dem datengenerierenden Prozess nicht eher ein einheitlicher Bildungseffekt zu Grunde liegt.
 
@@ -244,11 +244,11 @@ mreg <- lmer(y ~ 1 + x + (1 + grp),
 
 Wenn man `REML=FALSE` angibt, wird statt des REML-Schätzers der einfache ML-Schätzer genutzt.
 
-Der ML-Schätzer wählt dabei diejenigen Werte für die  Modellparamter, bei denen die Wahrscheinlichkeit (Likelihood) am größten ist, die Werte der Daten zu beobachten. Wähle das Modell, beim dem $p(Daten|Modell)$ am größten ist.
+Der ML-Schätzer wählt dabei diejenigen Werte für die Modellparameter, bei denen die Wahrscheinlichkeit (Likelihood) am größten ist, die Werte der Daten zu beobachten. Wähle das Modell, beim dem $p(Daten|Modell)$ am größten ist.
 
 Dabei können aber die Varianzparameter unterschätzt werden.
 
-Beim REML-Schätzer werden nur die Parameter der Varianzkomponenten, also die Random Effects des Modells über den ML-Schätzer gewählt. Die anderen Modellparamter werden als gegeben angenommen (sie werden zuvor automatisch seperat geschätzt). Die Schätzung des REML Schätzers ist also restricted auf die Varianzkomponenten. Und soll dadurch e eine unverzerrte Schätzung der Varianzkomponenten erlauben.
+Beim REML-Schätzer werden nur die Parameter der Varianzkomponenten, also die Random Effects des Modells über den ML-Schätzer gewählt. Die anderen Modellparamter werden als gegeben angenommen (sie werden zuvor automatisch separat geschätzt). Die Schätzung des REML Schätzers ist also restricted auf die Varianzkomponenten. Und soll dadurch e eine unverzerrte Schätzung der Varianzkomponenten erlauben.
 
 ABER: Je größer die SP, desto weniger ist die Schätzung der Varianzkomponenten mittels ML-Schätzer verzerrt.
 Diese Eigenschaft ist dann wichtig, wenn Sie folgende Fehlermeldung bei der Schätzung ihres Modells erhalten. 
@@ -358,7 +358,7 @@ Sehen wir uns das im Modell an:
 
 Wir schätzen also unser neues Modell, und für die Cross-Level Interaktion müssen wir nur einen ganz regulären Interaktionseffekt in der Formel spezifizieren. R weiß dann von ganz alleine, dass die eine Variable auf Ebene 1 ist und die andere Variable auf Ebene 2.
 
-Wir schätzen das Modell und schauen dann mit der Anova, ob das Modell signifikant besser an die Daten angepasst ist als das vorige. Da sich die fixierten Effekte verändert haben, müssen wir die ML-basierte Anova nutzen.
+Wir schätzen das Modell. 
 
 ```{r cross_level_interaktion}
 mreg4 <- lmer(pol_vertrauen ~ 1 + bildung + 
@@ -367,10 +367,18 @@ mreg4 <- lmer(pol_vertrauen ~ 1 + bildung +
                 bildung:korruption + 
                 (1 + bildung | cntry),  
               data=ess)
+```
+
+
+Dann schauen wir mit der Anova, ob das Modell signifikant besser an die Daten angepasst ist als das vorige. Da sich die fixierten Effekte verändert haben, müssen wir die ML-basierte Anova nutzen.
+
+Wir schauen zuerst auf die Anova, da Wenn das nicht der Fall ist, würden wir gar nicht erst das Modell inhaltlich interpretieren, sondern würden das Modell ohne Cross-Level Interaktion als das letztlich am besten passende Mehrebenenmodell berichten und interpretieren. In dem Fall würde alsi Korruption nicht den Effekt von Bildung moderieren. 
+
+```{r}
 anova(mreg3, mreg4, refit=T)
 ```
 
-Wir sehen, das Modell ist signifikant besser. 
+Aber wir sehen, das Modell ist signifikant besser. Also ist dieses Modell dasjenige, was am Ende am besten an die Daten angepasst ist und welches Interpretiert wird.
 
 ```{r}
 performance::r2(mreg4)

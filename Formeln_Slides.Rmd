@@ -121,3 +121,103 @@ $\hat{y}_{ij}=\beta_0j$
 <font color=red>$1$</font>
 $+\beta_1x_{ij}$
 </p>
+
+
+# Video 4
+
+## 1
+
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + u_{0j}$
+</p>
+</div>
+
+## 2
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + u_{0j}$
+</p>
+</div>
+
+## 3
+
+$R^2_{L1}=1-\frac{s^2_{L1_{Modell}}}{s^2_{L1_{Nullmodell}}}$  
+
+
+$R^2_{L2}=1-\frac{s^2_{L2_{Modell}}}{s^2_{L2_{Nullmodell}}}$  
+
+## 4
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}$
+</p>
+</div>
+ 
+ 
+# Video 5
+
+## 1
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} +$
+<font color=blue>$\beta_{1}$</font>
+$x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}$
+</p>
+</div>
+
+## 2
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} +$ 
+<font color=blue>$\beta_{1}$</font><font color=red>$_{j}$</font>
+$x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}$
+</p>
+und jetzt zusätzlich
+<p class=math_left>
+<font color=red>$\beta_{1j} = \gamma_{10} + u_{1j}$</font>
+</p>
+</div>
+
+## 3
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} +$ 
+<font color=blue>$\beta_{1}$</font><font color=red>$_{j}$</font>
+$x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}$
+</p>
+und jetzt zusätzlich
+<p class=math_left>
+$\beta_{1j} = \gamma_{10} +$<font color=red>$\gamma_{11j}$</font>$+ u_{1j}$
+</p>
+</div>

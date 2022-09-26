@@ -1,6 +1,6 @@
 # Videoserie Mehrebenenregression mit R 
 # Teil 5/6 
-# Wie schätz man variierende Slopes und Cross-Level Interaktionen?
+# Wie schätzt man variierende Slopes und Cross-Level Interaktionen?
 # Dr. Uwe Remer
 
 
@@ -63,7 +63,7 @@ sort(re_bildung+fixef(mreg3)[2])
 mreg4 <- lmer(pol_vertrauen ~ 1 + bildung + 
                 responsivitaet + zufr_wirtschaft + soz_vertrauen + 
                 korruption + 
-                bildung:korruption + #Hier wird die Cross-Level Interaktion speifiziert
+                bildung:korruption + #Hier wird die Cross-Level Interaktion spezifiziert
                 (1 + bildung | cntry),  
               data=ess)
 anova(mreg3, mreg4, refit=T)

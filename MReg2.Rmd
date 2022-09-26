@@ -141,7 +141,7 @@ ggplot(ess_c6, aes(x=pol_vertrauen, y=no_countries)) +
   theme_light() +
   theme(axis.title.x = element_blank(),
         plot.margin=unit(c(0,2,0,2), "cm"))
-save_fig("V1_1_1.png", save)
+save_fig("V2_1_1.png", save)
 ```
 
 Aber hier sehen wir relativ wenig, weil hinter jedem Punkt eine Vielzahl von Befragten steckt. Um einen besseren Eindruck bekommen, ziehe ich die Punkte auf der vertikalen und horizontalen Achse etwas auseinander und mache die Punkte kleiner. So erkennen wir alle der knapp 50.000 Punkte.
@@ -157,7 +157,7 @@ ggplot(ess, aes(pol_vertrauen, no_countries)) +
   theme_light() +
   theme(axis.title.x = element_blank(),
         plot.margin=unit(c(0,2,0,2), "cm"))
-save_fig("V1_1_2.png", save)
+save_fig("V2_1_2.png", save)
 ```
 
 Ganz schön viele Punkte. Damit das Beispiel übersichtlich bleibt, mache ich mit nur sechs der 27 Länder weiter und nutze von diesen auch nur 15 Prozent der Datenpunkte. 

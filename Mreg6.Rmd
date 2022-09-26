@@ -120,37 +120,112 @@ Aber der Königsweg ist natürlich, die Tabellen über RMarkdown direkt in html-
 - `htmlreg()` erstellt die Tabelle im html-Format.
 - `texreg()` gibt die Tabelle im Latex Format aus.
 
-Das probieren wir kurz aus...
+Auch dieses Dokument wurde mit RMarkdown erstellt, wir können hier also die Tabellenausgabe des Aufrufs `htmlreg()` sehen:
 
-Alternativ kann man die `tab_model()`-Funktion aus dem [`sjPlot`](https://strengejacke.github.io/sjPlot/)-Paket nutzen. Auch diese Funktion erstellt für unterschiedlichste Regressionsmodelle die passenden Tabellen. Zudem lassen sich die Tabellen sehr kleinteilig den eigenen Bedürfnissen anpassen. 
+```{r, results='asis'}
+htmlreg(list(mreg3,mreg4))
+```
+
+
+Damit Sie auch den passenden Markdown Code-Chunk sehen, probieren wir das kurz aus... 
+
+Dieses Code-Snippet kopiere ich in ein RMarkdown-Dokument, das ich dann als html oder als pdf-Datei knitten kann. Wichtig ist, das das Code-Chunk Argument `results='asis'` angegeben wird.
+
+
+```{r, eval=F}
+#```{r, results='asis'}
+source("./RScript_mreg5.R")
+library(texreg)
+htmlreg(list(mreg3,mreg4))
+texreg(list(mreg3,mreg4))
+#```
+```
+
+Abgesehen vom `texreg`-Paket kann man altrenativ die `tab_model()`-Funktion aus dem [`sjPlot`](https://strengejacke.github.io/sjPlot/)-Paket nutzen. Auch diese Funktion erstellt für unterschiedlichste Regressionsmodelle die passenden Tabellen. Zudem lassen sich die Tabellen sehr kleinteilig den eigenen Bedürfnissen anpassen. 
 
 Hilfe und Erläuterungen gibt es auch in der Vignette zum Paket: https://strengejacke.github.io/sjPlot/articles/tab_mixed.html   
 
-```{r sjt_tabellen, results='asis'}
+```{r}
 library(sjPlot)
 #?tab_model
-# Gibt Tabdelleim RStudio Viewe 
-tab_model(mreg3,mreg4, 
-           p.style = "stars",
-          use.viewer = F)
+# Gibt Tabelle im RStudio Viewer aus
+tab_model(mreg0, mreg3,mreg4, 
+          p.style = "stars",
+          use.viewer = T)
+```
 
-# Oder man kann die Tabelle in einer Datei speichern
-tab_model(mreg3,mreg4, 
-           p.style = "stars",
+
+Oder man kann die Tabelle in einer Datei speichern:
+
+```{r}
+tab_model(mreg0, mreg3, mreg4, 
+          p.style = "stars",
           use.viewer = F,
-          file = "tabelle.html")
+          file = "./Docs/tabelle.html")
+```
+
+# Grafische Darstellung der Ergebnisse
+
+Das Schweizer Taschenmesser der grafischen Darstellung von Regressionsergebnissen ist das schon genannte Paket [`sjPlot`](https://strengejacke.github.io/sjPlot/).
+
+Die Darstellung der fixed Effects erfolgt wie bei ganz gewöhnlichen Regressionsmodellen. Um die fixed Effects grafisch darszustellen nutze ich die Funktion `plot_model()`:
+
+```{r}
+library(sjPlot)
+plot_model(mreg4,
+           show.values=T)
+```
+
+Diese Darstellung lässt sich noch durch zahlreiche Optionen anpassen und verschönern. Das ist aber nicht mehr Teil dieser Videoserie. 
+
+Wenn wir mehrere Modelle vergleichen wollen, nutzen wir die Funktion `plot_models()` (das Plural-s macht den Unterschied).
+
+```{r}
+library(sjPlot)
+plot_models(mreg3, mreg4,
+           show.values=T)
 ```
 
 
-# Fixed Effects grafisch darstellen
+`plot_models` hat aber auch Mehrebenenmodell-spezifische Optionen. Ich empfehle auf jeden Fall einen Blick in die Dokumentation: 
 
-```{r grafiken_1}
-sjPlot::plot_model(mreg4,
-                   show.values=T)
-sjPlot::plot_model(mreg4, type="re", sort.est = "bildung")
-sjPlot::plot_model(mreg4, type="int")
+https://strengejacke.github.io/sjPlot
 
+Um einen Eindruck von den random Effects zu bekommen, also von den variierenden Intercepts und variierenden Slopes kann man der Funktion `plot_model()` mit dem argument `type="re"` sagen, dass die **r**andom **e**ffects dargestellt werden sollen.
+
+```{r}
+plot_model(mreg4, type="re")
+```           
+           
+
+Wenn ein Modell mehr als einen Random Effect aufweist, kann man mit `sort.est` angeben, nach welchem Effekt sortiert werden soll.
+
+```{r}
+plot_model(mreg4, type="re", sort.est = "bildung")
+plot_model(mreg4, type="re", sort.est = "(Intercept)")
 ```
+
+Schließlich kann der Cross-Level Interaktionseffekt dargestellt werden, indem man als `type="int"` spezifiziert.
+
+
+```{r}
+plot_model(mreg4, type="int")
+```
+
+Hier sieht man sehr anschaulich, was der Interaktionseffekt von $`r fixef(mreg4)[7]`$ bedeutet.
+
+Wie auch im Forrest Plot oder in der Tabelle ausgegeben sehen wir auch hier,  dass der Effekt von Bildung nicht signifikant ist - und zwar für Länder, die sehr sauber sind. 
+
+Der in der Tabelle berichtete Effekt für Bildung ist ja der Effekt, den wir für Länder schätzen, deren Wert für `korruption` bei $0$ liegt. Empirisch ist dieser Wert nicht vorhanden. Das sauberste Land hat einen Wert von $15$. Das sehen wir hier auch in der Grafik. Die rote Linie gibt den Effekt für Bildung wieder, den dieses am wenigsten Korrupte Land aufweist. 
+Zwar ist die Linie leicht ansteigend, da aber das Konfindenzband so breit ist, dass Anfang und Ende der Linie auf der jeweils gegenüberliegenden Seite immernoch innerhalb des Konfindenzbandes liegen wissen wir, dass der Effekt nicht signifikant ist.
+
+Anders bei Ländern mit den höchsten Wert auf dem Korruptionsindex. Hier sehen wir einen negativen Effekt. Je höher die Bildung, desto geringer ist das beobachtete Niveau an politischem Vertrauen.
+
+Natürlich gibt es für die Zwischenschritte von Korruption auch die jeweiligen Slopes für Bildung. Das lässt sich aber grafisch dann nicht überischtlich darstellen. 
+
+Zwar sind die Konfindenzbänder für beide Linien relativ zur Effektgröße recht breit. Dennoch sehen wir schon bei wenig über dem Minimum liegenden Werten von Bildung, dass sich die Konfidenzbänder einseitig nicht überschneiden, also signifikante Unteschiede zwischen den unterschiedlich korruptionsbelasteten Ländern bestehen.
+
+Inhaltlich ist das ein interessantes Ergebnis: Zunächst schien es, dass Bildung negativ auf politisches Vertrauen wirkt. Bei genauerem Hinsehen zeigt sich, dass der Effekt von Bildung varriert. In Ländern mit geringer Korruption hat Bildung keinen Einfluss. Mit zunehmender Korruption zeigt sich, dass Menschen mit höherer Bildung weniger Vertrauen. Für Menschen mit weniger Bildung, zeigt sich jedoch kein Unterschied. 
 
 
 # Schluss
@@ -184,6 +259,6 @@ Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernzi
 
 ```{r, echo=F, eval=F}
 library("knitr")
-knitr::purl("Mreg5.Rmd",
+knitr::purl("Mreg6.Rmd",
             documentation=0)
 ```
