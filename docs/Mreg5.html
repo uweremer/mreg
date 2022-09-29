@@ -2879,9 +2879,30 @@ Cross-Level Interaktionen?</h1>
 </div>
 
 
+<style type="text/css">
+/* CSS Stil für Formeln unter Scatterplots */
+P.math {
+    text-align: center;
+    font-size: 2vw;
+}
+
+P.math_left {
+    text-align: left;
+    font-size: 1.5vw;
+}
+
+
+DIV.border {
+    padding:9.5px;
+    border-radius:4px;
+    border:1px solid #cccccc;
+    margin-top: 10px;
+    margin-bottom:10px;
+}
+</style>
 <div id="themenüberblick" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Themenüberblick</h1>
-<p>Hallo und herzlich Willkommen zum fünften Teil der Videoserie zum
+<p>Hallo und herzlich willkommen zum fünften Teil der Videoserie zum
 Thema Mehrebenenregression in R.</p>
 <p>Die Fragestellung für dieses Video lautet: Wie schätzt man
 variierende Slopes und Cross-Level Interaktionen?</p>
@@ -3039,7 +3060,7 @@ auf:</p>
 ## Random effects:
 ##  Groups   Name        Variance Std.Dev. Corr
 ##  cntry    (Intercept) 0.13072  0.3616       
-##           bildung     0.00237  0.0487   0.38
+##           <font color="red">bildung     0.00237</font>  0.0487   0.38
 ##  Residual             2.77720  1.6665       
 ## Number of obs: 39998, groups:  cntry, 25
 ## 
@@ -3070,14 +3091,19 @@ auf:</p>
 ## korruption  -0.921 -0.013  0.018  0.038  0.035</code></pre>
 <p>Wir sehen nun bei den Random Effects, dass eine neue Zeile
 hinzugekommen ist: der <font color="red">Random Effect für Bildung.</font>
-Dessen Beitrag an der Gesamtvarianz ist mit einer Varianz von
-<font color="red"><span class="math inline">\(0.002\)</span></font> aber
-recht gering.</p>
-<p>Bevor wir das Modell also inhaltlich interpretieren, müssen wir
-prüfen, ob dieser variierende Slope tatsächlich gerechtfertigt ist. Oder
-anders ausgedrückt: Ist die Annahme eines zwischen den Ländern
-variierenden Regressionskoeffizienten für Bildung überhaupt empirisch
-haltbar?</p>
+Dessen Varianz liegt bei <font color="red"><span class="math inline">\(0.002\)</span></font>. Was nun außerdem
+hinzugekommen ist, ist diese letzte Spalte. Sie berichtet, wie stark der
+Random Slope für Bildung mit dem Random Intercept korreliert. Wir sehen
+also, daas in Ländern mit im Schnitt höherem politischen Vertrauen der
+Effekt von Bildung im höher ist als in Ländern mit niedrigem politischem
+Vertrauen.</p>
+<p>Der Beitrag des Random Effect für Bildung an der Gesamtvarianz ist
+mit einer Varianz von nur <span class="math inline">\(0.002\)</span>
+recht gering. Bevor wir das Modell also inhaltlich interpretieren,
+müssen wir prüfen, ob dieser variierende Slope tatsächlich
+gerechtfertigt ist. Oder anders ausgedrückt: Ist die Annahme eines
+zwischen den Ländern variierenden Regressionskoeffizienten für Bildung
+überhaupt empirisch haltbar?</p>
 <p>Was uns also interessiert ist, ob wir überhaupt einen signifikanten
 Random Effect für Bildung haben. Oder ob dem datengenerierenden Prozess
 nicht eher ein einheitlicher Bildungseffekt zu Grunde liegt.</p>
@@ -3118,14 +3144,14 @@ sogenannten <em>REML</em>-Schätzer (<strong>Re</strong>stricted
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">REML =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p>Wenn man <code>REML=FALSE</code> angibt, wird statt des
 REML-Schätzers der einfache ML-Schätzer genutzt.</p>
-<p>Der ML-Schätzer wählt dabei diejenigen Werte für die Modellparamter,
+<p>Der ML-Schätzer wählt dabei diejenigen Werte für die Modellparameter,
 bei denen die Wahrscheinlichkeit (Likelihood) am größten ist, die Werte
 der Daten zu beobachten. Wähle das Modell, beim dem <span class="math inline">\(p(Daten|Modell)\)</span> am größten ist.</p>
 <p>Dabei können aber die Varianzparameter unterschätzt werden.</p>
 <p>Beim REML-Schätzer werden nur die Parameter der Varianzkomponenten,
 also die Random Effects des Modells über den ML-Schätzer gewählt. Die
 anderen Modellparamter werden als gegeben angenommen (sie werden zuvor
-automatisch seperat geschätzt). Die Schätzung des REML Schätzers ist
+automatisch separat geschätzt). Die Schätzung des REML Schätzers ist
 also restricted auf die Varianzkomponenten. Und soll dadurch e eine
 unverzerrte Schätzung der Varianzkomponenten erlauben.</p>
 <p>ABER: Je größer die SP, desto weniger ist die Schätzung der
@@ -3302,24 +3328,31 @@ Variable Bildung hat, dann müsste auch die Residualvarianz <span class="math in
 Interaktion müssen wir nur einen ganz regulären Interaktionseffekt in
 der Formel spezifizieren. R weiß dann von ganz alleine, dass die eine
 Variable auf Ebene 1 ist und die andere Variable auf Ebene 2.</p>
-<p>Wir schätzen das Modell und schauen dann mit der Anova, ob das Modell
-signifikant besser an die Daten angepasst ist als das vorige. Da sich
-die fixierten Effekte verändert haben, müssen wir die ML-basierte Anova
-nutzen.</p>
+<p>Wir schätzen das Modell.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mreg4 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(pol_vertrauen <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> bildung <span class="sc">+</span> </span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>                responsivitaet <span class="sc">+</span> zufr_wirtschaft <span class="sc">+</span> soz_vertrauen <span class="sc">+</span> </span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                korruption <span class="sc">+</span></span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>                bildung<span class="sc">:</span>korruption <span class="sc">+</span> </span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                (<span class="dv">1</span> <span class="sc">+</span> bildung <span class="sc">|</span> cntry),  </span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">data=</span>ess)</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mreg3, mreg4, <span class="at">refit=</span>T)</span></code></pre></div>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">data=</span>ess)</span></code></pre></div>
+<p>Dann schauen wir mit der Anova, ob das Modell signifikant besser an
+die Daten angepasst ist als das vorige. Da sich die fixierten Effekte
+verändert haben, müssen wir die ML-basierte Anova nutzen.</p>
+<p>Wir schauen zuerst auf die Anova, da Wenn das nicht der Fall ist,
+würden wir gar nicht erst das Modell inhaltlich interpretieren, sondern
+würden das Modell ohne Cross-Level Interaktion als das letztlich am
+besten passende Mehrebenenmodell berichten und interpretieren. In dem
+Fall würde alsi Korruption nicht den Effekt von Bildung moderieren.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mreg3, mreg4, <span class="at">refit=</span>T)</span></code></pre></div>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["npar"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["AIC"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["BIC"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["logLik"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["deviance"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Chisq"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["Df"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["Pr(>Chisq)"],"name":[8],"type":["dbl"],"align":["right"]}],"data":[{"1":"10","2":"154524","3":"154610","4":"-77252","5":"154504","6":"NA","7":"NA","8":"NA","_rn_":"mreg3"},{"1":"11","2":"154517","3":"154612","4":"-77247","5":"154495","6":"8.9","7":"1","8":"0.00285","_rn_":"mreg4"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
-<p>Wir sehen, das Modell ist signifikant besser.</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(mreg4)</span></code></pre></div>
+<p>Aber wir sehen, das Modell ist signifikant besser. Also ist dieses
+Modell dasjenige, was am Ende am besten an die Daten angepasst ist und
+welches Interpretiert wird.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(mreg4)</span></code></pre></div>
 <pre><code>## # R2 for Mixed Models
 ## 
 ##   Conditional R2: 0.471
@@ -3328,7 +3361,7 @@ nutzen.</p>
 bei <span class="math inline">\(0.471\)</span>.</p>
 <p>Das das Modell tatsächlich besser zu den Daten passt, können wir auch
 die Ergebnisse interpretieren:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mreg4)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mreg4)</span></code></pre></div>
 <pre><code>## Linear mixed model fit by REML. t-tests use Satterthwaite&#39;s method [
 ## lmerModLmerTest]
 ## Formula: pol_vertrauen ~ 1 + bildung + responsivitaet + zufr_wirtschaft +  
@@ -3357,7 +3390,7 @@ die Ergebnisse interpretieren:</p>
 ## zufr_wirtschaft        0.313085     0.004389 39829.107658   71.34
 ## soz_vertrauen          0.210532     0.004992 39979.245989   42.18
 ## korruption            -0.011385     0.005362    23.222371   -2.12
-## bildung:korruption    -0.002205     0.000704    23.364165   -3.13
+## <font color="red">bildung:korruption    -0.002205</font>     0.000704    23.364165   -3.13
 ##                               Pr(&gt;|t|)    
 ## (Intercept)        &lt;0.0000000000000002 ***
 ## bildung                         0.1227    
@@ -3365,7 +3398,7 @@ die Ergebnisse interpretieren:</p>
 ## zufr_wirtschaft    &lt;0.0000000000000002 ***
 ## soz_vertrauen      &lt;0.0000000000000002 ***
 ## korruption                      0.0446 *  
-## bildung:korruption              0.0046 ** 
+## bildung:korruption              <font color="red">0.0046 ** </font>
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -3377,8 +3410,8 @@ die Ergebnisse interpretieren:</p>
 ## soz_vertran -0.027 -0.010 -0.140 -0.230              
 ## korruption  -0.929 -0.264  0.022  0.038  0.030       
 ## bldng:krrpt -0.258 -0.926  0.016  0.003 -0.012  0.280</code></pre>
-<p>Wir sehen bei den fixed Effects nun einen signifikanten
-Interaktionseffekt von <span class="math inline">\(-0.002\)</span>. Das
+<p>Wir sehen bei den fixed Effects nun einen <font color="red">signifikanten
+Interaktionseffekt von <span class="math inline">\(-0.002\)</span></font>. Das
 bedeutet, das mit Zunahme der Korruption um einen Skalenpunkt verändert
 sich der Effekt von Bildung um den Faktor <span class="math inline">\(-0.002\)</span>. Je höher die Korruption ist,
 desto negativer wird der Effekt von Bildung. Und umgekehrt: je weniger

@@ -9,7 +9,6 @@
 source("./RScript_mreg5.R") # Pfad zur Datei ggf. anpassen
 
 
-
 #### Tabellen #### 
 
 
