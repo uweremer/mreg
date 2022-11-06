@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="de-DE" xml:lang="de-DE"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.258">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dr.&nbsp;Uwe Remer">
+
+<title>Mehrebenenregression mit R - 2. Wann ist eine Mehrebenenregression angebracht?</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "Keine Treffer",
+    "search-matching-documents-text": "Treffer",
+    "search-copy-link-title": "Link in die Suche kopieren",
+    "search-hide-matches-text": "Zusätzliche Treffer verbergen",
+    "search-more-match-text": "weitere Treffer in diesem Dokument",
+    "search-more-matches-text": "weitere Treffer in diesem Dokument",
+    "search-clear-button-title": "Zurücksetzen",
+    "search-detached-cancel-button-title": "Abbrechen",
+    "search-submit-button-title": "Abschicken"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="Mehrebenenregression mit R">
+<meta property="og:description" content="6-teilige Videoreihe zum Einstieg in die Mehrebenenregression mit R">
+<meta property="og:image" content="Grafiken/varianten.png">
+<meta property="og:site-name" content="Mehrebenenregression mit R">
+<meta property="og:locale" content="de_DE">
+<meta name="twitter:title" content="Mehrebenenregression mit R">
+<meta name="twitter:description" content="6-teilige Videoreihe zum Einstieg in die Mehrebenenregression mit R">
+<meta name="twitter:image" content="Grafiken/varianten.png">
+<meta name="twitter:creator" content="@uweremerbollow">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Mehrebenenregression mit R</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html">
+ <span class="menu-text">Startseite</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-skript" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Skript</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-skript">    
+        <li>
+    <a class="dropdown-item" href="./mreg1.html">
+ <span class="dropdown-text">1. Was ist eine Mehrebenenregression?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg2.html">
+ <span class="dropdown-text">2. Wann ist eine Mehrebenenregression angebracht?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg3.html">
+ <span class="dropdown-text">3. Wie werden die Daten für eine Mehrebenregression vorbereitet?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg4.html">
+ <span class="dropdown-text">4. Wie schätzt man eine Mehrebenenregression in R?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg5.html">
+ <span class="dropdown-text">5. Wie schätzt man variierende Slopes und Cross-Level Interaktionen?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg6.html">
+ <span class="dropdown-text">6. Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="./ressourcen.html">
+ <span class="menu-text">Ressourcen</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./about.html">
+ <span class="menu-text">Kontakt</span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">2. Wann ist eine Mehrebenenregression angebracht?</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        <div class="sidebar-tools-collapse tools-wide">
+    <a href="https://www.sowi.uni-stuttgart.de/institut/team/Remer" title="" class="sidebar-tool px-1"><i class="bi bi-bank"></i></a>
+    <a href="https://github.com/uweremer/mreg" title="" class="sidebar-tool px-1"><i class="bi bi-github"></i></a>
+    <a href="https://fediscience.org/@uweremer" title="" class="sidebar-tool px-1"><i class="bi bi-mastodon"></i></a>
+</div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg1.html" class="sidebar-item-text sidebar-link">1. Was ist eine Mehrebenenregression?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg2.html" class="sidebar-item-text sidebar-link active">2. Wann ist eine Mehrebenenregression angebracht?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg3.html" class="sidebar-item-text sidebar-link">3. Wie werden die Daten für eine Mehrebenregression vorbereitet?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg4.html" class="sidebar-item-text sidebar-link">4. Wie schätzt man eine Mehrebenenregression in R?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg5.html" class="sidebar-item-text sidebar-link">5. Wie schätzt man variierende Slopes und Cross-Level Interaktionen?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg6.html" class="sidebar-item-text sidebar-link">6. Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Auf dieser Seite</h2>
+   
+  <ul>
+  <li><a href="#themenüberblick" id="toc-themenüberblick" class="nav-link active" data-scroll-target="#themenüberblick">Themenüberblick</a></li>
+  <li><a href="#context-matters" id="toc-context-matters" class="nav-link" data-scroll-target="#context-matters">Context Matters</a></li>
+  <li><a href="#das-nullmodell" id="toc-das-nullmodell" class="nav-link" data-scroll-target="#das-nullmodell">Das Nullmodell</a></li>
+  <li><a href="#die-intraklassenkorrelation-icc" id="toc-die-intraklassenkorrelation-icc" class="nav-link" data-scroll-target="#die-intraklassenkorrelation-icc">Die Intraklassenkorrelation ICC</a>
+  <ul class="collapse">
+  <li><a href="#umsetzung-in-r" id="toc-umsetzung-in-r" class="nav-link" data-scroll-target="#umsetzung-in-r">Umsetzung in R</a></li>
+  </ul></li>
+  <li><a href="#aufgabe" id="toc-aufgabe" class="nav-link" data-scroll-target="#aufgabe">Aufgabe</a></li>
+  <li><a href="#lernzielabgleich" id="toc-lernzielabgleich" class="nav-link" data-scroll-target="#lernzielabgleich">Lernzielabgleich</a></li>
+  <li><a href="#literatur" id="toc-literatur" class="nav-link" data-scroll-target="#literatur">Literatur</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">2. Wann ist eine Mehrebenenregression angebracht?</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="cell" data-layout-align="center">
+<style type="text/css">
+/* CSS Stil für Formeln unter Scatterplots */
+P.math {
+    text-align: center;
+    font-size: 1.8vw;
+}
+
+P.math_left {
+    text-align: left;
+    font-size: 1.5vw;
+}
+
+
+DIV.border {
+    padding:9.5px;
+    border-radius:4px;
+    border:1px solid #cccccc;
+    margin-top: 10px;
+    margin-bottom:10px;
+}
+</style>
+</div>
+<section id="themenüberblick" class="level1">
+<h1>Themenüberblick</h1>
+<p>In <a href="./mreg1.html">Teil 1</a> haben Sie das Grundprinzip der Mehrebenenregression kennengelernt. Wir hatten gesagt, dass eine Mehrebenenregression das geeignete statistische Verfahren ist, wenn Ihre Daten eine hiererchische Struktur aufweisen.</p>
+<p>In diesem zweiten Video vertiefen wir diesen Aspekt. Das Video zu diesem zweiten Teil finden Sie <a href="https://video.fernuni-hagen.de/Play/6077">hier</a>.</p>
+<p>In der ersten Hälfte möchte ich an einem Beispiel verdeutlichen, was es eigentlich heißt, dass Daten eine Mehrebenenstruktur aufweisen und wie sich das in der Gleichung des Mehrebenenmodells wiederspiegelt.</p>
+<p>In der zweiten Hälfte schauen wir dann, wie mit Hilfe des Nullmodell und dem Intraklassenkorrelationskoeffizienten <span class="math inline">\(ICC\)</span> bestimmt werden kann, ob eine Mehrebenenregression angemessen ist.</p>
+<p>Dann heißt auch Hands-on und wir rechnen mit R.</p>
+<p>Die konkreten Lernziele sind, dass Sie…</p>
+<ul>
+<li>theoretisch begründen können wie und warum der Kontext einen Einfluss auf Ihre Datenstruktur hat.</li>
+<li>erläutern können, was ein Nullmodell und es als Regressionsgleichung formulieren können.</li>
+<li>wissen welche Varianzkomponenten das Nullmodell beinhaltet und wo sie in der Regrgressionsgleichung zu finden sind.</li>
+<li>wissen was die Intraklassenkorrelation ist und wie man sie mit R berechnet und interpretiert.</li>
+</ul>
+</section>
+<section id="context-matters" class="level1">
+<h1>Context Matters</h1>
+<p>Viele Phänomene, die wir erklären wollen, oder über die wir eine Prognose treffen wollen lassen sich nicht alleine auf der Individualebene, bzw. der Mikroebene modellieren.</p>
+<p>Also nicht nur persönliche Eigenschaften, Merkmale und Einstellungen haben einen Einfluss darauf, was Menschen tun, was sie denken, wen Sie wählen oder wie sie konsumieren.</p>
+<p>Der soziale Kontext und die institutionellen Strukturen auf Meso- und Makroebene haben einen nicht zu unterschätzenden Einfluss auf die Menschen und ihr handeln.</p>
+<blockquote class="blockquote">
+<p>Menschen teilen einen gemeinsamen sozialen Kontext innerhalb von Gruppen. Gleichzeitig unterscheiden diese Kontexte sich aber zwischen den Gruppen. Menschen unterliegen also unterschiedlichen sozialen Kontexten. Mit den Konzepten des methodologischen Individualismus und dem Makro-Mikro-Makro-Schema, das besser bekannt ist als die Coleman’sche Badewanne, wird analytisch klar, dass die Erklärung sozialer Phänomene immer alle Ebenen berücksichtigen muss.</p>
+</blockquote>
+<p>Dieses Argument möchte ich Ihnen anhand der Daten des ESS verdeutlichen.</p>
+<p>Unser durchgängiges Beispiel in der Videoserie ist das Thema Politikverdrossenheit. Was in den Medien oder Alltagssprachlich als Politikverdrossenheit bezeichnet wird, wird in der Forschung mit dem Konzept „Political Support“ untersucht. Eine Komponente davon ist das politische Vertrauen der Bürger. Das ist unsere abhängige Variable.</p>
+<p>Wer mehr inhaltlich darüber wissen möchte, für den gibt es am Ende des Videos noch Literaturhinweise. Also: Schauen wir uns das politische Vertrauen in Europa an:</p>
+<div class="cell" data-layout-align="center">
+
+</div>
+<p>Es handelt sich um einen Mittelwert-Index aus drei Items.</p>
+<blockquote class="blockquote">
+<p>„Bitte […] sagen Sie mir zu jeder öffentlichen Einrichtung oder Personengruppe, die ich Ihnen nenne, wie sehr Sie persönlich jeder einzelnen davon vertrauen. […] 0 bedeutet, dass Sie dieser Einrichtung oder Personengruppe überhaupt nicht vertrauen, und 10 bedeutet, dass Sie ihr voll und ganz vertrauen.“ - den Parteien - dem Bundestag (bzw. dem jeweiligen Parlament im Land) - den Politikern</p>
+</blockquote>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mreg2_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Aber hier sehen wir relativ wenig, weil hinter jedem Punkt eine Vielzahl von Befragten steckt. Um einen besseren Eindruck bekommen, ziehe ich die Punkte auf der vertikalen und horizontalen Achse etwas auseinander und mache die Punkte kleiner. So erkennen wir alle der knapp 50.000 Punkte.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mreg2_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Ganz schön viele Punkte. Damit das Beispiel übersichtlich bleibt, mache ich mit nur sechs der 27 Länder weiter und nutze von diesen auch nur 15 Prozent der Datenpunkte.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mreg2_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Immer noch viel, aber etwas übersichtlicher. Lassen Sie uns noch den Mean einzeichnen.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mreg2_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Das Durchschnittliche politische Vertrauen in den sechs Länder liegt bei 4. Es ist also einen Skalenpunkt unterhalb der theoretischen Skalenmitte und somit leicht negativ. Aber was sagt dieser Mittelwert aus? Wir wissen ja, dass hier Befragte aus sechs unterschiedlichen Ländern zusammengefasst werden.</p>
+<p>Und wir sehen ja auch, dass die Streuung recht groß ist - um genau zu sein liegt die Standardabweichung bei 2.4.</p>
+<p>Man muss kein Politikwissenschaftler sein, um zu ahnen, dass ein Teil der Unterschiede - oder genauer ein Teil der Streuung im politischen Vertrauen - darauf zurückzuführen ist, dass zwischen den Ländern große Unterschiede im politischen Vertrauen bestehen.</p>
+<p>Also färben wir die Befrgaten mal nach Länderzugehörigkeit ein.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mreg2_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Ja… man ahnt schon etwas… unten mehr grün… oben mehr rot und hellblau. Aber machen wir es doch ganz eindeutig und gruppieren die Befragten nach ihren Ländern…</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mreg2_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Was wir nun sehen ist, dass ein Teil der Streuung in der Punktewolke auf Varianz zwischen den Ländern zurückzuführen ist.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mreg2_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Jedes Land hat ein anderes durchschnittliches Niveau von politischem Vertrauen. Wir können für jedes Land den Mittelwert einzeichnen. Und diese Mittelwerte streuen um den Mittelwert der Ländern, den sogenannten Grand Mean.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mreg2_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Was wir jetzt sehen: Es gibt also Varianz innerhalb der Länder: Befragte streuen um den ihren jeweiligen Landesmittelwert. Und es gibt Varianz zwischen den Ländern. Die Länder streuen um den Gesamtmittelwert, den Grand Mean.</p>
+<p>Die Varianz innerhalb der Länder, also Varianz auf Individualebene kann nur durch Prädiktoren auf Individualebene erklärt werden. Und Varianz zwischen den Ländern kann nur durch Merkmale auf Ebene der Länder erklärt werden.</p>
+<p>Also: Menschen haben hohes oder niedriges politisches Vertrauen (Mikroebene). Aber der soziale Kontext - hier das politische System und gesellschaftliche Faktoren auf Ebene der Länder - beeinflussen als Makroebene das politische Vertrauen. Ein Teil der Unterschiede im politischen Vertrauen, geht also alleine auf diese Kontextfaktoren zurück. Und kann also nur durch Variation auf der Kontextebene erklärt werden.</p>
+<p>Wie wir bereits gesehen haben ist die Mehrebenenregression das geeignete Verfahren zur Analyse sozialer Phänomene, bei denen Kontextfaktoren und deren Wechselwirkungen mit der Individualebene explizit modelliert werden sollen.</p>
+<p>Eine Bedingung ist aber, dass die Daten auch empirisch eine hierarchische Struktur aufweisen.</p>
+<p>Also dass die Ebenen nicht nur strukturell vorhanden sind, sondern darüber hinaus, dass auch tatsächlich eine empirische Variation zwischen den Ländern vorhanden ist.</p>
+<p>Und zwar für die jeweilige Y-Variable, die für Sie in Ihrer Forschungsfrage relevant ist!</p>
+<p>Das heißt ob und wie stark die Mehrebenenstruktur ausgeprägt ist, ist kein Merkmal des gesamten Datensatzes, sondern ein Merkmal einer spezifischen Variable in Abhängigkeit einer spezifischen Gruppierungsvariable. Und das kann bei einer anderen Variable, die einem anderen datengenerierenden Prozess unterliegt, ganz anders aussehen.</p>
+<p>Der erste Schritt einer Mehrebeneanalyse ist also zu prüfen, ob ausreichend Variation auf der oberen Ebene vorhanden. Dafür schätzen wir ein sogenannten <strong>Nullmodell</strong> oder leeres Modell (manchmal auch Baseline Modell).</p>
+</section>
+<section id="das-nullmodell" class="level1">
+<h1>Das Nullmodell</h1>
+<p>Das Nullmodell ist ein Mehrebenenmodell, bei dem noch <em>keine</em> unabhängigen Variablen mit ins Modell aufgenommen werden. Es ist ein Random Intercept Modell ohne Prädiktoren.</p>
+<p>Das hier erkennen Sie bestimmt:</p>
+<p class="math">
+<span class="math inline">\(\hat{y}=a+bx\)</span>
+</p>
+<p>Es ist die klassische Regressiongleichung.</p>
+<p>Der Vorhersagewert <span class="math inline">\(\hat{y}\)</span> ergibt sich aus einer Regressionsgeraden, welche die Y-Achse an einem bestimmten Punkt schneidet. Das ist der Intercept <span class="math inline">\(a\)</span>. Und der Regressionskoeffizient <span class="math inline">\(b\)</span> sagt uns, um welchen Wert die Regressionsgerade steigt, wenn die unabhänige Variable <span class="math inline">\(x\)</span> um einen bestimmten Wert zunimmt. Dieser Steigungsparameter <span class="math inline">\(b\)</span> wird im englischen Slope genannt.</p>
+<p>Auch dier Mehrebenenregression basiert auf dieser klassischen Gleichung. Allerdings werden alle Regressionsparamter, also der Intercept und die Slopes einfach mit <span class="math inline">\(\beta\)</span> bezeichnet und durchgezählt. <span class="math inline">\(\beta_0\)</span> ist der Intercept, <span class="math inline">\(\beta_1\)</span> die erste unabhänige Variable, <span class="math inline">\(\beta_2\)</span> die zweite, usw..</p>
+<p class="math">
+<span class="math inline">\(\hat{y}=\beta_0+\beta_1x_1\)</span>
+</p>
+<p>Weil das einfache OLS Modell nur eine Ebene hat, verzichtet man häufig auf einen Index. Vollständig würde die Gleichung aber lauten:</p>
+<p class="math">
+<span class="math inline">\(\hat{y}_i=\beta_0+\beta_1x_{1i}\)</span>
+</p>
+<p>Der Vorhersagewert und der Wert der x-Variable sind Befragtenspezifisch, daher Index <span class="math inline">\(i\)</span>.</p>
+<p>Auch im klassischen OLS Modell könnten wir ein Nullmodel, also ein Modell ohne unabhängige Variablen schätzen.</p>
+<p class="math">
+<span class="math inline">\(\hat{y}_i=\beta_0\)</span>
+</p>
+<p>Der Vorhersagewert wäre für alle Befragten einfach der Intercept, also eine Gerade, die parallel zur x-Achse verläuft und dem Mittelwert der abhängigen Variable entspricht.</p>
+<p>Das Nullmodell einer Mehrebenenregression wird Formel folgendermaßen ausgedrückt:</p>
+<p class="math">
+<span class="math inline">\(\hat{y}_{ij} = \beta_{0j}\)</span>
+</p>
+<p>Neu ist, dass der Vorhersagewert und der Intercept zusätzlich den Index <span class="math inline">\(j\)</span> haben. Für den Vorhersagewert <span class="math inline">\(\hat{y}\)</span> heißt das, nur das es sich um den Wert des Befrgaten <span class="math inline">\(i\)</span> in Land <span class="math inline">\(j\)</span> handelt. Für den Intercept <span class="math inline">\(\beta_{0}\)</span> heißt es, dass es sich um einen länderspezifischen Mittelwert handelt.</p>
+<p>Im Nullmodell ergibt sich also der Vorhersagewert <span class="math inline">\(\hat{y}_{ij}\)</span> einzig aus einem länderspezifischen Intercept <span class="math inline">\(\beta_{0j}\)</span>.</p>
+<p>Wir könnten die Formel auch etwas ausführlicher schreiben:</p>
+<p class="math">
+<span class="math inline">\(y_{ij} = \beta_{0j} + r_{ij}\)</span>
+</p>
+<p>Statt dem Vorhersagewert <span class="math inline">\(\hat{y}\)</span> haben wir nun den beobachteten Wert <span class="math inline">\(y\)</span> auf der linken Seite. Damit die Gleichung trotzdem aufgeht, ergänzen wir rechts noch die Fehlerterm, bzw. die Residuen <span class="math inline">\(r_{ij}\)</span>.</p>
+<p>Der beobachtete Wert <span class="math inline">\(y_{ij}\)</span> für Befragten <span class="math inline">\(i\)</span> in Land <span class="math inline">\(j\)</span> ergibt sich demnach aus dem Intercept <span class="math inline">\(\beta_{0j}\)</span> für Land <span class="math inline">\(j\)</span> und einem Fehlerterm oder Residuum <span class="math inline">\(r_{ij}\)</span> für den jeweiligen Befragten <span class="math inline">\(i\)</span> in Land <span class="math inline">\(j\)</span>.</p>
+<p>Der länderspezifische Intercept <span class="math inline">\(\beta_{0j}\)</span> macht nichts anderes, als dass er die Varianz zwischen den Ländern aus den Daten heraus rechnet.</p>
+<p>Was bleibt, ist die Varianz auf Individualebene. Und da wir keine weiteren Prädiktoren im Modell haben, ist steckt alle Varianz zwischen den Befragten also im Residuum <span class="math inline">\(r_{ij}\)</span>.</p>
+<p>Da der Intercept <span class="math inline">\(\beta_{0j}\)</span> aber länderspezifisch ist (das sehen wir im Index <span class="math inline">\(j\)</span>), müssen wir auch das im Modell berücksichtigen. Das heißt das Nullmodell ergänzen wir noch um eine zweite Zeile, die angibt, wie sich der variierende Intercept zusammensetzt. Oder anders ausgedrückt: Wir müssen noch ein Modell für die Ebene 2 formulieren:</p>
+<div class="border">
+<p class="math_left">
+<span class="math inline">\(y_{ij} = \beta_{0j} + r_{ij}\)</span>
+</p>
+mit
+<p class="math_left">
+<span class="math inline">\(\beta_{0j} = \gamma_{00} + u_{0j}\)</span>
+</p>
+</div>
+<p>Die zweite Zeile sagt nun: Der Ebene 1 Intercept <span class="math inline">\(\beta_{0j}\)</span> für Land <span class="math inline">\(j\)</span> ergibt sich aus einem Ebene 2 Intercept <span class="math inline">\(\gamma_{00}\)</span> (Gamma Null Null) und einem Ebene 2 Residuum <span class="math inline">\(u_{0j}\)</span>.</p>
+<p><span class="math inline">\(\gamma_{00}\)</span> ist dabei der Grand Mean, also der Mittelwert der Ländermittelwerte. Wie jeder Intercept ist das eine Konstante. Da <span class="math inline">\(\gamma_{00}\)</span> nicht variiert, hat es keinen Index <span class="math inline">\(j\)</span>.</p>
+<p>Das Ebene 2 Residuum <span class="math inline">\(u_{0j}\)</span> beschtreibt dann für jedes Land <span class="math inline">\(j\)</span> die Abweichung vom Grand Mean, also vom Ebene 2 Intercept <span class="math inline">\(\gamma_{00}\)</span>. Alle Varianz zwischen den Ländern steckt also im Ebene 2 Residuum <span class="math inline">\(u_{0j}\)</span></p>
+<p>Mit Hilfe des Nullmodells können wir also berechnen, wie viel Varianz jeweils auf Individualebene und auf Kontextebene zu finden ist.</p>
+<p>Damit können wir den sogenannten <span class="math inline">\(ICC\)</span> berechnen, der uns Hilft zu entscheiden, ob eine Mehrebenenregression notwendig ist.</p>
+</section>
+<section id="die-intraklassenkorrelation-icc" class="level1">
+<h1>Die Intraklassenkorrelation ICC</h1>
+<p>Wie wir gerade gesehen haben, können die Gesamtvarianz in einer abhängigen Variable mit Hilfe des Nullmodels in Varianzkomponenten zerlegt werden.</p>
+<p>Wir können bestimmen, wie viel der Variation in der Abweichung der Individuen vom jeweiligen Gruppenmittelwert - also dem länderspezifischen Intercept <span class="math inline">\(\beta_{0j}\)</span> steck. Und wie viel der Variation in der Abweichung der Gruppen bzw. Länder vom Gesamtmittelwert, bzw. Grand Mean <span class="math inline">\(\gamma_{00}\)</span> steckt.</p>
+<p>Kurz nochmal als Auffrischung: Die Varianz ist die Summe der quadrierten Abweichungen vom Mittelwert, die um die Stichprobengröße bereinigt ist. Das Ganze sieht dann so aus:</p>
+<p><span class="math display">\[s^2=\frac{\sum\nolimits _{i=1}^{n}{(x_i-\bar{x})^2}}{n-1}\]</span></p>
+<p>Also der Abstand von Beobachtungswert zum Mittelwert wird quadriert und über alle Befragten aufsummiert. Dann durch die Fallzahl minus 1 geteilt.</p>
+<p>Die Gesamtvarianz hier im Bild in der Variable politisches Vertrauen ist 5.67.</p>
+<p>Wenn wir für jedes Land den Ländermittelwert, also den länderpsezifischen Intercept <span class="math inline">\(beta_{0j}\)</span> abziehen, man könnte auch sagen, um den Gruppenmittelwert zentrieren, dann rechnen wir die Varianz auf Ebene 2 aus der Gesamtvarianz heraus. Es bleibt nur noch die Varianz auf Individualebene, unabhängig von der Länderzugehörigkeit.</p>
+<p>Das sehen Sie nun rechts im Bild.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mreg2_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Hier ist die Varianz nur noch bei 4.28, weil die Varianz zwischen den Ländern fehlt. 4.28 ist die Varianz auf Individualebene.</p>
+<p>Jetzt können wir auch ausrechnen, wie große der Anteil der Varianz zwischen den Ländern an der Gesamtvarianz ist:</p>
+<p><span class="math display">\[\frac{Varianz~auf~L2}{Gesamtvarianz} = \frac{Gesamtvarianz ~ -  ~ Varianz~auf~L1}{Gesamtvarianz} = \frac{5.67 - 4.28}{5.67} = 0.24\]</span></p>
+<div class="cell" data-layout-align="center">
+
+</div>
+<p>Wenn wir diesen Wert mit 100 multiplizieren, können wir den Wert als Prozentwert interpretieren: Wir sehen also, dass 24 Prozent der Varianz in den Daten (hier für diese 6 Länder) auf Kontexteffekte zurückgehen.</p>
+<p>Was wir hier berechnet haben ist der sogenannte <strong>Intraklassenkorrelationkoeffizient</strong> kurz <span class="math inline">\(ICC\)</span>. In Lehrbüchern finden Sie auch manchmal die Notation mit griechischem <span class="math inline">\(\rho\)</span> (rho) für den ICC und <span class="math inline">\(\sigma^2\)</span> (sigma) für die Varianz:</p>
+<p><span class="math inline">\(ICC = \rho=\frac{\sigma^2_{L2}}{\sigma^2_{L1}+\sigma^2_{L2}}\)</span></p>
+<p>Der <span class="math inline">\(ICC\)</span> gibt an, wie viel Varianz in den einer Variable durch die Gruppierungsvariable aufgeklärt werden kann (in Prozent).</p>
+<p>Als <strong>Daumenregel</strong> wird häufig genannt, dass der <span class="math inline">\(ICC \ge 0.05\)</span> sein sollte. Wenn also mindestens 5 Prozent der Varianz auf der Kontextebene zu finden sind, ist ein Mehrebenenmodell sinnvoll.</p>
+<p>Allerdings ist das kein hartes Kriterium. Denn: Sobald der <span class="math inline">\(ICC\)</span> positive Werte annimmt werden die Standardfehler bei nicht Berücksichtigung der Mehrebenenstruktur bereits unterschätzt (<a href="https://doi.org/10.2307/271070">Muthen/Satorra 1995: 289</a>)! Im schlechtesten Fall geht man von signifikanten Effekten aus, wo gar keine sind. Dazu aber auch noch mehr im dritten Video.</p>
+<p>Schauen wir uns nun in R an, wie wir das Nullmodell schätzen und damit den <span class="math inline">\(ICC\)</span> berechnen.</p>
+<section id="umsetzung-in-r" class="level2">
+<h2 class="anchored" data-anchor-id="umsetzung-in-r">Umsetzung in R</h2>
+<p>Um den ICC berechnen zu können, schätzen wir ein sogenannten <strong>Nullmodell</strong> oder leeres Modell (manchmal auch Baseline Modell).</p>
+<p>Dabei handelt es sich um ein Mehrebenenmodell, bei dem noch <em>keine</em> unabhängigen Variablen mit ins Modell aufgenommen werden. Es ist ein Random Intercept Modell ohne Prädiktoren.</p>
+<p>Das Nullmodell ist immer der erste Schritt bei einer Mehrebenenanalyse. Es liefert uns die Informationen, wie viel Varianz auf welcher Ebene zu finden ist - und damit, ob es sich überhaupt lohnt, weitere komplexere Mehrebenenmodelle zu schätzen.</p>
+<p>Bevor wir dieses Nullmodell berechnen können, müssen wir aber zunächst die Daten einlesen und vorbereiten. Ich nutze das <a href="https://cran.r-project.org/web/packages/foreign/index.html"><code>foreign</code></a>-Paket mit der Funktion <code>read.spss()</code> um den ESS Datensatz den ich heruntergeladen habe einzulesen. Information und Link zum Datensatz finden Sie im ersten Video.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Einlesen des Datensatzes</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(foreign)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ess <span class="ot">&lt;-</span> <span class="fu">read.spss</span>(<span class="st">"./Daten/ESS9e02.sav"</span>, </span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">use.value.labels =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">to.data.frame =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">reencode =</span> <span class="cn">TRUE</span>)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Als nächstes erstelle ich einen Mittelwertindex mit der Funktion <code>rowMeans()</code> aus den drei Vertrauens-Items <code>trstpr</code>, <code>trstpl</code> und <code>trstprt</code>. Der Mittelwertindex hat den Vorteil, dass wir nicht so viele Missing Values erhalten wie bei einem additiven Index. Beim additiven Index genügt schon ein <code>NA</code> auf einem der drei Items um zu einem listenweisen Fallausschluss zu führen.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Operationalisierung der abh. Variable </span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># "Politisches Vertrauen"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Mittelwertindex aus drei Items:</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>idx_vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"trstprl"</span>,<span class="st">"trstplt"</span>,<span class="st">"trstprt"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>ess<span class="sc">$</span>pol_vertrauen <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(ess[,idx_vars], </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                              <span class="at">na.rm =</span> F)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#table(ess$pol_vertrauen, useNA = "always")</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#DescTools::Desc(ess$pol_vertrauen)</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#table(ess$cntry)</span></span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Wir haben nun also die Variable <code>pol_vertrauen</code> als abhängige Variable und die Variable <code>cntry</code> als L2 Gruppierungsvariable. Da wir für das Nullmodell noch keine weiteren Prädiktoren benötigen, können wir direkt im nächsten Schritt das Nullmodell schätzen.</p>
+<p>Für die Mehrebenenregression nutzen wir das Paket <a href="https://cran.r-project.org/web/packages/lme4/index.html"><code>lme4</code></a> von <a href="https://doi.org/10.18637/jss.v067.i01">Bates et al.&nbsp;(2015)</a>. Darauf aufbauend gibt es noch das Paket <a href="https://www.jstatsoft.org/article/view/v082i13"><code>lmerTest</code></a>, welches zusätzlich Signifikanztests mit ausgibt.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lmerTest) <span class="co">#Eigentlich genügt lmerTest, da das automatisch auch lme4 lädt</span></span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Beide Pakete enthalten die Funktion <code>lmer()</code>. <strong>lmer</strong> steht für <strong>l</strong>inear <strong>m</strong>ixed <strong>e</strong>ffects <strong>r</strong>egression.</p>
+<p>Die <code>lmer()</code>-Funktion erwartet im einfachsten Fall nur eine Formel, die das Modell spezifiziert und den Dataframe den wir nutzen.</p>
+<p>Was neu ist, ist dass wir nun explizit angeben müssen, dass ein Intercept geschätzt werden soll.</p>
+<p>Die Formel für den R-Code lautet <code>pol_vertrauen ~ 1 + (1 | cntry)</code>.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>mreg<span class="fl">.0</span> <span class="ot">&lt;-</span> <span class="fu">lmer</span>(pol_vertrauen <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> cntry),</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> ess)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Allgemeiner heißt das:</p>
+<ul>
+<li>Die abhängige Variable <code>pol_vertrauen</code></li>
+<li>wird regrediert <code>~</code></li>
+<li>auf einen Ebene 1 Intercept <code>1</code></li>
+<li>dabei darf der Intercept <code>1</code> variieren <code>|</code> nach der Gruppierungsvariable <code>cntry</code>: also: <code>(1 | cntry)</code></li>
+</ul>
+<p>Dass der Intercept mit einer <code>1</code> angegeben wird, kommt daher, dass die Regressionsgleichung eigentlich so aussieht:</p>
+<p class="math">
+<span class="math inline">\(\hat{y}_{ij}=\beta_0j\)</span> <font color="red"><span class="math inline">\(1\)</span></font> <span class="math inline">\(+\beta_1x_{ij}\)</span>
+</p>
+<p>Der Intercept wird nämlich für jeden Befragten mal 1 genommen, was man aber in der Formle nicht ausschreiben muss.</p>
+<p>Das Regressionsobjekt haben wir unter dem Namen <code>mreg.0</code> gespeichert.</p>
+<p>Das können wir nun aufrufen oder direkt mit der Funktion <code>summary()</code> anzeigen lassen:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mreg<span class="fl">.0</span>)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: pol_vertrauen ~ 1 + (1 | cntry)
+   Data: ess
+
+REML criterion at convergence: 196954.6
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.7457 -0.7566  0.0255  0.7034  3.8140 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ cntry    (Intercept) 1.053    1.026   
+ Residual             4.471    2.115   
+Number of obs: 45391, groups:  cntry, 27
+
+Fixed effects:
+            Estimate Std. Error      df t value Pr(&gt;|t|)    
+(Intercept)   3.8413     0.1978 25.9987   19.42   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>Viele Informationen in diesem Output sind an dieser Stelle nicht wichtig. Für uns sind folgende Quanitites of Interest relevant:</p>
+<p>Unten bei den <font color="blue">Fixed Effects</font> in blau hervorgehoben, sehen wir den durchschnittlichen Wert der variienden Intercepts, also den Grand Mean <span class="math inline">\(\gamma_{00}\)</span>. Dieser liegt bei <span class="math inline">\(3.8\)</span>.</p>
+<p>Aber: der Intercept darf ja variierenden! Und wie groß diese Varianz ist, sehen wir oben bei den <font color="red">Random Effects</font>, hier in rot hervorgehoben. Hier finden wir die Varianzkomponenten des Modells. Also: das was variieren darf, und was noch nicht systematisch im Modell erklärt wird. Daher auch die Bezeichnung <em>Random</em> Effects.</p>
+<p>Auf der Ebene der Gruppierungsvariable <code>cntry</code> haben wir einen variierenden Intercept, das ist das <span class="math inline">\(\beta_{0j}\)</span>, mit einer Varianz von <span class="math inline">\(1.05.\)</span></p>
+<p>Übrig bleibt eine Resiudalvarianz auf Ebene 1, also das was nicht durch den variierenden Intercept erklärt wird. Das sind hier <span class="math inline">\(4.47.\)</span></p>
+<p>Mit diesen beiden Zahlen lässt sich nun der <span class="math inline">\(ICC\)</span> berechnen.</p>
+<p><span class="math inline">\(\frac{1.05}{1.05 + 4.47}= 0.19\)</span></p>
+<p>Um das nicht von Hand erledigen zu müssen, gibt es im Paket <a href="https://cran.r-project.org/web/packages/performance/index.html"><code>performance</code></a> die Funktion <code>icc()</code>, die man auf das Nullmodell anwendet:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(performance)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">icc</span>(mreg<span class="fl">.0</span>)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># Intraclass Correlation Coefficient
+
+    Adjusted ICC: 0.191
+  Unadjusted ICC: 0.191</code></pre>
+</div>
+</div>
+<p>Wir sehen also der<span class="math inline">\(ICC\)</span> beträgt 0.19065 - 19.1 Prozent der Varianz liegen auf Ebene 2.</p>
+<p>Das ist ziemlich guter Wert für eine abhängige Variable aus dem Bereich der politikwissenschaftlichen Einstellungs- und Verhaltensforschung. Der datengenerierende Prozess resultiert also tatsächlich in einer geclusterten bzw. hierarchischen Datenstruktur. Die obere Ebene ist für fast ein Fünftel der Varianz in den Daten verantwortlich.</p>
+<p>Somit wissen wir: Eine Mehrebenenregression ist unbedingt einer einfachen OLS Regression vorzuziehen, wenn wir korrekte Ergebnisse erhalten wollen, denen wir auch trauen können.</p>
+<p>Tun wir das nicht, korrelieren die Fehler der Individualebene mit einem Kontextmerkmal, nämlich der Länderzugehörigkeit der Befragten. Wir nehmen an, die Befragten wären unabhängig voneinander, was sie in Wahrheit nicht sind.</p>
+<p>Unter anderem werden die Standardfehler der Regressionskoeffizienten im einfachen OLS Modell auf Basis der gesamten Stichprobe berechnet. Es wird nicht berücksichtigt, dass die Varianzen und Fallzahlen in den Gruppen unterschiedlich sind. Als Folge werden die Standardfehler unterschätzt.</p>
+<p>Wenn die Standardfehler aber kleiner sind, als sie sein müssten, wird auch die Irrtumswahrscheinlichkeit beim Signifikanztest unterschätzt.</p>
+<p>Im schlechtesten Fall gehen Sie also von signifikanten Effekten aus, wo in Wahrheit kein Zusammenhang zu finden ist.</p>
+<p>Sie sehen, wenn die Daten eine Mehrebenenstruktur aufweisen, sollten Sie auch unbedingt ein Mehrebenenmodell schätzen!</p>
+<p>Im nächsten <a href="./mreg3.html">Teil 3</a> werden wir uns aber zunächst mit der Operationalisierung, also der Vorbereitung der Daten für die Mehrebenenregression beschäftigen.</p>
+</section>
+</section>
+<section id="aufgabe" class="level1">
+<h1>Aufgabe</h1>
+<p>Für diese Aufgaben ist es sinnvoll, das Codebuch des ESS Datensatzes zur Hand zu nehmen, um nach geegineten Variablen zu suchen. Das Codebuch ist auf der Webseite des ESS verfügbar.</p>
+<ul>
+<li>Überlegen Sie sich, welche anderen Variablen Sie als abhängige Variable nutzen könnten und prüfen Sie anhand des ICC, wie stark diese von der oberen Ebene der Länder abhängig sind.</li>
+<li>Überlegen Sie sich für eine abhänige Variable ihrer Wahl, ob neben den Ländern auch eine andere Gruppierungsvariable denkbar ist. Berechnen Sie den ICC.</li>
+</ul>
+</section>
+<section id="lernzielabgleich" class="level1">
+<h1>Lernzielabgleich</h1>
+<p>Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernziele erreicht haben:</p>
+<ul>
+<li>Sie können theoretisch begründen wie und warum der Kontext einen Einfluss auf Ihre Datenstruktur hat.</li>
+<li>Sie können erläutern, was ein Nullmodell ist und können es als Regressionsgleichung formulieren.</li>
+<li>Sie wissen welche Varianzkomponenten das Nullmodell beinhaltet und wo sie in der Regrgressionsgleichung zu finden sind.</li>
+<li>Sie wissen was die Intraklassenkorrelation ist und wie man sie mit R berechnet und interpretiert.</li>
+</ul>
+</section>
+<section id="literatur" class="level1">
+<h1>Literatur</h1>
+<ul>
+<li>Bates, D., Mächler, M., Bolker, B., &amp; Walker, S. (2015). Fitting Linear Mixed-Effects Models Using lme4. Journal of Statistical Software, 67(1), 1–48. DOI: <a href="https://doi.org/10.18637/jss.v067.i01" class="uri">https://doi.org/10.18637/jss.v067.i01</a></li>
+<li>Elff, Martin; Heisig, Jan Paul; Schaeffer, Merlin; Shikano, Susumu (2021): Multilevel Analysis with Few Clusters: Improving Likelihood-based Methods to Provide Unbiased Estimates and Accurate Inference. British Journal of Political Science 51(1): 412-426. DOI: <a href="https://doi.org/10.1017/S0007123419000097" class="uri">https://doi.org/10.1017/S0007123419000097</a></li>
+<li>Gelman, Andrew; Hill, Jennifer (2009): Data-Analysis Using regression and Multilevel/Hierachical Models. Cambridge: Cambridge University Press. Kap. 12 &amp; 13. <a href="https://doi.org/10.1017/CBO9780511790942" class="uri">https://doi.org/10.1017/CBO9780511790942</a></li>
+<li>Muthen, B. O.; Satorra, A. (1995): Complex sample data in structural equation modeling. Sociological methodology, 267-316. DOI: <a href="https://doi.org/10.2307/271070" class="uri">https://doi.org/10.2307/271070</a></li>
+</ul>
+<p>Literatur zur Beispielfragestellung (nach Aktualität sortiert):</p>
+<ul>
+<li>Dalton, Russell J. (2019): Citizen politics: Public opinion and political parties in advanced industrial democracies. Cq Press.</li>
+<li>van Ham, Caroline; Thomassen, Jaques. J.; Aarts, Kees; Andeweg, Rudy B. (Hrsg.)(2017): Myth and reality of the legitimacy crisis: Explaining trends and cross-national differences in established democracies. Oxford University Press. <a href="https://doi.org/10.1093/oso/9780198793717.001.0001" class="uri">https://doi.org/10.1093/oso/9780198793717.001.0001</a></li>
+<li>Arzheimer, Kai (2002): Politikverdrossenheit. Bedeutung, Verwendung und empirische Relevanz eines politikwissenschaftlichen Begriffes. Wiesbaden: Westdeutscher Verlag. Volltext: <a href="https://www.kai-arzheimer.com/politikverdrossenheit.pdf" class="uri">https://www.kai-arzheimer.com/politikverdrossenheit.pdf</a></li>
+</ul>
+<div class="cell" data-layout-align="center">
+
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Kopiert");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Kopiert");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var filterRegex = new RegExp(/^(?:http:|https:)\/\.github\.io\/uweremer/);
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+    var links = window.document.querySelectorAll('a:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+          // target, if specified
+          link.setAttribute("target", "_blank");
+      }
+    }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">© 2022, Uwe Remer</div>   
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="./datenschutz.html">Datenschutz</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="./about.html">Impressum</a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+</body></html>

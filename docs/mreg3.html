@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="de-DE" xml:lang="de-DE"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.258">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dr.&nbsp;Uwe Remer">
+
+<title>Mehrebenenregression mit R - 3. Wie werden die Daten für eine Mehrebenregression vorbereitet?</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "Keine Treffer",
+    "search-matching-documents-text": "Treffer",
+    "search-copy-link-title": "Link in die Suche kopieren",
+    "search-hide-matches-text": "Zusätzliche Treffer verbergen",
+    "search-more-match-text": "weitere Treffer in diesem Dokument",
+    "search-more-matches-text": "weitere Treffer in diesem Dokument",
+    "search-clear-button-title": "Zurücksetzen",
+    "search-detached-cancel-button-title": "Abbrechen",
+    "search-submit-button-title": "Abschicken"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="Mehrebenenregression mit R">
+<meta property="og:description" content="6-teilige Videoreihe zum Einstieg in die Mehrebenenregression mit R">
+<meta property="og:image" content="Grafiken/varianten.png">
+<meta property="og:site-name" content="Mehrebenenregression mit R">
+<meta property="og:locale" content="de_DE">
+<meta name="twitter:title" content="Mehrebenenregression mit R">
+<meta name="twitter:description" content="6-teilige Videoreihe zum Einstieg in die Mehrebenenregression mit R">
+<meta name="twitter:image" content="Grafiken/varianten.png">
+<meta name="twitter:creator" content="@uweremerbollow">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Mehrebenenregression mit R</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html">
+ <span class="menu-text">Startseite</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-skript" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Skript</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-skript">    
+        <li>
+    <a class="dropdown-item" href="./mreg1.html">
+ <span class="dropdown-text">1. Was ist eine Mehrebenenregression?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg2.html">
+ <span class="dropdown-text">2. Wann ist eine Mehrebenenregression angebracht?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg3.html">
+ <span class="dropdown-text">3. Wie werden die Daten für eine Mehrebenregression vorbereitet?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg4.html">
+ <span class="dropdown-text">4. Wie schätzt man eine Mehrebenenregression in R?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg5.html">
+ <span class="dropdown-text">5. Wie schätzt man variierende Slopes und Cross-Level Interaktionen?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg6.html">
+ <span class="dropdown-text">6. Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="./ressourcen.html">
+ <span class="menu-text">Ressourcen</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./about.html">
+ <span class="menu-text">Kontakt</span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">3. Wie werden die Daten für eine Mehrebenregression vorbereitet?</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        <div class="sidebar-tools-collapse tools-wide">
+    <a href="https://www.sowi.uni-stuttgart.de/institut/team/Remer" title="" class="sidebar-tool px-1"><i class="bi bi-bank"></i></a>
+    <a href="https://github.com/uweremer/mreg" title="" class="sidebar-tool px-1"><i class="bi bi-github"></i></a>
+    <a href="https://fediscience.org/@uweremer" title="" class="sidebar-tool px-1"><i class="bi bi-mastodon"></i></a>
+</div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg1.html" class="sidebar-item-text sidebar-link">1. Was ist eine Mehrebenenregression?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg2.html" class="sidebar-item-text sidebar-link">2. Wann ist eine Mehrebenenregression angebracht?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg3.html" class="sidebar-item-text sidebar-link active">3. Wie werden die Daten für eine Mehrebenregression vorbereitet?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg4.html" class="sidebar-item-text sidebar-link">4. Wie schätzt man eine Mehrebenenregression in R?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg5.html" class="sidebar-item-text sidebar-link">5. Wie schätzt man variierende Slopes und Cross-Level Interaktionen?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg6.html" class="sidebar-item-text sidebar-link">6. Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Auf dieser Seite</h2>
+   
+  <ul>
+  <li><a href="#themenüberblick" id="toc-themenüberblick" class="nav-link active" data-scroll-target="#themenüberblick">Themenüberblick</a></li>
+  <li><a href="#forschungsfrage-für-das-beispiel" id="toc-forschungsfrage-für-das-beispiel" class="nav-link" data-scroll-target="#forschungsfrage-für-das-beispiel">Forschungsfrage für das Beispiel</a></li>
+  <li><a href="#operationalisierung" id="toc-operationalisierung" class="nav-link" data-scroll-target="#operationalisierung">Operationalisierung</a>
+  <ul class="collapse">
+  <li><a href="#bildung" id="toc-bildung" class="nav-link" data-scroll-target="#bildung">Bildung</a></li>
+  <li><a href="#wahrgenommene-politische-responsivität" id="toc-wahrgenommene-politische-responsivität" class="nav-link" data-scroll-target="#wahrgenommene-politische-responsivität">Wahrgenommene politische Responsivität</a></li>
+  <li><a href="#zufriedenheit-wirtschaftslage" id="toc-zufriedenheit-wirtschaftslage" class="nav-link" data-scroll-target="#zufriedenheit-wirtschaftslage">Zufriedenheit Wirtschaftslage</a></li>
+  <li><a href="#soziales-vertrauen" id="toc-soziales-vertrauen" class="nav-link" data-scroll-target="#soziales-vertrauen">Soziales Vertrauen</a></li>
+  <li><a href="#kontextdaten" id="toc-kontextdaten" class="nav-link" data-scroll-target="#kontextdaten">Kontextdaten</a></li>
+  <li><a href="#missing-values-ausschließen" id="toc-missing-values-ausschließen" class="nav-link" data-scroll-target="#missing-values-ausschließen">Missing Values ausschließen</a></li>
+  <li><a href="#zentrieren" id="toc-zentrieren" class="nav-link" data-scroll-target="#zentrieren">Zentrieren</a></li>
+  </ul></li>
+  <li><a href="#schluss" id="toc-schluss" class="nav-link" data-scroll-target="#schluss">Schluss</a></li>
+  <li><a href="#aufgabe" id="toc-aufgabe" class="nav-link" data-scroll-target="#aufgabe">Aufgabe</a></li>
+  <li><a href="#lernzielabgleich" id="toc-lernzielabgleich" class="nav-link" data-scroll-target="#lernzielabgleich">Lernzielabgleich</a></li>
+  <li><a href="#literatur" id="toc-literatur" class="nav-link" data-scroll-target="#literatur">Literatur</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">3. Wie werden die Daten für eine Mehrebenregression vorbereitet?</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="cell" data-layout-align="center">
+<style type="text/css">
+/* CSS Stil für Formeln unter Scatterplots */
+P.math {
+    text-align: center;
+    font-size: 2vw;
+}
+
+P.math_left {
+    text-align: left;
+    font-size: 1.5vw;
+}
+
+
+DIV.border {
+    padding:9.5px;
+    border-radius:4px;
+    border:1px solid #cccccc;
+    margin-top: 10px;
+    margin-bottom:10px;
+}
+</style>
+</div>
+<section id="themenüberblick" class="level1">
+<h1>Themenüberblick</h1>
+<p>In <a href="./mreg2.html">Teil 2</a> haben wir gesehen, wie man mit Hilfe des sogenannten Nullmodells berechnet, ob eine Mehrebenenregression überhaupt notwendig ist. Nur wenn dies der Fall ist, werden die eigentlich interessierenden Mehrebenenmodelle geschätzt.</p>
+<p>Bevor wir aber das Nullmodell um unabhängige Variablen ergänzen können und somit ein einfaches Mehrebenenmodell schätzen können, müssen wir die Daten entsprechend vorbereiten, also operationalisieren.</p>
+<p>Und genau darum geht es in diesem dritten Teil: Wie bereiten wir die Daten für eine Mehrebenenregression vor? Das Video zu diesem dritten Teil finden Sie <a href="https://video.fernuni-hagen.de/Play/6078">hier</a>.</p>
+<p>Lernziele für dieses Video sind…</p>
+<ul>
+<li>dass Sie die Variablen für das Mehrebenenmodell vorbereiten können:
+<ul>
+<li>dass Sie wissen wie man Datensätze zusammenspielt</li>
+<li>dass Sie verstehen, warum die unabhängigen Variablen zentriert werden und wissen, wie Sie das in R umsetzen können</li>
+</ul></li>
+</ul>
+<p>Das alles schauen wir uns direkt in R an…</p>
+</section>
+<section id="forschungsfrage-für-das-beispiel" class="level1">
+<h1>Forschungsfrage für das Beispiel</h1>
+<p>Bevor es losgeht, benötigen wir aber noch eine Forschungsfrage.</p>
+<p>Wenn wir nicht wissen, welche Frage wir eigentlich beantworten wollen, können wir auch nicht entscheiden, welche Variablen im Modell berücksichtigt werden müssen.</p>
+<p>Für die Beispielfragestellung bleiben wir beim politischen Vertrauen aus dem letzten Video 2 und Fragen:</p>
+<blockquote class="blockquote">
+<p>Welchen Einfluss hat Bildung auf politisches Vertrauen?</p>
+</blockquote>
+<p>An dieser Stelle können Sie ja Mal kurz auf Pause drücken und für sich selbst überlegen, welche Mechanismen Bildung und politisches Vertrauen verbinden und ob Bildung einen positiven oder einen negativen Effekt auf politisches Vertrauen hat.</p>
+<p>Auch wenn es für beide Richtungen Argumente gibt, zeigt sich, dass üblicherweise höhere Bildung mit Eliten-kritischeren Einstellungen einhergeht. Bildung also einen negativen Effekt auf politisches Vertrauen hat.</p>
+<p>Ob das so ist und ob dieser Effekt in allen europäischen Ländern zu finden ist, wollen wir untersuchen.</p>
+<p>Und um richtig zeigen zu können, was die Mehrebenenregression kann, ergänzen wir die Fragestellung noch folgendermaßen:</p>
+<blockquote class="blockquote">
+<p>Wie beeinflusst Korruption die Wirkung von Bildung auf politisches Vertrauen?</p>
+</blockquote>
+<p>Diese zweite Fragestellung beinhaltet explizit ein Effekt der von der Kontextebene auf einen Effekt der Individualebene.</p>
+<p>Da wir nun wissen, was wir untersuchen wollen, wechseln wir in R.</p>
+</section>
+<section id="operationalisierung" class="level1">
+<h1>Operationalisierung</h1>
+<p>Noch ein kurzer Hinweis: Ich nutze in dieser Videoreihe bei der Operationalisierung “<em>base R</em>”. Das Umbenennen von Variablen, recodieren oder transformieren von Variablen kann man natürlich auch mit Funktionen des <a href="https://dplyr.tidyverse.org/"><code>dplyr</code></a>-Paketes oder mit <a href="https://strengejacke.github.io/sjmisc/"><code>sjmisc</code></a> umsetzen und im “tidyverse”-Stil mit dem Pipe-Operator schreiben.</p>
+<p>Bevor wir also unsere Modelle schätzen können, müssen die Variablen operationalisiert werden. Als Datensatz nutzen wir den ESS 9. Informationen zum Datensatz finden Sie im ersten Video.</p>
+<p>Bereits im letzten Teil 2 haben wir die abhängige Variable für unser Beispiel kennengelernt: das politische Vertrauen.</p>
+<p>Den ersten Teil des R-Codes können wir direkt noch Mal nutzen.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Importieren des Datensatz</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(foreign)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ess <span class="ot">&lt;-</span> <span class="fu">read.spss</span>(<span class="st">"./Daten/ESS9e02.sav"</span>, </span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">use.value.labels =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">to.data.frame =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">reencode =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Operationalisierung der abh. Variable </span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># "Politisches Vertrauen"</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Mittelwertindex aus drei Items:</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>idx_vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"trstprl"</span>,<span class="st">"trstplt"</span>,<span class="st">"trstprt"</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>ess<span class="sc">$</span>pol_vertrauen <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(ess[,idx_vars], </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>                              <span class="at">na.rm =</span> F)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#table(ess$pol_vertrauen, useNA = "always")</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DescTools)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#Desc(ess$pol_vertrauen)</span></span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Neben der abhängigen Variablen benötigen wir auch noch die unabhängigen Variablen.</p>
+<p>Sie sollten die Variablen natürlich auf Basis theoretischer Überlegungen wählen. Passend zu unserer Fragestellung habe ich hier zwei Literaturvorschläge: <a href="https://doi.org/10.1093/ijpor/edab008">Jiang &amp; Zhang (2021)</a> und <a href="https://doi.org/10.1177/0032321715607514">Van der Meer &amp; Hakhverdian (2017)</a>.</p>
+<section id="bildung" class="level2">
+<h2 class="anchored" data-anchor-id="bildung">Bildung</h2>
+<p>Als erstes operationalisiere ich unsere Haupterklärungsvariable <code>Bildung</code>.</p>
+<p>Die Messung erfolgt über die “International Standard Classification of Education” - <code>eisced</code>, welche die nationalen Bildungabschlüsse in eine vergleichbare Skala überführt.</p>
+<p>Die numerischen Merkmalsausprägungen reichen von <span class="math inline">\(1\)</span> <em>less than lower secondary</em> bis <span class="math inline">\(7\)</span> <em>higher tertiary education</em>.</p>
+<p>Streng genommen handelt es sich um eine ordinale Skala, aus didaktischen Gründen nutze ich sie für dieses Beispiel als metrische Skala.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Operationalisierung der unabh. Variable </span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Bildung</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>ess<span class="sc">$</span>bildung <span class="ot">&lt;-</span> ess<span class="sc">$</span>eisced </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># NAs definieren:</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># `0` (nicht harmonisierbar) und `55` (andere) auf `NA` setzten</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ess<span class="sc">$</span>bildung[ess<span class="sc">$</span>bildung <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">55</span>)] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Desc(ess$bildung)</span></span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Neben der abhängigen und der uns interessierenden unabhängigen Variable, müssen wir noch weitere Variablen im Modell berücksichtigen - die sogenannten Kontrollvariablen.</p>
+<p>Für unser Beispielfragestellung nutze ich die Variablen:</p>
+<ul>
+<li>Wahrgenommene politische Responsivität</li>
+<li>Zufriedenheit mit der Wirtschaftslage</li>
+<li>Soziales Vertrauen</li>
+</ul>
+</section>
+<section id="wahrgenommene-politische-responsivität" class="level2">
+<h2 class="anchored" data-anchor-id="wahrgenommene-politische-responsivität">Wahrgenommene politische Responsivität</h2>
+<p>Mittelwertindex aus zwei Items</p>
+<p><em>How much would you say the political system in [country] allows people like you to have a say in what the government does?</em></p>
+<p><em>And how much would you say that the political system in [country] allows people like you to have an influence on politics?</em></p>
+<p>Die Antwortskala umfasst eine 5er Skala:</p>
+<ul>
+<li><span class="math inline">\(1\)</span> Not at all</li>
+<li><span class="math inline">\(5\)</span> A great deal</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Operationalisierung der unabh. Variable </span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Wahrgenommene politische Responsivität </span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Mittelwertindex aus zwei Items </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>idx_vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"psppsgva"</span>,<span class="st">"psppipla"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>ess<span class="sc">$</span>responsivitaet <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(ess[,idx_vars], </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                               <span class="at">na.rm =</span> F)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Desc(ess$responsivitaet)</span></span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="zufriedenheit-wirtschaftslage" class="level2">
+<h2 class="anchored" data-anchor-id="zufriedenheit-wirtschaftslage">Zufriedenheit Wirtschaftslage</h2>
+<p><em>On the whole how satisfied are you with the present state of the economy in [country]?</em></p>
+<ul>
+<li><span class="math inline">\(0\)</span> Extremely dissatisfied</li>
+<li><span class="math inline">\(10\)</span> Extremely satisfied</li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Operationalisierung der unabh. Variable </span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># "Zufriedenheit Wirtschaftslage"</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>ess<span class="sc">$</span>zufr_wirtschaft <span class="ot">&lt;-</span> ess<span class="sc">$</span>stfeco</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#Desc(ess$zufr_wirtschaft)</span></span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="soziales-vertrauen" class="level2">
+<h2 class="anchored" data-anchor-id="soziales-vertrauen">Soziales Vertrauen</h2>
+<p>Soziales Vertrauen messen wir mit Hilfe der Social Trust Scale. Informationen zu dieser Skala finden Sie beim GESIS in der Zusammenstellung sozialwissenschaftlicher Items und Skalen (ZIS) <a href="https://doi.org/10.6102/zis235">(Breyer 2015)</a>.</p>
+<p>Der Index wurde ursprünglich von <a href="https://doi.org/10.1177/002200275700100403">Rosenberg (1956)</a> vorgeschlagen. Er besteht aus den drei Items:</p>
+<ul>
+<li>Vertrauenswürdigkeit <code>ppltrst</code></li>
+<li>Fairness <code>pplfair</code><br>
+</li>
+<li>Hilfsbereitschaft <code>pplhlp</code></li>
+</ul>
+<p><em>Generally speaking, would you say that most people can be trusted, or that you can’t be too careful in dealing with people?</em></p>
+<p>Auch hier liegt für jedes Item eine 10er Skala vor, z.B. für Vertrauen lauten die ANtwortkategorien:</p>
+<ul>
+<li><span class="math inline">\(0\)</span> You can’t be too careful</li>
+<li><span class="math inline">\(10\)</span> Most people can be trusted</li>
+</ul>
+<p>Hohe Werte bedeuten positive Einstellungen.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Operationalisierung der unabh. Variable </span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Soziales Vertrauen</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>idx_vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"ppltrst"</span>, <span class="st">"pplfair"</span>, <span class="st">"pplhlp"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>ess<span class="sc">$</span>soz_vertrauen <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(ess[,idx_vars], </span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                               <span class="at">na.rm =</span> F)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#Desc(ess$soz_vertrauen)</span></span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="kontextdaten" class="level2">
+<h2 class="anchored" data-anchor-id="kontextdaten">Kontextdaten</h2>
+<p>Wenn man eine Mehrebenenregression rechnet, möchte man häufig auch Variablen der Makroebene nutzen. Wenn die Gruppierungsvariable Länder oder andere administrative Einheiten sind, gibt es diese Daten häufig bei den statistischen Ämtern. Zum Beispiel Eurostat, dem Statistischen Bundesamt, der Weltbank, der OECD oder den Vereinten Nationen.</p>
+<p>Aber: wir sind in einer sehr komfortablen Situation, denn im Rahmen des ESS Programms wurden auch Makro-Datensätze erstellt, in denen Daten aus verschiedenen Quellen zusammengetragen wurden. Diese Datensätze enthalten neben den Individualdaten auch Kontextdaten.</p>
+<p>Auch der Makrodatensatz ist nach Registrierung kostenlos verfügbar. Jedoch ist der Makrodatensatz etwa 2 GB groß.</p>
+<p>Statt des ganzen Datensatzes, habe ich ihnen einen kleinen Ausschnitt davon als csv-Datei vorbereitet.</p>
+<p>Die csv-Datei finden Sie als Download bei den <a href="./ressourcen.html">Ressourcen</a>. Lesen wir zuerst den vorbereiteten Makrodatensatz ein:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Einlesen Makrodaten einlesen und mit merge() hinzuspielen</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># ggf. Daetipfad anpassen</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>ess_macro <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">"./Daten/ess2018_macro.csv"</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">sep=</span><span class="st">";"</span>, <span class="at">header=</span>T)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(ess_macro)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  cntry c_tensys_2018 c_ticpi_2018 c_gini_2018
+1    AT            64           76        26.8
+2    BE            88           75        25.7
+3    BG            28           42        39.6
+4    CH            88           85        29.7
+5    CY            30           59        29.1
+6    CZ            28           59        24.0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#View(ess_macro)</span></span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Diese Datei enthält neben der Gruppierungsvariable <code>cntry</code> drei weitere Variablen:</p>
+<ul>
+<li><code>c_ticpi_2018</code> Corruption Perceptions Index<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></li>
+<li><code>c_gini_2018</code> GINI Index<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></li>
+<li><code>c_tensys_2018</code> System Tenure<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></li>
+</ul>
+<p>Mit diesem Datensatz haben wir gleich auch die Gelegenheit einen typischen Schritt der Datenvorbereitung umzusetzen: das <strong>mergen</strong> von Datensätzen.</p>
+<p>Megren heißt, dass man zwei Datensätze anhand einer Schlüsselvariable zusammenspielt.</p>
+<p>Probieren wir es aus:</p>
+<p>Wir sehen im Environment Fenster in R, dass der Datensatz 4 Variablen mit 29 Beobachtungen enthält. Die <code>head()</code>-Funktion gibt uns einen ersten Blick auf die Daten. Wir sehen, dass jede Beobachtung, also jeder Fall ein Land ist.</p>
+<p>Der ESS-Datensatz den wir vorhin eingelesen hatten, hat als Beobachtungseinheit Individuen.</p>
+<p>Trotzdem können wir beide Datensätze zusammenspielen. Dafür nutzen wir die <code>cntry</code>-Variable als Schlüsselvariable. Jeder Befragte eines Landes, bekommt den jeweiligen Wert des Landes aus dem Makrodatensatz zugespielt.</p>
+<p>Dafür nutzen wir die <code>merge()</code>-Funktion:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ess_micro <span class="ot">&lt;-</span> ess</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>ess <span class="ot">&lt;-</span> <span class="fu">merge</span>(ess_micro, ess_macro, <span class="co"># Die beiden Datensätze die zusammengespielt werden</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">by =</span> <span class="st">"cntry"</span>, <span class="co"># Die Schlüsselvariable</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">all.x =</span> T) <span class="co"># Das alle Fälle des x-Datensatzes (des erstgenannten) behalten werden</span></span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Der neue ESS Datensatz enthält wie der Mikro-Datensatz die gut 47.000 Befragten, aber drei zusätzliche Variablen aus dem Makrodatensatz. Die vierte Variable aus dem Makrodatensatz muss ja nicht übernommen werden, denn die <code>cntry</code> Variable war ja auch vorher schon ein Merkmal im Mikro-Datensatz.</p>
+<p>Von den drei Kontextvariablen nutzen wir in unserem Beispiel nur die Korruptionsvariable. Die anderen beiden können Sie für selbstständiges Üben nutzen.</p>
+</section>
+<section id="missing-values-ausschließen" class="level2">
+<h2 class="anchored" data-anchor-id="missing-values-ausschließen">Missing Values ausschließen</h2>
+<p>Um einen Datensatz zu erhalten, der in über alle Modelle die gleiche Fallzahl aufweist, werden diejenigen Fälle ausgeschlossen, die auf mindestens einer der für die Analysen genutzten vVariablen fehlende Werte aufweisen (“Listenweiser Fallausschluss”).</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Missing Values ausschließen</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>variablen_im_modell <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"pol_vertrauen"</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"bildung"</span>,      </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"responsivitaet"</span>,                         </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"zufr_wirtschaft"</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"soz_vertrauen"</span>, </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"cntry"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"c_ticpi_2018"</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>ess <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(ess[,variablen_im_modell])</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ein Hinweis: Da bei den Makrovariablen Daten für zwei Länder fehlen, liegen nach diesem Ausschluss fehlender Werte nur Daten für gut 40.000 Befragte aus 25 Ländern vor.</p>
+</section>
+<section id="zentrieren" class="level2">
+<h2 class="anchored" data-anchor-id="zentrieren">Zentrieren</h2>
+<p>Kommen wir zu einem weiteren wichtigen Schritt der Datenvorbereitung.</p>
+<p>In Mehrebenenmodellen ist es häufig üblich, dass die unabhängigen Variablen auf Ebene 1 mittelwertzentriert werden. Das sogenannte <em>Grand-Mean-Centering</em> sorgt dafür, dass der jeweilige Intercept eines Landes <span class="math inline">\(\beta_{0j}\)</span> als Abweichung vom Grand Mean interpretiert werden kann.</p>
+<p>Eine andere Möglichkeit ist es, die Variablen auf einen vergleichbaren Wertebereich, zum Beispiel zwischen 0 und 1 zu standardisieren.</p>
+<p>Wie man sich auch entscheidet, wichtig ist, dass man an folgendes denkt: der Intercept einer Regression ist der Vorhersagewert an der Stelle der Regressionsgeraden, bei der alle unabhängigen Variablen den Wert 0 annehmen.</p>
+<p>Oder anders: Der Wert der Regressionsgeraden für <span class="math inline">\(X=0\)</span>, wo die Regressionsgerade die Y-Achse schneidet.</p>
+<p>Wenn Ihre unabhängigen Variablen den Wertebereich <span class="math inline">\(0\)</span> gar nicht enthält, kann man auch den Intercept inhaltlich nicht interpretieren.</p>
+<p>In unserem Beispiel entscheide ich mich für das Mittelwertzentrieren. Wir haben nur metrische Variablen im Beispiel daher nutze die <code>scale()</code>-Funktion. Diese Funktion dient eigentlich zur z-Transformation: sie nimmt eine Variable, zieht den Mittelwert ab und teilt durch die Standardabweichung. Allerdings möchte ich nicht, dass durch die Standardabweichung geteilt wird, das teile ich der Funktion mittels <code>scale=FALSE</code> mit.</p>
+<p>Diese Funktion kann ich direkt auf die relevanten Spalten des Datensatzes anwenden. Um herauszufinden welche das sind, schaue ich mir die <code>names()</code> an.</p>
+<p>Unsere unabhängigen Variablen befinden sich in Spalte 2 bis 5 des Datensatzes. Jetzt kann ich mit der Indizierungsklammer die Spalten auswählen und mit <code>scale()</code> zentrieren.</p>
+<p>Das speichere ich in einem neuen Objekt und überschreibe danach die ursprünglichen Variablen 2 bis 5.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Zentrieren der Ebene 1 x-Variablen</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Diese sind an 2. bis 5. und 7. Stelle im Datensatz</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#names(ess)</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#ess[,c(2:5)]</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#scale(ess[,c(2:5)], scale=F)</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>ess_centered <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">scale</span>(ess[,<span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">5</span>)], <span class="at">scale=</span>F))</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>ess[,<span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">5</span>)] <span class="ot">&lt;-</span> ess_centered</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="schluss" class="level1">
+<h1>Schluss</h1>
+<p>Damit sind wir am Ende des dritten Teils.</p>
+<p>Wir haben jetzt alle Variablen auf Individualebene operationalisiert und die Kontextvariablen in den Datensatz mit <code>merge()</code> hinzugefügt.</p>
+<p>Im den nächsten Teilen <a href="./mreg4.html">4</a> und <a href="./mreg5.html">5</a> werden wir dann die unterschiedlichen Modellvarianten der Mehrebenenregression in R schätzen.</p>
+<p>Am Ende dieses Videos gibt es noch eine Aufgabe und zum Schluss die Literatur.</p>
+</section>
+<section id="aufgabe" class="level1">
+<h1>Aufgabe</h1>
+<ul>
+<li>Überlegen Sie sich eine eigene Fragestellung, die mit den Variablen des ESS als Mehrebenenmodell geschätzt werden kann (Variablenübersicht im Codebuch des ESS). Bereiten Sie die Variablen in R so vor, dass sie für eine Regression genutzt werden können.</li>
+<li>Laden Sie den vollständigen ESS Makrodatensatz und dessen Codebuch von der Webseite des ESS herunter. Schauen Sie sich den Datensatz an und machen Sie sich mit seiner Struktur vertraut.</li>
+</ul>
+</section>
+<section id="lernzielabgleich" class="level1">
+<h1>Lernzielabgleich</h1>
+<p>Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernziele erreicht haben:</p>
+<ul>
+<li>Sie können die Variablen für das Mehrebenenmodell vorbereiten:
+<ul>
+<li>Sie wissen wie man Datensätze zusammenspielt.</li>
+<li>Sie verstehen, warum die unabhängigen Variablen zentriert werden und wissen, wie Sie das in R umsetzen können.</li>
+</ul></li>
+</ul>
+</section>
+<section id="literatur" class="level1">
+<h1>Literatur</h1>
+<ul>
+<li><p>Breyer, Bianka (2015): Social Trust Scale (ESS). In: Zusammenstellung sozialwissenschaftlicher Items und Skalen (ZIS). DOI: <a href="https://doi.org/10.6102/zis235" class="uri">https://doi.org/10.6102/zis235</a></p></li>
+<li><p>Jiang, Anli; Zhang, Tony Huiquan (2021): Political Trust in East and Southeast Asia: The Joint Effects of Education, Corruption Perception, and Urbanization. In: International Journal of Public Opinion Research 33(4): 911-926. DOI: <a href="https://doi.org/10.1093/ijpor/edab008" class="uri">https://doi.org/10.1093/ijpor/edab008</a></p></li>
+<li><p>Van der Meer, Tom; Hakhverdian, Armen (2017): Political trust as the evaluation of process and performance: A cross-national study of 42 European countries. In: Political Studies 65(1): 81-102. DOI: <a href="https://doi.org/10.1177/0032321715607514" class="uri">https://doi.org/10.1177/0032321715607514</a></p></li>
+<li><p>Rosenberg, Morris (1956): Misanthropy and Political Ideology. In: American Sociological Review, 216: 690-695. DOI: <a href="https://doi.org/10.1177/002200275700100403" class="uri">https://doi.org/10.1177/002200275700100403</a></p></li>
+</ul>
+<div class="cell" data-layout-align="center">
+
+</div>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Fußnoten</h2>
+
+<ol>
+<li id="fn1"><p>Transparency International, <a href="https://www.transparency.org/en/cpi/2018" class="uri">https://www.transparency.org/en/cpi/2018</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Eurostat, <a href="http://ec.europa.eu/eurostat/data/database?node_code=ilc_di12" class="uri">http://ec.europa.eu/eurostat/data/database?node_code=ilc_di12</a><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>The World Bank - Database of Political Institutions (DPI), <a href="http://dx.doi.org/10.18235/0003049" class="uri">http://dx.doi.org/10.18235/0003049</a><a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Kopiert");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Kopiert");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var filterRegex = new RegExp(/^(?:http:|https:)\/\.github\.io\/uweremer/);
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+    var links = window.document.querySelectorAll('a:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+          // target, if specified
+          link.setAttribute("target", "_blank");
+      }
+    }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">© 2022, Uwe Remer</div>   
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="./datenschutz.html">Datenschutz</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="./about.html">Impressum</a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+</body></html>

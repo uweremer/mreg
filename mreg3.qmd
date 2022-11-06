@@ -1,0 +1,373 @@
+---
+title: "3. Wie werden die Daten für eine Mehrebenregression vorbereitet?"
+---
+
+```{r setup, include=FALSE}
+# Figure size in inches
+w = 5
+h = 2.5
+s = 2.8
+    
+knitr::opts_chunk$set(eval=TRUE, echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.width=w, fig.height=h, fig.align='center')
+
+options(scipen=999, digits=3)
+
+save <-  F
+save_fig <- function(filename, save = TRUE){
+  if(save==TRUE){
+    ggsave(paste0("./Grafiken/", filename), 
+         width = w, height = h,
+         #scale = s,       
+         unit = "in")
+  }
+  else{
+    message("Saving skipped...")
+  }
+}
+```
+
+```{css, eval=T, echo=F}
+/* CSS Stil für Formeln unter Scatterplots */
+P.math {
+    text-align: center;
+    font-size: 2vw;
+}
+
+P.math_left {
+    text-align: left;
+    font-size: 1.5vw;
+}
+
+
+DIV.border {
+    padding:9.5px;
+    border-radius:4px;
+    border:1px solid #cccccc;
+    margin-top: 10px;
+    margin-bottom:10px;
+}
+```
+
+# Themenüberblick
+
+In [Teil 2](mreg2.qmd) haben wir gesehen, wie man mit Hilfe des sogenannten Nullmodells berechnet, ob eine Mehrebenenregression überhaupt notwendig ist. Nur wenn dies der Fall ist, werden die eigentlich interessierenden Mehrebenenmodelle geschätzt.
+
+Bevor wir aber das Nullmodell um unabhängige Variablen ergänzen können und somit ein einfaches Mehrebenenmodell schätzen können, müssen wir die Daten entsprechend vorbereiten, also operationalisieren.
+
+Und genau darum geht es in diesem dritten Teil: Wie bereiten wir die Daten für eine Mehrebenenregression vor? Das Video zu diesem dritten Teil finden Sie [hier](https://video.fernuni-hagen.de/Play/6078).
+
+Lernziele für dieses Video sind...
+
+-   dass Sie die Variablen für das Mehrebenenmodell vorbereiten können:
+    -   dass Sie wissen wie man Datensätze zusammenspielt
+    -   dass Sie verstehen, warum die unabhängigen Variablen zentriert werden und wissen, wie Sie das in R umsetzen können
+
+Das alles schauen wir uns direkt in R an...
+
+# Forschungsfrage für das Beispiel
+
+Bevor es losgeht, benötigen wir aber noch eine Forschungsfrage.
+
+Wenn wir nicht wissen, welche Frage wir eigentlich beantworten wollen, können wir auch nicht entscheiden, welche Variablen im Modell berücksichtigt werden müssen.
+
+Für die Beispielfragestellung bleiben wir beim politischen Vertrauen aus dem letzten Video 2 und Fragen:
+
+> Welchen Einfluss hat Bildung auf politisches Vertrauen?
+
+An dieser Stelle können Sie ja Mal kurz auf Pause drücken und für sich selbst überlegen, welche Mechanismen Bildung und politisches Vertrauen verbinden und ob Bildung einen positiven oder einen negativen Effekt auf politisches Vertrauen hat.
+
+Auch wenn es für beide Richtungen Argumente gibt, zeigt sich, dass üblicherweise höhere Bildung mit Eliten-kritischeren Einstellungen einhergeht. Bildung also einen negativen Effekt auf politisches Vertrauen hat.
+
+Ob das so ist und ob dieser Effekt in allen europäischen Ländern zu finden ist, wollen wir untersuchen.
+
+Und um richtig zeigen zu können, was die Mehrebenenregression kann, ergänzen wir die Fragestellung noch folgendermaßen:
+
+> Wie beeinflusst Korruption die Wirkung von Bildung auf politisches Vertrauen?
+
+Diese zweite Fragestellung beinhaltet explizit ein Effekt der von der Kontextebene auf einen Effekt der Individualebene.
+
+Da wir nun wissen, was wir untersuchen wollen, wechseln wir in R.
+
+# Operationalisierung
+
+Noch ein kurzer Hinweis: Ich nutze in dieser Videoreihe bei der Operationalisierung "*base R*". Das Umbenennen von Variablen, recodieren oder transformieren von Variablen kann man natürlich auch mit Funktionen des [`dplyr`](https://dplyr.tidyverse.org/)-Paketes oder mit [`sjmisc`](https://strengejacke.github.io/sjmisc/) umsetzen und im "tidyverse"-Stil mit dem Pipe-Operator schreiben.
+
+Bevor wir also unsere Modelle schätzen können, müssen die Variablen operationalisiert werden. Als Datensatz nutzen wir den ESS 9. Informationen zum Datensatz finden Sie im ersten Video.
+
+Bereits im letzten Teil 2 haben wir die abhängige Variable für unser Beispiel kennengelernt: das politische Vertrauen.
+
+Den ersten Teil des R-Codes können wir direkt noch Mal nutzen.
+
+```{r}
+# Importieren des Datensatz
+library(foreign)
+ess <- read.spss("./Daten/ESS9e02.sav", 
+                 use.value.labels = FALSE,
+                 to.data.frame = TRUE,
+                 reencode = TRUE)
+
+
+
+# Operationalisierung der abh. Variable 
+# "Politisches Vertrauen"
+# Mittelwertindex aus drei Items:
+idx_vars <- c("trstprl","trstplt","trstprt")
+ess$pol_vertrauen <- rowMeans(ess[,idx_vars], 
+                              na.rm = F)
+#table(ess$pol_vertrauen, useNA = "always")
+library(DescTools)
+#Desc(ess$pol_vertrauen)
+```
+
+Neben der abhängigen Variablen benötigen wir auch noch die unabhängigen Variablen.
+
+Sie sollten die Variablen natürlich auf Basis theoretischer Überlegungen wählen. Passend zu unserer Fragestellung habe ich hier zwei Literaturvorschläge: [Jiang & Zhang (2021)](https://doi.org/10.1093/ijpor/edab008) und [Van der Meer & Hakhverdian (2017)](https://doi.org/10.1177/0032321715607514).
+
+## Bildung
+
+Als erstes operationalisiere ich unsere Haupterklärungsvariable `Bildung`.
+
+Die Messung erfolgt über die "International Standard Classification of Education" - `eisced`, welche die nationalen Bildungabschlüsse in eine vergleichbare Skala überführt.
+
+Die numerischen Merkmalsausprägungen reichen von $1$ *less than lower secondary* bis $7$ *higher tertiary education*.
+
+Streng genommen handelt es sich um eine ordinale Skala, aus didaktischen Gründen nutze ich sie für dieses Beispiel als metrische Skala.
+
+```{r Operationalisierung_X5}
+# Operationalisierung der unabh. Variable 
+# Bildung
+ess$bildung <- ess$eisced 
+
+# NAs definieren:
+# `0` (nicht harmonisierbar) und `55` (andere) auf `NA` setzten
+ess$bildung[ess$bildung %in% c(0,55)] <- NA
+
+#Desc(ess$bildung)
+```
+
+Neben der abhängigen und der uns interessierenden unabhängigen Variable, müssen wir noch weitere Variablen im Modell berücksichtigen - die sogenannten Kontrollvariablen.
+
+Für unser Beispielfragestellung nutze ich die Variablen:
+
+-   Wahrgenommene politische Responsivität
+-   Zufriedenheit mit der Wirtschaftslage
+-   Soziales Vertrauen
+
+## Wahrgenommene politische Responsivität
+
+Mittelwertindex aus zwei Items
+
+*How much would you say the political system in \[country\] allows people like you to have a say in what the government does?*
+
+*And how much would you say that the political system in \[country\] allows people like you to have an influence on politics?*
+
+Die Antwortskala umfasst eine 5er Skala:
+
+-   $1$ Not at all
+-   $5$ A great deal
+
+```{r Operationalisierung_X2}
+# Operationalisierung der unabh. Variable 
+# Wahrgenommene politische Responsivität 
+# Mittelwertindex aus zwei Items 
+
+idx_vars <- c("psppsgva","psppipla")
+ess$responsivitaet <- rowMeans(ess[,idx_vars], 
+                               na.rm = F)
+
+#Desc(ess$responsivitaet)
+```
+
+## Zufriedenheit Wirtschaftslage
+
+*On the whole how satisfied are you with the present state of the economy in \[country\]?*
+
+-   $0$ Extremely dissatisfied
+-   $10$ Extremely satisfied
+
+```{r Operationalisierung_X1}
+# Operationalisierung der unabh. Variable 
+# "Zufriedenheit Wirtschaftslage"
+
+ess$zufr_wirtschaft <- ess$stfeco
+#Desc(ess$zufr_wirtschaft)
+```
+
+## Soziales Vertrauen
+
+Soziales Vertrauen messen wir mit Hilfe der Social Trust Scale. Informationen zu dieser Skala finden Sie beim GESIS in der Zusammenstellung sozialwissenschaftlicher Items und Skalen (ZIS) [(Breyer 2015)](https://doi.org/10.6102/zis235).
+
+Der Index wurde ursprünglich von [Rosenberg (1956)](https://doi.org/10.1177/002200275700100403) vorgeschlagen. Er besteht aus den drei Items:
+
+-   Vertrauenswürdigkeit `ppltrst`
+-   Fairness `pplfair`\
+-   Hilfsbereitschaft `pplhlp`
+
+*Generally speaking, would you say that most people can be trusted, or that you can't be too careful in dealing with people?*
+
+Auch hier liegt für jedes Item eine 10er Skala vor, z.B. für Vertrauen lauten die ANtwortkategorien:
+
+-   $0$ You can't be too careful
+-   $10$ Most people can be trusted
+
+Hohe Werte bedeuten positive Einstellungen.
+
+```{r Operationalisierung_sozVertrauen}
+# Operationalisierung der unabh. Variable 
+# Soziales Vertrauen
+
+idx_vars <- c("ppltrst", "pplfair", "pplhlp")
+
+ess$soz_vertrauen <- rowMeans(ess[,idx_vars], 
+                               na.rm = F)
+#Desc(ess$soz_vertrauen)
+```
+
+## Kontextdaten
+
+Wenn man eine Mehrebenenregression rechnet, möchte man häufig auch Variablen der Makroebene nutzen. Wenn die Gruppierungsvariable Länder oder andere administrative Einheiten sind, gibt es diese Daten häufig bei den statistischen Ämtern. Zum Beispiel Eurostat, dem Statistischen Bundesamt, der Weltbank, der OECD oder den Vereinten Nationen.
+
+Aber: wir sind in einer sehr komfortablen Situation, denn im Rahmen des ESS Programms wurden auch Makro-Datensätze erstellt, in denen Daten aus verschiedenen Quellen zusammengetragen wurden. Diese Datensätze enthalten neben den Individualdaten auch Kontextdaten.
+
+Auch der Makrodatensatz ist nach Registrierung kostenlos verfügbar. Jedoch ist der Makrodatensatz etwa 2 GB groß.
+
+Statt des ganzen Datensatzes, habe ich ihnen einen kleinen Ausschnitt davon als csv-Datei vorbereitet.
+
+Die csv-Datei finden Sie als Download bei den [Ressourcen](ressourcen.qmd). Lesen wir zuerst den vorbereiteten Makrodatensatz ein:
+
+```{r read_macro, echo=T}
+# Einlesen Makrodaten einlesen und mit merge() hinzuspielen
+# ggf. Daetipfad anpassen
+ess_macro <- read.table("./Daten/ess2018_macro.csv",
+                        sep=";", header=T)
+head(ess_macro)
+#View(ess_macro)
+```
+
+Diese Datei enthält neben der Gruppierungsvariable `cntry` drei weitere Variablen:
+
+-   `c_ticpi_2018` Corruption Perceptions Index[^1]
+-   `c_gini_2018` GINI Index[^2]
+-   `c_tensys_2018` System Tenure[^3]
+
+[^1]: Transparency International, <https://www.transparency.org/en/cpi/2018>
+
+[^2]: Eurostat, <http://ec.europa.eu/eurostat/data/database?node_code=ilc_di12>
+
+[^3]: The World Bank - Database of Political Institutions (DPI), <http://dx.doi.org/10.18235/0003049>
+
+Mit diesem Datensatz haben wir gleich auch die Gelegenheit einen typischen Schritt der Datenvorbereitung umzusetzen: das **mergen** von Datensätzen.
+
+Megren heißt, dass man zwei Datensätze anhand einer Schlüsselvariable zusammenspielt.
+
+Probieren wir es aus:
+
+Wir sehen im Environment Fenster in R, dass der Datensatz 4 Variablen mit 29 Beobachtungen enthält. Die `head()`-Funktion gibt uns einen ersten Blick auf die Daten. Wir sehen, dass jede Beobachtung, also jeder Fall ein Land ist.
+
+Der ESS-Datensatz den wir vorhin eingelesen hatten, hat als Beobachtungseinheit Individuen.
+
+Trotzdem können wir beide Datensätze zusammenspielen. Dafür nutzen wir die `cntry`-Variable als Schlüsselvariable. Jeder Befragte eines Landes, bekommt den jeweiligen Wert des Landes aus dem Makrodatensatz zugespielt.
+
+Dafür nutzen wir die `merge()`-Funktion:
+
+```{r}
+ess_micro <- ess
+ess <- merge(ess_micro, ess_macro, # Die beiden Datensätze die zusammengespielt werden
+             by = "cntry", # Die Schlüsselvariable
+             all.x = T) # Das alle Fälle des x-Datensatzes (des erstgenannten) behalten werden
+```
+
+Der neue ESS Datensatz enthält wie der Mikro-Datensatz die gut 47.000 Befragten, aber drei zusätzliche Variablen aus dem Makrodatensatz. Die vierte Variable aus dem Makrodatensatz muss ja nicht übernommen werden, denn die `cntry` Variable war ja auch vorher schon ein Merkmal im Mikro-Datensatz.
+
+Von den drei Kontextvariablen nutzen wir in unserem Beispiel nur die Korruptionsvariable. Die anderen beiden können Sie für selbstständiges Üben nutzen.
+
+## Missing Values ausschließen
+
+Um einen Datensatz zu erhalten, der in über alle Modelle die gleiche Fallzahl aufweist, werden diejenigen Fälle ausgeschlossen, die auf mindestens einer der für die Analysen genutzten vVariablen fehlende Werte aufweisen ("Listenweiser Fallausschluss").
+
+```{r Missing_values_ausschließen}
+# Missing Values ausschließen
+variablen_im_modell <- c("pol_vertrauen",
+                         "bildung",      
+                         "responsivitaet",                         
+                         "zufr_wirtschaft",
+                         "soz_vertrauen", 
+                         "cntry",
+                         "c_ticpi_2018")
+ess <- na.omit(ess[,variablen_im_modell])
+```
+
+Ein Hinweis: Da bei den Makrovariablen Daten für zwei Länder fehlen, liegen nach diesem Ausschluss fehlender Werte nur Daten für gut 40.000 Befragte aus 25 Ländern vor.
+
+## Zentrieren
+
+Kommen wir zu einem weiteren wichtigen Schritt der Datenvorbereitung.
+
+In Mehrebenenmodellen ist es häufig üblich, dass die unabhängigen Variablen auf Ebene 1 mittelwertzentriert werden. Das sogenannte *Grand-Mean-Centering* sorgt dafür, dass der jeweilige Intercept eines Landes $\beta_{0j}$ als Abweichung vom Grand Mean interpretiert werden kann.
+
+Eine andere Möglichkeit ist es, die Variablen auf einen vergleichbaren Wertebereich, zum Beispiel zwischen 0 und 1 zu standardisieren.
+
+Wie man sich auch entscheidet, wichtig ist, dass man an folgendes denkt: der Intercept einer Regression ist der Vorhersagewert an der Stelle der Regressionsgeraden, bei der alle unabhängigen Variablen den Wert 0 annehmen.
+
+Oder anders: Der Wert der Regressionsgeraden für $X=0$, wo die Regressionsgerade die Y-Achse schneidet.
+
+Wenn Ihre unabhängigen Variablen den Wertebereich $0$ gar nicht enthält, kann man auch den Intercept inhaltlich nicht interpretieren.
+
+In unserem Beispiel entscheide ich mich für das Mittelwertzentrieren. Wir haben nur metrische Variablen im Beispiel daher nutze die `scale()`-Funktion. Diese Funktion dient eigentlich zur z-Transformation: sie nimmt eine Variable, zieht den Mittelwert ab und teilt durch die Standardabweichung. Allerdings möchte ich nicht, dass durch die Standardabweichung geteilt wird, das teile ich der Funktion mittels `scale=FALSE` mit.
+
+Diese Funktion kann ich direkt auf die relevanten Spalten des Datensatzes anwenden. Um herauszufinden welche das sind, schaue ich mir die `names()` an.
+
+Unsere unabhängigen Variablen befinden sich in Spalte 2 bis 5 des Datensatzes. Jetzt kann ich mit der Indizierungsklammer die Spalten auswählen und mit `scale()` zentrieren.
+
+Das speichere ich in einem neuen Objekt und überschreibe danach die ursprünglichen Variablen 2 bis 5.
+
+```{r zentrieren_L1_X-Vars}
+# Zentrieren der Ebene 1 x-Variablen
+# Diese sind an 2. bis 5. und 7. Stelle im Datensatz
+
+#names(ess)
+#ess[,c(2:5)]
+#scale(ess[,c(2:5)], scale=F)
+ess_centered <- as.data.frame(scale(ess[,c(2:5)], scale=F))
+ess[,c(2:5)] <- ess_centered
+```
+
+# Schluss
+
+Damit sind wir am Ende des dritten Teils.
+
+Wir haben jetzt alle Variablen auf Individualebene operationalisiert und die Kontextvariablen in den Datensatz mit `merge()` hinzugefügt.
+
+Im den nächsten Teilen [4](mreg4.qmd) und [5](mreg5.qmd) werden wir dann die unterschiedlichen Modellvarianten der Mehrebenenregression in R schätzen.
+
+Am Ende dieses Videos gibt es noch eine Aufgabe und zum Schluss die Literatur.
+
+# Aufgabe
+
+-   Überlegen Sie sich eine eigene Fragestellung, die mit den Variablen des ESS als Mehrebenenmodell geschätzt werden kann (Variablenübersicht im Codebuch des ESS). Bereiten Sie die Variablen in R so vor, dass sie für eine Regression genutzt werden können.
+-   Laden Sie den vollständigen ESS Makrodatensatz und dessen Codebuch von der Webseite des ESS herunter. Schauen Sie sich den Datensatz an und machen Sie sich mit seiner Struktur vertraut.
+
+# Lernzielabgleich
+
+Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernziele erreicht haben:
+
+-   Sie können die Variablen für das Mehrebenenmodell vorbereiten:
+    -   Sie wissen wie man Datensätze zusammenspielt.
+    -   Sie verstehen, warum die unabhängigen Variablen zentriert werden und wissen, wie Sie das in R umsetzen können.
+
+# Literatur
+
+-   Breyer, Bianka (2015): Social Trust Scale (ESS). In: Zusammenstellung sozialwissenschaftlicher Items und Skalen (ZIS). DOI: <https://doi.org/10.6102/zis235>
+
+-   Jiang, Anli; Zhang, Tony Huiquan (2021): Political Trust in East and Southeast Asia: The Joint Effects of Education, Corruption Perception, and Urbanization. In: International Journal of Public Opinion Research 33(4): 911-926. DOI: <https://doi.org/10.1093/ijpor/edab008>
+
+-   Van der Meer, Tom; Hakhverdian, Armen (2017): Political trust as the evaluation of process and performance: A cross-national study of 42 European countries. In: Political Studies 65(1): 81-102. DOI: <https://doi.org/10.1177/0032321715607514>
+
+-   Rosenberg, Morris (1956): Misanthropy and Political Ideology. In: American Sociological Review, 216: 690-695. DOI: <https://doi.org/10.1177/002200275700100403>
+
+```{r, echo=F, eval=F}
+library("knitr")
+knitr::purl("Mreg3.Rmd",
+            documentation=0)
+```

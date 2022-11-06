@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="de-DE" xml:lang="de-DE"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.258">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dr.&nbsp;Uwe Remer">
+
+<title>Mehrebenenregression mit R - 5. Wie schätzt man variierende Slopes und Cross-Level Interaktionen?</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "Keine Treffer",
+    "search-matching-documents-text": "Treffer",
+    "search-copy-link-title": "Link in die Suche kopieren",
+    "search-hide-matches-text": "Zusätzliche Treffer verbergen",
+    "search-more-match-text": "weitere Treffer in diesem Dokument",
+    "search-more-matches-text": "weitere Treffer in diesem Dokument",
+    "search-clear-button-title": "Zurücksetzen",
+    "search-detached-cancel-button-title": "Abbrechen",
+    "search-submit-button-title": "Abschicken"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="Mehrebenenregression mit R">
+<meta property="og:description" content="6-teilige Videoreihe zum Einstieg in die Mehrebenenregression mit R">
+<meta property="og:image" content="Grafiken/varianten.png">
+<meta property="og:site-name" content="Mehrebenenregression mit R">
+<meta property="og:locale" content="de_DE">
+<meta name="twitter:title" content="Mehrebenenregression mit R">
+<meta name="twitter:description" content="6-teilige Videoreihe zum Einstieg in die Mehrebenenregression mit R">
+<meta name="twitter:image" content="Grafiken/varianten.png">
+<meta name="twitter:creator" content="@uweremerbollow">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Mehrebenenregression mit R</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html">
+ <span class="menu-text">Startseite</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-skript" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Skript</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-skript">    
+        <li>
+    <a class="dropdown-item" href="./mreg1.html">
+ <span class="dropdown-text">1. Was ist eine Mehrebenenregression?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg2.html">
+ <span class="dropdown-text">2. Wann ist eine Mehrebenenregression angebracht?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg3.html">
+ <span class="dropdown-text">3. Wie werden die Daten für eine Mehrebenregression vorbereitet?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg4.html">
+ <span class="dropdown-text">4. Wie schätzt man eine Mehrebenenregression in R?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg5.html">
+ <span class="dropdown-text">5. Wie schätzt man variierende Slopes und Cross-Level Interaktionen?</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mreg6.html">
+ <span class="dropdown-text">6. Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="./ressourcen.html">
+ <span class="menu-text">Ressourcen</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./about.html">
+ <span class="menu-text">Kontakt</span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">5. Wie schätzt man variierende Slopes und Cross-Level Interaktionen?</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        <div class="sidebar-tools-collapse tools-wide">
+    <a href="https://www.sowi.uni-stuttgart.de/institut/team/Remer" title="" class="sidebar-tool px-1"><i class="bi bi-bank"></i></a>
+    <a href="https://github.com/uweremer/mreg" title="" class="sidebar-tool px-1"><i class="bi bi-github"></i></a>
+    <a href="https://fediscience.org/@uweremer" title="" class="sidebar-tool px-1"><i class="bi bi-mastodon"></i></a>
+</div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg1.html" class="sidebar-item-text sidebar-link">1. Was ist eine Mehrebenenregression?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg2.html" class="sidebar-item-text sidebar-link">2. Wann ist eine Mehrebenenregression angebracht?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg3.html" class="sidebar-item-text sidebar-link">3. Wie werden die Daten für eine Mehrebenregression vorbereitet?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg4.html" class="sidebar-item-text sidebar-link">4. Wie schätzt man eine Mehrebenenregression in R?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg5.html" class="sidebar-item-text sidebar-link active">5. Wie schätzt man variierende Slopes und Cross-Level Interaktionen?</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mreg6.html" class="sidebar-item-text sidebar-link">6. Wie lassen sich die Ergebnisse einer Mehrebenregression berichten?</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Auf dieser Seite</h2>
+   
+  <ul>
+  <li><a href="#themenüberblick" id="toc-themenüberblick" class="nav-link active" data-scroll-target="#themenüberblick">Themenüberblick</a></li>
+  <li><a href="#variierende-intercepts-und-variierende-slopes" id="toc-variierende-intercepts-und-variierende-slopes" class="nav-link" data-scroll-target="#variierende-intercepts-und-variierende-slopes">Variierende Intercepts und variierende Slopes</a>
+  <ul class="collapse">
+  <li><a href="#modellvergleich-mittels-anova" id="toc-modellvergleich-mittels-anova" class="nav-link" data-scroll-target="#modellvergleich-mittels-anova">Modellvergleich mittels Anova</a></li>
+  <li><a href="#interpretation-des-varying-slope-modells" id="toc-interpretation-des-varying-slope-modells" class="nav-link" data-scroll-target="#interpretation-des-varying-slope-modells">Interpretation des Varying Slope Modells</a></li>
+  </ul></li>
+  <li><a href="#cross-level-interaktionen" id="toc-cross-level-interaktionen" class="nav-link" data-scroll-target="#cross-level-interaktionen">Cross Level Interaktionen</a></li>
+  <li><a href="#schluss" id="toc-schluss" class="nav-link" data-scroll-target="#schluss">Schluss</a></li>
+  <li><a href="#aufgabe" id="toc-aufgabe" class="nav-link" data-scroll-target="#aufgabe">Aufgabe</a></li>
+  <li><a href="#lernzielabgleich" id="toc-lernzielabgleich" class="nav-link" data-scroll-target="#lernzielabgleich">Lernzielabgleich</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">5. Wie schätzt man variierende Slopes und Cross-Level Interaktionen?</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="cell" data-layout-align="center">
+<style type="text/css">
+/* CSS Stil für Formeln unter Scatterplots */
+P.math {
+    text-align: center;
+    font-size: 2vw;
+}
+
+P.math_left {
+    text-align: left;
+    font-size: 1.5vw;
+}
+
+
+DIV.border {
+    padding:9.5px;
+    border-radius:4px;
+    border:1px solid #cccccc;
+    margin-top: 10px;
+    margin-bottom:10px;
+}
+</style>
+</div>
+<section id="themenüberblick" class="level1">
+<h1>Themenüberblick</h1>
+<p>Die Fragestellung für dieses Teils lautet: Wie schätzt man variierende Slopes und Cross-Level Interaktionen?</p>
+<p>Und daran anschließend: Wie findet man das eigentlich das passende Modell für die Mehrebenenregression? Welche der Varianten ist am Ende die angemessene?</p>
+<p>Im vorigen <a href="./mreg4.html">Teil 4</a> haben wir das einfache Varying Intercept Modell geschätzt. Wir haben Prädiktoren auf Ebene 1 und 2 berücksichtigt und die Fixed Effects und die Random Effects interpretiert.</p>
+<p>In diesem Teil wird es darum gehen, wie man das passende Modell aus den möglichen Varianten findet. Dazu erweitern wir das Varying Intercept Modell zunächst um einen Varying Slope und danach um eine Cross Level Interaktion.</p>
+<p>Wir schauen dann, anhand welcher Kriterien wir entscheiden können, welches der Modelle, das richtige ist.</p>
+<p>Die konkreten Lernziele sind, dass Sie…</p>
+<ul>
+<li>Modelle mit variierenden Slopes und Cross Level Interaktionen…
+<ul>
+<li>als Mehrebenengleichung formulieren können.</li>
+<li>in R umsetzen können.</li>
+</ul></li>
+<li>Verschiedene empirische Modelle miteinander vergleichen können und entscheiden können, welche Modellvariante die passende ist.</li>
+</ul>
+<p>Dazu wechseln wir nun zu R.</p>
+</section>
+<section id="variierende-intercepts-und-variierende-slopes" class="level1">
+<h1>Variierende Intercepts und variierende Slopes</h1>
+<p>Bevor wir mit dem neuen Modell loslegen, führen Sie bitte das komplette RScript zu Video 4 aus (<code>RScript_mreg4.R</code> bei den <a href="./ressourcen.html">Ressourcen</a>). Mit der <code>source()</code>-Funktion können Sie das direkt aus R heraus laufen lassen.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"./Ressourcen/RScript_mreg4.R"</span>) <span class="co">#Pfad zur Datei ggf. anpassen</span></span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Legen wir los… Unsere erste Forschungsfrage lautet ja:</p>
+<blockquote class="blockquote">
+<p>Welchen Einfluss hat Bildung auf politisches Vertrauen?</p>
+</blockquote>
+<p>Im letzten Video haben das Grundmodell mit variierenden Intercepts geschätzt. Und eine vorläufige Antwort auf die Forschungsfrage war: Bildung hat auf Individualebene einen negativen Effekt auf politisches Vertrauen.</p>
+<p>Aber: Wir haben ja bereits gesehen, dass der datengenerierende Prozess kontextabhängig ist. So könnte es auch sein, dass der Effekt der Variable <code>bildung</code> nicht in allen Ländern gleich wirkt!</p>
+<p>Es wäre ja denkbar, dass der negative Effekt in manchen Ländern stärker und in anderen schwächer ausfällt.</p>
+<p>Genau das können wir mit eine Varying Intercept, Varying Slope Modell testen.</p>
+<p>Das Varying Intercept, Varying Slope Modell wird manchmal auch Random Intercept, Random Slope Modell genannt.</p>
+<p>Die Idee ist, dass der Effekt eines Ebene 1 Prädiktors zwischen den Kontexteinheiten variieren darf.</p>
+<p>Was heißt das für unser Mehrebenenmodell?</p>
+<p>Dieses Modell ist die Formel unseres Varying Intercept Modells:</p>
+<div class="border">
+<p class="math_left">
+<span class="math inline">\(y_{ij} = \beta_{0j} +\)</span> <font color="blue"><span class="math inline">\(\beta_{1}\)</span></font> <span class="math inline">\(x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}\)</span>
+</p>
+mit
+<p class="math_left">
+<span class="math inline">\(\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}\)</span>
+</p>
+</div>
+<p>Wenn wir jetzt den Slope <font color="blue"><span class="math inline">\(\beta_{1}\)</span></font> variieren lassen wollen, ergänzen wir zunächst einen Index <font color="red"><span class="math inline">\(j\)</span></font>, also <font color="blue"><span class="math inline">\(\beta_{1}\)</span></font><font color="red"><span class="math inline">\(_{j}\)</span></font>.</p>
+<p>Außerdem müssen wir eine Regressionsgleichung für diesen variierenden Slope ergänzen.</p>
+<div class="border">
+<p class="math_left">
+<span class="math inline">\(y_{ij} = \beta_{0j} +\)</span> <font color="blue"><span class="math inline">\(\beta_{1}\)</span></font><font color="red"><span class="math inline">\(_{j}\)</span></font> <span class="math inline">\(x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}\)</span>
+</p>
+mit
+<p class="math_left">
+<span class="math inline">\(\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}\)</span>
+</p>
+und jetzt zusätzlich
+<p class="math_left">
+<font color="red"><span class="math inline">\(\beta_{1j} = \gamma_{10} + u_{1j}\)</span></font>
+</p>
+</div>
+<p>Sie erkennen: die Form ist analog zur Gleichung des variierenden Intercepts. <span class="math inline">\(\gamma_{10}\)</span> ist der Ebene 2 Intercept, also der durchschnittliche Effekt - der fixed Effect - für den Ebene 1 Bildungseffekt <span class="math inline">\(\beta_{1j}\)</span>.</p>
+<p>Und das Residuum <span class="math inline">\(u_{1j}\)</span> enthält die Varianz, also die Streuung der länderspezifischen Bildungseffekte um den Wert <span class="math inline">\(\gamma_{10}\)</span>.</p>
+<p>Im Unterschied zur Gleichung für den variierenden Intercept, haben wir hier noch keine Determinanten für den variierenden Slope in der Gleichung. Das kommt später.</p>
+<p>Das setzen wir nun auch in der <code>lmer()</code>-Formel in R um:</p>
+<p>In der Klammer haben wir bisher gesagt: “Lasse den Intercept <code>1</code> variieren nach <code>cntry</code>”.</p>
+<p>Das ergänzen wir so, dass nun auch <code>bildung</code> nach <code>cntry</code> variieren darf.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lmerTest) </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mreg3 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(pol_vertrauen <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> bildung <span class="sc">+</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                responsivitaet <span class="sc">+</span> zufr_wirtschaft <span class="sc">+</span> soz_vertrauen <span class="sc">+</span> </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                korruption <span class="sc">+</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                (<span class="dv">1</span> <span class="sc">+</span> bildung <span class="sc">|</span> cntry),  </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">data=</span>ess)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Leider passiert es immer wieder, dass Mehrebenenmodelle wenn sie komplexer werden, eine Fehlermeldung oder Warnung auswerfen weil das Modell nicht konvergiert sei.</p>
+<p>Das muss zunächst nichts Schlimmes bedeuten. Meist liegt es daran, dass das Modell eine fehlerhafte oder unsinnige Spezifikation enthält.</p>
+<p>Ein anderer Grund kann sein, dass der der Algorithmus, der die passenden Modellparameter sucht - sagen wir es mal untechnisch - sich verläuft.</p>
+<p>Dieser Optimizer-Algorithmus könnte dann, wenn wir ihm mehr Versuche geben, doch noch zum Ziel finden, oder wir wählen einen anderen Optimizer aus.</p>
+<p>Das sind aber wirklich fortgeschrittene Themen. Daher präsentiere ich hier nur eine Lösung und verweise auf eine <a href="https://joshua-nugent.github.io/allFit/">weiterführende Quelle</a> zur Funktion allFit() und generell auf die ausgezeichnete Hilfe, die man auf <a href="Stackoverflow.com">Stackoverflow.com</a> findet.</p>
+<p>Als simple Lösung in unserem Beispiel, wähle ich einen alternativen Optimizer. Dazu ergänze ich den <code>lmer()</code>-Aufruf um ein <code>control</code> Argument:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mreg3 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(pol_vertrauen <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> bildung <span class="sc">+</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                responsivitaet <span class="sc">+</span> zufr_wirtschaft <span class="sc">+</span> soz_vertrauen <span class="sc">+</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                korruption <span class="sc">+</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                (<span class="dv">1</span> <span class="sc">+</span> bildung <span class="sc">|</span> cntry),  </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">data=</span>ess,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">control=</span><span class="fu">lmerControl</span>(<span class="at">optimizer=</span><span class="st">"bobyqa"</span>))</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Jetzt konvergiert das Modell und wir rufen wir die Ergebnisse auf:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mreg3)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: pol_vertrauen ~ 1 + bildung + responsivitaet + zufr_wirtschaft +  
+    soz_vertrauen + korruption + (1 + bildung | cntry)
+   Data: ess
+Control: lmerControl(optimizer = "bobyqa")
+
+REML criterion at convergence: 154548
+
+Scaled residuals: 
+   Min     1Q Median     3Q    Max 
+-4.167 -0.657  0.009  0.647  5.398 
+
+Random effects:
+ Groups   Name        Variance Std.Dev. Corr
+ cntry    (Intercept) 0.13072  0.3616       
+          bildung     0.00237  0.0487   0.38
+ Residual             2.77720  1.6665       
+Number of obs: 39998, groups:  cntry, 25
+
+Fixed effects:
+                   Estimate  Std. Error          df t value            Pr(&gt;|t|)
+(Intercept)         4.14202     0.18685    23.93926   22.17 &lt;0.0000000000000002
+bildung            -0.03305     0.01099    24.15529   -3.01              0.0061
+responsivitaet      0.84274     0.01142 39980.96092   73.80 &lt;0.0000000000000002
+zufr_wirtschaft     0.31316     0.00439 39829.10499   71.35 &lt;0.0000000000000002
+soz_vertrauen       0.21039     0.00499 39978.82048   42.15 &lt;0.0000000000000002
+korruption         -0.00648     0.00515    23.33301   -1.26              0.2212
+                   
+(Intercept)     ***
+bildung         ** 
+responsivitaet  ***
+zufr_wirtschaft ***
+soz_vertrauen   ***
+korruption         
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr) bildng rspnsv zfr_wr sz_vrt
+bildung      0.142                            
+responsivtt -0.017 -0.076                     
+zfr_wrtschf -0.034 -0.006 -0.241              
+soz_vertran -0.031 -0.047 -0.140 -0.230       
+korruption  -0.921 -0.013  0.018  0.038  0.035</code></pre>
+</div>
+</div>
+<p>Wir sehen nun bei den Random Effects, dass eine neue Zeile hinzugekommen ist: der <font color="red">Random Effect für Bildung.</font> Dessen Varianz liegt bei <font color="red"><span class="math inline">\(0.002\)</span></font>. Was nun außerdem hinzugekommen ist, ist diese letzte Spalte. Sie berichtet, wie stark der Random Slope für Bildung mit dem Random Intercept korreliert. Wir sehen also, daas in Ländern mit im Schnitt höherem politischen Vertrauen der Effekt von Bildung im höher ist als in Ländern mit niedrigem politischem Vertrauen.</p>
+<p>Der Beitrag des Random Effect für Bildung an der Gesamtvarianz ist mit einer Varianz von nur <span class="math inline">\(0.002\)</span> recht gering. Bevor wir das Modell also inhaltlich interpretieren, müssen wir prüfen, ob dieser variierende Slope tatsächlich gerechtfertigt ist. Oder anders ausgedrückt: Ist die Annahme eines zwischen den Ländern variierenden Regressionskoeffizienten für Bildung überhaupt empirisch haltbar?</p>
+<p>Was uns also interessiert ist, ob wir überhaupt einen signifikanten Random Effect für Bildung haben. Oder ob dem datengenerierenden Prozess nicht eher ein einheitlicher Bildungseffekt zu Grunde liegt.</p>
+<p>Um das festzustellen prüfen wir, ob das Modell mit dem variierenden Intercept - <code>mreg3</code>- besser zu den Daten passt, als das Modell ohne diesen variierenden Intercept (Modell <code>mreg2</code>).</p>
+<section id="modellvergleich-mittels-anova" class="level2">
+<h2 class="anchored" data-anchor-id="modellvergleich-mittels-anova">Modellvergleich mittels Anova</h2>
+<p>Üblicherweise vergleichen wir zwei Modelle mit der <code>anova()</code>-Funktion.</p>
+<p>Die Anova testet die Nullhypothese, dass die beiden Modelle gleich gut oder schlecht zu den Daten passen. Ist der Test signifikant, wird die Nullhypothese also zurückgewiesen, wissen wir, dass das eine Modell eine bessere Anpassung an die Daten hat.</p>
+<p>Werden zwei OLS Modelle verglichen, basiert die Anova auf einem F-Test der Fehlerqaudrate der beiden Modelle.</p>
+<p>Für Modelle die auf einem Maximum Likelihood Schätzer basieren- z.B. bei der logistischen Regression, aber auch das Mehrebenenmodell - dann nutzt die Anova einen <span class="math inline">\(\chi^2\)</span>-Test (Chi quadrat) auf Basis der Likelihood-Funktion der Modelle.</p>
+<p>Leider ist das bei Mehrebenenmodellen nicht ohne größere Vorsicht möglich.</p>
+<p>Und um das zu verstehen müssen wir kurz über den Schätzalgorithmus sprechen.</p>
+<p>Bisher haben wir unsere Mehrebenenregression mit der <code>lmer()</code>-Funktion geschätzt, ohne explizit anzugeben, welcher Schätzer genutzt werden soll.</p>
+<p><code>lmer()</code> nutzt dabei als Voreinstellung automatisch den sogenannten <em>REML</em>-Schätzer (<strong>Re</strong>stricted <strong>M</strong>aximum <strong>L</strong>ikelihood).</p>
+<p>Der <code>lmer()</code> Befehl ergänzt also implizit <code>REML=TRUE</code>:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Nicht ausführen</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>mreg <span class="ot">&lt;-</span> <span class="fu">lmer</span>(y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> x <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> grp), </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">data =</span> df, </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">REML =</span> <span class="cn">TRUE</span>)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Wenn man <code>REML=FALSE</code> angibt, wird statt des REML-Schätzers der einfache ML-Schätzer genutzt.</p>
+<p>Der ML-Schätzer wählt dabei diejenigen Werte für die Modellparameter, bei denen die Wahrscheinlichkeit (Likelihood) am größten ist, die Werte der Daten zu beobachten. Wähle das Modell, beim dem <span class="math inline">\(p(Daten|Modell)\)</span> am größten ist.</p>
+<p>Dabei können aber die Varianzparameter unterschätzt werden.</p>
+<p>Beim REML-Schätzer werden nur die Parameter der Varianzkomponenten, also die Random Effects des Modells über den ML-Schätzer gewählt. Die anderen Modellparamter werden als gegeben angenommen (sie werden zuvor automatisch separat geschätzt). Die Schätzung des REML Schätzers ist also restricted auf die Varianzkomponenten. Und soll dadurch e eine unverzerrte Schätzung der Varianzkomponenten erlauben.</p>
+<p>ABER: Je größer die SP, desto weniger ist die Schätzung der Varianzkomponenten mittels ML-Schätzer verzerrt. Diese Eigenschaft ist dann wichtig, wenn Sie folgende Fehlermeldung bei der Schätzung ihres Modells erhalten. Dann lässt sich das Modell nicht mit dem REML Schätzer berechnen. Bei ausreichend größeren Fallzahlen können Sie versuchen, das Modell mit dem ML Schätzer zu fitten, also <code>REML=FALSE</code>.</p>
+<p>OK, kurz durchatmen, dann kommen wir zurück zur einfachen Anwendung.</p>
+<p>Kommen wir zurück zum Modellvergleich mit der Anova.</p>
+<p>Durch die Eigenschaft der REML-Schätzung darf die log-Likelihood zwischen Modellen mit unterschiedlichen fixed Effects nicht verglichen werden - und damit darf auch die Devianz, also die Differenz zwischen zwei Modellen, nicht berechnet werden. Diese ist aber die Grundlage für den <span class="math inline">\(\chi^2\)</span>-Test der Anova.</p>
+<p>Sollen zwei Modelle mit unterschiedlichen fixed Effects verglichen werden, müssen diese Modelle mit dem ML-Schätzer gefittet sein.</p>
+<p>Die Modelle <code>mreg1</code> und <code>mreg2</code> sind zwei Modelle, die sich nur hinsichtlich der fixed Effects unterscheiden. Aber wir hatten sie mit dem REML-Schätzer gefittet, da dieser ja die default Einstellung ist.</p>
+<p>Was passiert, wenn wir mit diesen Modellen die Anova rechnen?</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Per default werden die Modelle mit ML refittet:</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mreg1, mreg2)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Data: ess
+Models:
+mreg1: pol_vertrauen ~ 1 + bildung + responsivitaet + zufr_wirtschaft + soz_vertrauen + (1 | cntry)
+mreg2: pol_vertrauen ~ 1 + bildung + responsivitaet + zufr_wirtschaft + soz_vertrauen + korruption + (1 | cntry)
+      npar    AIC    BIC logLik deviance Chisq Df Pr(&gt;Chisq)  
+mreg1    7 154581 154641 -77284   154567                      
+mreg2    8 154578 154647 -77281   154562  4.71  1       0.03 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#anova(mreg1, mreg2, refit=T)</span></span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Die Anova schätzt automatisch beide Modelle erneut mit dem ML Schätzer. So können wir also direkt die Anova interpretieren:</p>
+<p>Modell 2 ist also signifikant besser an die Daten angepasst als Modell 1.</p>
+<p>Und was ist mit dem Vergleich von <code>mreg2</code> und <code>mreg3</code>? Hier unterscheiden sich die random Effects, die fixed Effects sind aber identisch spezifiziert. Wir müssen also beide Modelle mit dem REML-Schätzer vergleichen.</p>
+<p>Auch hier würde die Anova mit dem ML-Schätzer refitten. Dann dürften wir die Anova aber nicht interpretieren. Wir müssen der Anova also sagen, dass sie nicht refitten soll: das geschieht mit dem Argument <code>refit=FALSE</code>:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mreg2, mreg3, <span class="at">refit=</span>F)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Data: ess
+Models:
+mreg2: pol_vertrauen ~ 1 + bildung + responsivitaet + zufr_wirtschaft + soz_vertrauen + korruption + (1 | cntry)
+mreg3: pol_vertrauen ~ 1 + bildung + responsivitaet + zufr_wirtschaft + soz_vertrauen + korruption + (1 + bildung | cntry)
+      npar    AIC    BIC logLik deviance Chisq Df        Pr(&gt;Chisq)    
+mreg2    8 154624 154693 -77304   154608                               
+mreg3   10 154568 154654 -77274   154548    60  2 0.000000000000093 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>Auch hier sehen wir, dass die log-Likelihood im zweiten Modell geringer ist - also besser ist - und zwar so viel, dass der <span class="math inline">\(\chi^2\)</span>-Test bei zwei Freiheitsgraden signifikant ist. <code>mreg3</code> ist also signifikant besser als<code>mreg2</code> - wir haben also signifikante Varianz im random Slope für Bildung und können das Modell nun auch inhaltlich interpretieren!</p>
+</section>
+<section id="interpretation-des-varying-slope-modells" class="level2">
+<h2 class="anchored" data-anchor-id="interpretation-des-varying-slope-modells">Interpretation des Varying Slope Modells</h2>
+<p>Der Fixed Effect für Bildung sagt uns nun wie groß der durchschnittliche Bildungseffekt <span class="math inline">\(\gamma_{10}\)</span> ist: <span class="math inline">\(-0.033\)</span>. Dieser Effekt ist signifikant. Also haben wir über alle Länder hinweg einen leicht negativen Effekt für Bildung.</p>
+<p>Interessant ist nun aber, wie stark sich die Effekte zwischen den Länder unterscheiden. Denn: wir haben ja einen variierenden Effekt, dessen Varianz bei <span class="math inline">\(0.002\)</span> liegt!</p>
+<p>Mit der Funktion <code>ranef()</code> können wir uns Ausgeben lassen, wie stark die Länder vom durchschnittliche Bildungseffekt, dem fixed Effect <span class="math inline">\(\gamma_{10}\)</span> abweichen:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ranef</span>(mreg3)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$cntry
+   (Intercept)  bildung
+AT     -0.1319 -0.04009
+BE      0.3412  0.01361
+BG     -0.1306 -0.06326
+CH      0.1159 -0.04039
+CY     -0.0209 -0.07355
+CZ     -0.3222 -0.03894
+DE     -0.4280  0.01240
+EE      0.1487  0.02992
+ES     -0.3056  0.01687
+FI      0.3602  0.04636
+FR      0.2671  0.02568
+GB     -0.2287  0.06221
+HR     -0.4182 -0.02260
+HU      0.7530 -0.01809
+IE     -0.0763  0.02471
+IT      0.4765  0.04142
+LT     -0.2662 -0.02655
+LV     -0.2626 -0.00636
+NL      0.5076  0.05266
+NO      0.2414  0.02780
+PL     -0.4717 -0.07547
+PT     -0.1912  0.04102
+SE      0.3093  0.07651
+SI     -0.5424 -0.04742
+SK      0.2760 -0.01844
+
+with conditional variances for "cntry" </code></pre>
+</div>
+</div>
+<p>Tatsächlich reichen diese Abweichungen von <span class="math inline">\(-0.075\)</span> bis <span class="math inline">\(0.077\)</span>.</p>
+<p>Um das anschaulicher zu machen, addieren wir den fixed Effect für Bildung.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>re_bildung <span class="ot">&lt;-</span> <span class="fu">ranef</span>(mreg3)<span class="sc">$</span>cntry[,<span class="dv">2</span>]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(re_bildung) <span class="ot">&lt;-</span> <span class="fu">row.names</span>(<span class="fu">ranef</span>(mreg3)<span class="sc">$</span>cntry)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#re_bildung+fixef(mreg2)[2]</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(re_bildung<span class="sc">+</span><span class="fu">fixef</span>(mreg2)[<span class="dv">2</span>])</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       PL        CY        BG        SI        CH        AT        CZ        LT 
+-0.100462 -0.098543 -0.088252 -0.072407 -0.065380 -0.065079 -0.063930 -0.051539 
+       HR        SK        HU        LV        DE        BE        ES        IE 
+-0.047593 -0.043436 -0.043086 -0.031350 -0.012589 -0.011378 -0.008124 -0.000284 
+       FR        NO        EE        PT        IT        FI        NL        GB 
+ 0.000690  0.002807  0.004929  0.016026  0.016428  0.021372  0.027672  0.037216 
+       SE 
+ 0.051515 </code></pre>
+</div>
+</div>
+<p>Addiert man also zu den jeweiligen random Effects für Bildung je Land den fixed Effect für Bildung <span class="math inline">\(\gamma_{10}\)</span> zeigt sich, das der variierende Slope für Bildung <span class="math inline">\(\beta_{1j}\)</span> von <span class="math inline">\(-0.1\)</span> in Polen PL bis <span class="math inline">\(0.052\)</span> in Schweden SE reicht.</p>
+</section>
+</section>
+<section id="cross-level-interaktionen" class="level1">
+<h1>Cross Level Interaktionen</h1>
+<p>Wir sehen also, der Effekt von Bildung variiert also zwischen den Ländern: in manchen wirkt Bildung negativ, in anderen Ländern aber auch positiv auf das politische Vertrauen!</p>
+<p>Die Frage die sich hier stellt: Warum ist das so? Und wir haben ja schon eine Hypothese, denn als zweite Forschungsfrage hatten wir formuliert:</p>
+<blockquote class="blockquote">
+<p>Wie beeinflusst Korruption die Wirkung von Bildung auf politisches Vertrauen?</p>
+</blockquote>
+<p>Könnte es also sein, dass das Ausmaß an Korruption in einem Land diese Variation des Random Slope erklären kann?</p>
+<p>Der Effekt des Individualmerkmals Bildung ist ein Effekt auf Ebene 1 - auch wenn die Größe dieses Ebene 1 Effektes zwischen den Ländern variiert.</p>
+<p>Korruption messen wir dabei als Kontextmerkmal auf Ebene 2. Wir haben für jedes Land einen Wert für den Transparency International Corruption Perception Index.</p>
+<p>Wenn diese Ebene 2 Variable also einen Effekt auf Ebene 1 beeinflusst ist das ein sogenannter <strong>Cross-Level Interaktionseffekt</strong>. Interaktion deshalb, weil ein Effekt einen anderen Effekt beeinflusst, also mit ihm interagiert.</p>
+<p>Wir ergänzen nun in der Regressionsgleichung diesen Ebene 2 Prädiktor für den variierenden Slope von Bildung:</p>
+<div class="border">
+<p class="math_left">
+<span class="math inline">\(y_{ij} = \beta_{0j} + \beta_{1j}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}\)</span>
+</p>
+mit
+<p class="math_left">
+<span class="math inline">\(\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}\)</span>
+</p>
+und jetzt zusätzlich
+<p class="math_left">
+<span class="math inline">\(\beta_{1j} = \gamma_{10} +\)</span> <font color="red"><span class="math inline">\(\gamma_{11j}\)</span></font> <span class="math inline">\(+u_{1j}\)</span>
+</p>
+</div>
+<p><font color="red"><span class="math inline">\(\gamma_{11j}\)</span></font> ist dabei der Regressionskoeffizient der Variable <code>korruption</code>, also der Einfluss der Variable <code>korruption</code> auf den variierende Slope der Variable Bildung <span class="math inline">\(\beta_{1j}\)</span>.</p>
+<p>Wenn <span class="math inline">\(\gamma_{11j}\)</span> tatsächlich einen Erklärungsbeitrag für die Variation des random Effects der Variable Bildung hat, dann müsste auch die Residualvarianz <span class="math inline">\(u_{1j}\)</span> geringer werden.</p>
+<p>Sehen wir uns das im Modell an:</p>
+<p>Wir schätzen also unser neues Modell, und für die Cross-Level Interaktion müssen wir nur einen ganz regulären Interaktionseffekt in der Formel spezifizieren. R weiß dann von ganz alleine, dass die eine Variable auf Ebene 1 ist und die andere Variable auf Ebene 2.</p>
+<p>Wir schätzen das Modell.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>mreg4 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(pol_vertrauen <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> bildung <span class="sc">+</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                responsivitaet <span class="sc">+</span> zufr_wirtschaft <span class="sc">+</span> soz_vertrauen <span class="sc">+</span> </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                korruption <span class="sc">+</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                bildung<span class="sc">:</span>korruption <span class="sc">+</span> </span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>                (<span class="dv">1</span> <span class="sc">+</span> bildung <span class="sc">|</span> cntry),  </span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">data=</span>ess)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Dann schauen wir mit der Anova, ob das Modell signifikant besser an die Daten angepasst ist als das vorige. Da sich die fixierten Effekte verändert haben, müssen wir die ML-basierte Anova nutzen.</p>
+<p>Wir schauen zuerst auf die Anova, da Wenn das nicht der Fall ist, würden wir gar nicht erst das Modell inhaltlich interpretieren, sondern würden das Modell ohne Cross-Level Interaktion als das letztlich am besten passende Mehrebenenmodell berichten und interpretieren. In dem Fall würde alsi Korruption nicht den Effekt von Bildung moderieren.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mreg3, mreg4, <span class="at">refit=</span>T)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Data: ess
+Models:
+mreg3: pol_vertrauen ~ 1 + bildung + responsivitaet + zufr_wirtschaft + soz_vertrauen + korruption + (1 + bildung | cntry)
+mreg4: pol_vertrauen ~ 1 + bildung + responsivitaet + zufr_wirtschaft + soz_vertrauen + korruption + bildung:korruption + (1 + bildung | cntry)
+      npar    AIC    BIC logLik deviance Chisq Df Pr(&gt;Chisq)   
+mreg3   10 154524 154610 -77252   154504                       
+mreg4   11 154517 154612 -77247   154495   8.9  1     0.0028 **
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>Aber wir sehen, das Modell ist signifikant besser. Also ist dieses Modell dasjenige, was am Ende am besten an die Daten angepasst ist und welches Interpretiert wird.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(mreg4)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># R2 for Mixed Models
+
+  Conditional R2: 0.471
+     Marginal R2: 0.446</code></pre>
+</div>
+</div>
+<p>Und das konditionale <span class="math inline">\(R^2\)</span> liegt bei <span class="math inline">\(0.471\)</span>.</p>
+<p>Das das Modell tatsächlich besser zu den Daten passt, können wir auch die Ergebnisse interpretieren:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mreg4)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: pol_vertrauen ~ 1 + bildung + responsivitaet + zufr_wirtschaft +  
+    soz_vertrauen + korruption + bildung:korruption + (1 + bildung |  
+    cntry)
+   Data: ess
+
+REML criterion at convergence: 154553
+
+Scaled residuals: 
+   Min     1Q Median     3Q    Max 
+-4.167 -0.657  0.009  0.646  5.398 
+
+Random effects:
+ Groups   Name        Variance Std.Dev. Corr
+ cntry    (Intercept) 0.12586  0.3548       
+          bildung     0.00158  0.0398   0.34
+ Residual             2.77719  1.6665       
+Number of obs: 39998, groups:  cntry, 25
+
+Fixed effects:
+                       Estimate   Std. Error           df t value
+(Intercept)            4.305159     0.192738    23.148932   22.34
+bildung                0.040085     0.024976    22.173418    1.60
+responsivitaet         0.842420     0.011419 39979.720725   73.77
+zufr_wirtschaft        0.313085     0.004389 39829.107658   71.34
+soz_vertrauen          0.210532     0.004992 39979.245989   42.18
+korruption            -0.011385     0.005362    23.222371   -2.12
+bildung:korruption    -0.002205     0.000704    23.364165   -3.13
+                              Pr(&gt;|t|)    
+(Intercept)        &lt;0.0000000000000002 ***
+bildung                         0.1227    
+responsivitaet     &lt;0.0000000000000002 ***
+zufr_wirtschaft    &lt;0.0000000000000002 ***
+soz_vertrauen      &lt;0.0000000000000002 ***
+korruption                      0.0446 *  
+bildung:korruption              0.0046 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr) bildng rspnsv zfr_wr sz_vrt krrptn
+bildung      0.283                                   
+responsivtt -0.020 -0.049                            
+zfr_wrtschf -0.034 -0.006 -0.241                     
+soz_vertran -0.027 -0.010 -0.140 -0.230              
+korruption  -0.929 -0.264  0.022  0.038  0.030       
+bldng:krrpt -0.258 -0.926  0.016  0.003 -0.012  0.280</code></pre>
+</div>
+</div>
+<p>Wir sehen bei den fixed Effects nun einen signifikanten Interaktionseffekt von <span class="math inline">\(-0.002\)</span>. Das bedeutet, das mit Zunahme der Korruption um einen Skalenpunkt verändert sich der Effekt von Bildung um den Faktor <span class="math inline">\(-0.002\)</span>. Je höher die Korruption ist, desto negativer wird der Effekt von Bildung. Und umgekehrt: je weniger Korruption in einem Land herrscht, desto positiver wird der Effekt von Bildung auf politisches Vertrauen.</p>
+<p>Da es sich bei Interaktionseffekten um bedingte Effekte handelt, dürfen wir auch den Haupteffekt von Bildung nur in Abhängigkeit der Korruptionsvariable interpretieren - der Haupteffekt von Bildung ist der Effekt den man beobachtet, wenn die Interaktionsvariable den Wert <span class="math inline">\(0\)</span> hat. Also: in einem ein Land, das keine Korruption hat, bzw. das sehr sauber ist, hat Bildung keinen signifikanten Effekt auf politisches Vertrauen.</p>
+<p>Man kann auch sagen: in Ländern mit hoher Korruption sorgt hohe Bildung dafür, dass man den politischen Eliten weniger Vertraut. In Ländern mit geringer/keiner Korruption hat Bildung keinen Effekt auf politisches Vertrauen.</p>
+</section>
+<section id="schluss" class="level1">
+<h1>Schluss</h1>
+<p>Wir haben unser Mehrebenenmodell um einen variierenden Slope ergänzt und haben gesehen, dass ein Teil der Unterschiede in der Varianz dieses random Effects mit einer Cross-Level Interaktion erklärt werden kann.</p>
+<p>Im nächsten <a href="./mreg6.html">Teil 6</a> werden wir uns anschauen, wie man die Ergebnisse der unterschiedlichen Varianten der Mehrebenenregression am besten aufbereitet und tabellarisch und grafisch darstellt.</p>
+<p>Noch ein Hinweis: Wichtig ist, dass man nicht einfach beliebige Ebene 1 Prädiktoren variieren lässt. Nur wo es eine Relevanz für die Forschungsfrage hat und nur dann, wenn auch die Theorie eine begründete Hypothese zulässt, nur dann werden variierende Slopes im Modell spezifiziert.</p>
+</section>
+<section id="aufgabe" class="level1">
+<h1>Aufgabe</h1>
+<ul>
+<li>Prüfen Sie zu einer eigenen Fragestellung, ob ein variierender Slope das Modell signifikant verbessert.</li>
+<li>Prüfen Sie zur eigenen Fragestellung, ob eine Cross-Level Interaktion vorliegt.</li>
+</ul>
+</section>
+<section id="lernzielabgleich" class="level1">
+<h1>Lernzielabgleich</h1>
+<p>Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernziele erreicht haben:</p>
+<ul>
+<li>Sie können Modelle mit variierenden Slopes und Cross Level Interaktionen als Mehrebenengleichung formulieren.</li>
+<li>Sie können Modelle mit variierenden Slopes und Cross Level Interaktionen in R umsetzen können.</li>
+<li>Sie können verschiedene empirische Modelle miteinander vergleichen und entscheiden, welche Modellvariante die passende ist.</li>
+</ul>
+<div class="cell" data-layout-align="center">
+
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Kopiert");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Kopiert");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var filterRegex = new RegExp(/^(?:http:|https:)\/\.github\.io\/uweremer/);
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+    var links = window.document.querySelectorAll('a:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+          // target, if specified
+          link.setAttribute("target", "_blank");
+      }
+    }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">© 2022, Uwe Remer</div>   
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="./datenschutz.html">Datenschutz</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="./about.html">Impressum</a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+</body></html>
