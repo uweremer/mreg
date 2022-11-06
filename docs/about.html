@@ -7,9 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Dr.&nbsp;Uwe Remer">
-<meta name="dcterms.date" content="2022-11-03">
 
-<title>Mehrebenenregression mit R</title>
+<title>Mehrebenenregression mit R - Dr.&nbsp;Uwe Remer</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -35,7 +34,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
@@ -75,7 +73,7 @@ ul.task-list li input[type="checkbox"] {
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
-<body class="nav-sidebar floating nav-fixed">
+<body class="nav-sidebar floating nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -92,7 +90,7 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page">
+    <a class="nav-link" href="./index.html">
  <span class="menu-text">Startseite</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -131,7 +129,7 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Ressourcen</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./about.html">
+    <a class="nav-link active" href="./about.html" aria-current="page">
  <span class="menu-text">Kontakt</span></a>
   </li>  
 </ul>
@@ -141,7 +139,7 @@ ul.task-list li input[type="checkbox"] {
     </nav>
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
     <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title">Mehrebenenregression mit R</h1>
+      <h1 class="quarto-secondary-nav-title">Dr.&nbsp;Uwe Remer</h1>
       <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
         <i class="bi bi-chevron-right"></i>
       </button>
@@ -198,102 +196,39 @@ ul.task-list li input[type="checkbox"] {
     </div>
 </nav>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Auf dieser Seite</h2>
-   
-  <ul>
-  <li><a href="#mehrebenenregression-mit-r" id="toc-mehrebenenregression-mit-r" class="nav-link active" data-scroll-target="#mehrebenenregression-mit-r">Mehrebenenregression mit R</a>
-  <ul class="collapse">
-  <li><a href="#die-kurzfassung" id="toc-die-kurzfassung" class="nav-link" data-scroll-target="#die-kurzfassung">Die Kurzfassung</a></li>
-  <li><a href="#voraussetzungen" id="toc-voraussetzungen" class="nav-link" data-scroll-target="#voraussetzungen">Voraussetzungen</a></li>
-  <li><a href="#zielgruppe" id="toc-zielgruppe" class="nav-link" data-scroll-target="#zielgruppe">Zielgruppe</a></li>
-  <li><a href="#literatur-zum-einstieg" id="toc-literatur-zum-einstieg" class="nav-link" data-scroll-target="#literatur-zum-einstieg">Literatur zum Einstieg</a></li>
-  </ul></li>
-  </ul>
-</nav>
-    </div>
+    
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-about-jolla">
+  <img src="./Grafiken/uweremer.jpg" class="about-image
+  round " style="height: 15em; width: 15em;">
+ <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Mehrebenenregression mit R</h1>
-<p class="subtitle lead">Eine einfache Einführung</p>
+<h1 class="title d-none d-lg-block">Dr.&nbsp;Uwe Remer</h1>
 </div>
-
-
-
 <div class="quarto-title-meta">
-
-    <div>
-    <div class="quarto-title-meta-heading">Autor:in</div>
-    <div class="quarto-title-meta-contents">
-             <p>Dr.&nbsp;Uwe Remer </p>
-          </div>
   </div>
-    
-    <div>
-    <div class="quarto-title-meta-heading">Veröffentlichungsdatum</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">November 3, 2022</p>
-    </div>
-  </div>
-  
-    
-  </div>
-  
-
-</header>
-
-<section id="mehrebenenregression-mit-r" class="level1">
-<h1>Mehrebenenregression mit R</h1>
-<p>Dies ist das Skript zur <em>Videoserie Mehrebenenregression mit R</em>, die für die Stelle Quantitatvie Methoden der <a href="https://www.fernuni-hagen.de/">FernUni Hagen</a> entstanden ist.</p>
-<p>Diese Videoserie besteht aus sechs aufeinander aufbauenden Teilen:</p>
-<ul>
-<li>Teil 1: Was ist eine Mehrebenenregression? [<a href="https://video.fernuni-hagen.de/Play/6076">Video</a>]</li>
-<li>Teil 2: Wann ist eine Mehrebenenregression angebracht? [ <a href="https://video.fernuni-hagen.de/Play/6077">Video</a>]</li>
-<li>Teil 3: Wie werden die Daten für eine Mehrebenregression vorbereitet? [ <a href="https://video.fernuni-hagen.de/Play/6078">Video</a>]</li>
-<li>Teil 4: Wie schätzt man eine Mehrebenenregression in R? [<a href="https://video.fernuni-hagen.de/Play/6089">Video</a>]</li>
-<li>Teil 5: Wie schätzt man variierende Slopes und Cross-Level Interaktionen? [<a href="https://video.fernuni-hagen.de/Play/6147">Video</a>]</li>
-<li>Teil 6: Wie lassen sich die Ergebnisse einer Mehrebenregression berichten? [<a href="https://video.fernuni-hagen.de/Play/6148">Video</a>]</li>
-</ul>
-<p>Zu allen Videos gibt es auf dieser Seite den R Code sowie das Skript.</p>
-<section id="die-kurzfassung" class="level2">
-<h2 class="anchored" data-anchor-id="die-kurzfassung">Die Kurzfassung</h2>
-<p>Die Mehrebenenregression ist ein multivariates statistisches Verfahren zur Analyse von Daten, die eine hierarchische Struktur mit mehreren (mindestens zwei) Ebenen aufweisen:</p>
-<p>Zum Beispiel:</p>
-<ul>
-<li>Befragte in Ländern / Gemeinden / Oragnisationen</li>
-<li>Schüler:innen in Klassen in Schulen</li>
-<li>Länder in Jahren</li>
-<li>etc.</li>
-</ul>
-<p>Immer wenn die übergeordnete Ebene für ausreichend große Varianz in den Daten sorgt, ist eine einfache Regression ungeeignet. Zum einen werden die Standardfehler unterschätzt. Die Mehrebenenregression schätzt diese korrekt. Außerdem erlaubt es die Mehrebenenregression, die komplexe Datenstruktur elegant zu modellieren und in greifbaren <em>quantities of interest</em> auszudrücken.</p>
-<p>Mit der Mehrebenenregression kann man die welche Wechselwirkungen zwischen den unterschidlichen Ebenen besser modellieren und statistisch prüfen, ob diese Unterschiede tatsöächlich bedeutsam sind.</p>
-</section>
-<section id="voraussetzungen" class="level2">
-<h2 class="anchored" data-anchor-id="voraussetzungen">Voraussetzungen</h2>
-<p>Damit Sie den Inhalten folgen können, sollten Sie Vorkenntnisse zur linearen OLS Regression haben, sowie Grundlagen in R beherrschen. Ideal wäre es, wenn Sie auch schon einen Lehrbuchtext zur Mehrebenenregression gelesen haben. Eine Auswahl an geeigneten Texten finden Sie am weiter unten auf dieser Seite.</p>
-</section>
-<section id="zielgruppe" class="level2">
-<h2 class="anchored" data-anchor-id="zielgruppe">Zielgruppe</h2>
-<p>BA oder MA Studierende aus Wirtschafts- und Sozialwissenschaften, Psychologie oder Digital Humanities, mit Vorkenntnissen in quantitativen Methoden (Grundlagen in R und in multivariater Statistik, z.B. OLS Regression).</p>
-</section>
-<section id="literatur-zum-einstieg" class="level2">
-<h2 class="anchored" data-anchor-id="literatur-zum-einstieg">Literatur zum Einstieg</h2>
-<ul>
-<li>Tausendpfund, Markus (2020): Mehrebenenanalyse. In: ebd. (Hrsg.): Fortgeschrittene Analyseverfahren in den Sozialwissenschaften. Grundwissen Politik. Springer VS, Wiesbaden. <a href="https://doi.org/10.1007/978-3-658-30237-5_5" class="uri">https://doi.org/10.1007/978-3-658-30237-5_5</a></li>
-<li>Pötschke, Manuela. (2020). Mehrebenenmodelle. In: Wagemann, Claudius; Goerres, Achim; Siewert, Markus B. (Hrsg.): Handbuch Methoden der Politikwissenschaft. Springer VS, Wiesbaden. <a href="https://doi.org/10.1007/978-3-658-16936-7_29" class="uri">https://doi.org/10.1007/978-3-658-16936-7_29</a></li>
-<li>Gellman, Andrew; Hill, Jennifer (2009): Data-Analysis Using regression and Multilevel/Hierachical Models. Cambridge: Cambridge University Press. Kap. 12 &amp; 13. <a href="https://doi.org/10.1017/CBO9780511790942" class="uri">https://doi.org/10.1017/CBO9780511790942</a></li>
-<li>Fox, John 2016: Applied Regression Analysis and Generalized Linear Models. Sage. Chp 23 Linear Mixed-Effects Models for Hierarchical and Longitudinal Data 700-742.</li>
-</ul>
+</header><main class="content" id="quarto-document-content">
+<p>Institut für Sozialwissenschaften<br> Computational Social Science (CSS-Lab)<br> Universität Stuttgart<br> Seidenstraße 36<br> 70174 Stuttgart<br> Deutschland<br> +49 711 685-83548<br> <a href="mailto:uwe.remer@sowi.uni-stuttgart.de">uwe.remer@sowi.uni-stuttgart.de</a></p>
 
 
-</section>
-</section>
-
-</main> <!-- /main -->
+</main> 
+  <hr class="about-sep">
+   <div class="about-links">
+  <a href="https://www.sowi.uni-stuttgart.de/institut/team/Remer" class="about-link">
+    <i class="bi bi-bank"></i>
+     <span class="about-link-text">Homepage</span>
+  </a>
+  <a href="https://github.com/uweremer/mreg" class="about-link">
+    <i class="bi bi-github"></i>
+     <span class="about-link-text">github</span>
+  </a>
+  <a href="https://fediscience.org/@uweremer" class="about-link">
+    <i class="bi bi-mastodon"></i>
+     <span class="about-link-text">Mastodon</span>
+  </a>
+</div>
+</div>
+ <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -314,13 +249,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
   toggleBodyColorPrimary();  
-  const icon = "";
-  const anchorJS = new window.AnchorJS();
-  anchorJS.options = {
-    placement: 'right',
-    icon: icon
-  };
-  anchorJS.add('.anchored');
   const clipboard = new window.ClipboardJS('.code-copy-button', {
     target: function(trigger) {
       return trigger.previousElementSibling;

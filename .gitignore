@@ -4,6 +4,8 @@
 *.html
 ![dD]ocs/*.html
 
+.quarto/
+
 # History files
 .Rhistory
 .Rapp.history
