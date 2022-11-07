@@ -61,7 +61,38 @@ GitHub hat Compliance-Maßnahmen für internationale Datenübermittlungen umgese
 
 # IV. Verwendung von Cookies
 
-Die Webseite nutzt keine Cookies.
+## 1. Beschreibung und Umfang der Datenverarbeitung
+
+Die Webseite nutzt keine zustimmungspflichtigen Cookies, jedoch einen essentielln Session-Cookie, der durch das VG-Wort Zählpixel gesetzt wird. 
+
+Verantwortlich für diesen Cookie ist die VG Wort:
+
+Verwertungsgesellschaft WORT (VG WORT)<br>
+Rechtsfähiger Verein kraft Verleihung<br>
+Untere Weidenstraße 5<br>
+81543 München<br>
+
+Beim Aufruf der Webseite wird das Zählpixel geladen und ein Cookie gesetzt. Durch diesen wird die Zahl der "Visits" ermittelt. Die VG-Wort führt dazu aus: 
+
+> "Ein Visit definiert sich durch alle Zugriffe eines Nutzers während einer Browsersitzung auf den mit einer Zählmarke versehenen Text. [...] Die IP Adressen werden vor dem Eingang in den Zählserver um das letzte Oktet verkürzt, so dass keine exakte Rückverfolgung  des  Aufrufes  zu  einem  bestimmten  Nutzer  mehr  möglich  ist.  Danach  werden  die  Geodaten ausgewertet,  um  das  Land  aus  dem  der  Abruf  kommt  zu  ermitteln  (nur  Zugriffe  aus  Deutschland  sind  ausschüttungsrelevant!). Dann wird die IP  Adresse "Einweg" verschlüsselt und nur das Ergebnis der Verschlüsselung  wird  gespeichert.  Vollständige  IP  Adressen  werden  also  nicht  verwendet  und  IP  Adressen  werden  in unverschlüsselter Form nicht gespeichert." 
+
+Personenbezogene Daten werden also nicht erfasst.
+
+## 2. Rechtsgrundlage für die Datenverarbeitung
+
+Rechtsgrundlage für die Datenverarbeitung ist ein berechtigtes Interesse im Sinne des Art. 6 Abs. 1 S. 1 lit. b, e und f DSGVO.
+ 
+## 3. Zweck der Datenverarbeitung
+
+Der VG-Wort Zählpixel-Cookie ist ist ein notwendiger essentieller Cookie, der der Erfüllung rechtlicher und vertraglicher Pflichten dient, nämlich der Feststellung der Kopierwahrscheinlichkeit eines Textes als Grundlage für der Ermittlung des Anspruchs auf Autorenvergütung. 
+ 
+## 4. Dauer der Speicherung
+ 
+Der Session Cookie wird nur temporär gesetzt und nach Ende einer Brwosersitzung (Schließen des Browsers) gelöscht. 
+
+## 5. Widerspruchs- und Beseitigungsmöglichkeit
+
+Besucher der Seite können die Nutzung von Cookies verhindern, indem Sie das Setzen von Cookies durch entsprechende Einstellungen im Webbrowser blockieren. Außerdem können Besucher der Seite zu jedem Zeitpunkt  bereits gesetzte Cookies manuell über die Brwosereinstellungen löschen.
 
 
 # V. E-Mail-Kontakt
