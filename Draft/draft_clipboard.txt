@@ -1,0 +1,189 @@
+
+V2: 
+Was unter 'korrekten Ergebnissen' zu verstehen ist, wie sich die Ergebnisse einer Mehrebenenregression von denen einer OLS Regression unterscheiden und welche Rolle dabei Fallzahlen spielen, besprechen wir im siebten und letzten Video dieser Videoreihe, da es sich um weiterführende Themen handelt.
+
+
+
+mit an und schreiben explizit, dass wir den `REML`-Schätzer verwenden wollen (**RE**stricted, **M**aximum **L**ikelihood). Dazu später mehr. 
+
+
+
+Zusätzlich bekommt man Mehrere R^2 für variierende Parameter
+
+
+
+## Und wie sieht das technisch aus?
+
+Die MLM erweitert die einfache OLS Regression
+Aus y=a+bx wird im einfachsten Fall
+yij = _0j + b1+ rij
+mit _0j = 00 + u0j
+ERLÄUTERN
+
+
+## Vorteile 
+
+Wenn also ausreichend Varianz auf Ebene 2 vorliegt, können Sie die Vorteile der Mehrebenenregression nutzen.
+
+Die Vorteile betreffen dabei zwei Aspekte: 
+  
+  - zunächst den Aspekt der Prognose: das heißt, wie gut können wir mit dem Modell Aussagen über die abhängige Variable treffen? 
+  - und zum zweiten die kausale Inferenz: wie gut können wir Aussagen über Zusammenhänge zwischen der abhängigen und den unabhängigen Variablen treffen?
+  
+  Gut heißt dabei: unverzerrt und effizient. Das kennen Sie vielleicht aus der Regressionstheorie, wir meinen damit dass die Schätzung der Regressionsparameter nah dran am unbekannten wahren Wert liegt und möglichst geringe Unsicherheit aufweist.
+
+Wenn Daten also eine Mehrebenenstruktur aufweist, ist die Mehrebenenregression das Modell, dass bessere Vorhersagen ermöglicht, aber auch die Zusammenhänge zwischen den Variablen besser modellieren kann.
+
+
+Wir fassen die Vorteile am Ende des Videos noch einmal konkreter Zusammen. 
+
+
+Um das zu verstehen, müssen wir uns das Mehrebenenmodell aber erst im Detail kennenlernen. 
+
+
+Wenn also ausreichend Varianz auf Ebene 2 vorliegt, können wir die Mehrebenenregression nutzen. Vorteil ist, dass wir bessere Schätzungen für die Regressionsparameter erhalten (was das genau heißt sehen wir noch), und das wir die Wehcslewirkungen zwischen den Ebenen explizit im Modell berücksichtigen können und in wenigen Maßazahlen auch kompat beschrieben können. 
+
+
+Wenn Prognose:
+  Deutlich bessere Vorhersage: 
+  -	Bessere Prognose als wenn ML Struktur unberücksichtigt (höhere Erklärungskraft)
+-	Ehrlichere Unsicherheit als wenn unberücksichtigt
+-	Weniger Unsicherheit als bei einzelnen Ländern
+-	Geringere Variabilität der Schätzung als bei einzelnen Ländern 
+
+Wenn Inferenz: explizite Modellierung
+Welchen Einfluss haben Prädiktoren auf Ebene 1 an der Varianz auf Ebene 1
+Welchen Einfluss haben Prädiktoren auf Ebene 2 an der Varianz auf Ebene 2
+Unterscheiden sich die Effekte eines Prädiktors der Ebene 1 zwischen Einheiten der Ebene 2
+Können Prädiktoren der Ebene 2 erklären, warum sich Effekte von Prädiktoren der Ebene 1 zwischen den Ebene 2 Einheiten unterscheiden?
+  
+  
+  
+  
+  
+  # Das Grundprinzip der Mehrebenenregression
+  
+  Alle statistischen Verfahren haben im Kern zwei Ziele: Inferenz und Prognose. Es kommt zwar auf die konkrete Fragestellung an, aber in der Regel sind wir als Wissenschaftler:innen  an Inferenz interessiert – denn wir wollen verstehen und erklären. 
+
+In der praktischen Anwendung außerhalb der Forschung – z.B. in Beratung, oder im Unternehmenseinsatz - ist häufig Prognose das Ziel: Was passiert, wenn man das eine oder andere ändert? 
+  
+  Ob man das Ziel erreicht, also ob Sie Ihrer Inferenz oder Prognose trauen können, hängt davon ab, ob man das richtige Instrument nutzt. In vielen Fällen ist die einfache lineare Regression ausreichend. Aber in vielen Fällen gibt es substantielle Gründe und/oder statistische Gründe, die eine Mehrebenenregression zum korrekten Modell der Wahl machen. Schauen wir als erstes auf die substantiellen Gründe.
+  
+  
+  
+##### Design Effekt
+
+
+
+
+Neben dem $ICC$ wird häufig auch der sogenannte **Design Effect** $D_{eff}$ betrachtet. Der Design Effekt gibt an, um welchen Faktor die Varianz eines Parameters unterschätzt würde, wenn man die Mehrebenenstruktur nicht explizit berücksichtigt. 
+
+Die Idee ist, dass die Mehrebenenstruktur als eine Art geschichtete Stichprobe aufgefasst werden kann, bei der das Schichtungsmerkmal mit bestimmten Merkmalen korrelieren (und wieviel, das sagt uns der der $ICC$).
+
+Wenn der ICC aber 0 ist, dann können wir die Daten verstehen, als stammen sie aus einer einfachen Zufallsstichprobe. Also, als ob es kein Schichtungsmerkmal, dass mit einem Parameter korreliert. 
+
+Der Design Effekt sagt uns nun, um welchen Faktor unsere Varianzen unter- oder überschätzt werden, wenn man so tut, als ob die Daten aus einer einfachen Zufallsstichprobe stammen, obwohl sie eigentlich geclustert sind.
+
+Bei Werten von 1 sind die Varianzen nicht verzerrt. Bei Werten > 1 ist die Varianz eines Parameters größer, wenn man die Mehrebenenstruktur korrekt berücksichtigt. Im Umkehrschluss heißt das, dass man die Varianz eines Parameters unterschätzt, wenn man die Mehrebenenstruktur ignoriert und eine einfache OLS Regression rechnet und so tut, als wären die Daten alle aus einer ungeschichteten Stichprobe.
+
+Der Design Effekt berechnet sich aus 1 plus der mittleren Fallzahl der Gruppen mal dem $ICC$ ([Muthen/Satorra 1995: 289](https://doi.org/10.2307/271070)).
+
+
+$$D_{eff}=1+(n-1)\rho$$ 
+Bei einem $D_{eff}\ge 2$ sollte eine Mehrebenenregression genutzt werden ([Muthen 1999](http://www.statmodel.com/discussion/messages/12/18.html)).
+
+Beide Parameter, der ICC und der Design Effekt müssen zum Glück nicht von Hand berechnet werden. 
+Schauen wir uns nun in R an, wie wir das Nullmodell schätzen und damit diese beiden Maße berechnen:
+
+
+Um den Design Effekt mit der Formel $D_{eff}=1+(n-1)\rho$ zu berechnen, benötigen wir die durchschnittliche Gruppengröße und den $ICC$.
+
+```{r}
+grp_mean <- mean(table(ess$cntry))
+icc <- icc(mreg.0)$ICC_adjusted
+
+Deff <- 1 + (grp_mean - 1)*icc
+```
+
+
+
+
+- Muthen, B. O.; Satorra, A. (1995): Complex sample data in structural equation modeling. Sociological methodology, 267-316. DOI: https://doi.org/10.2307/271070
+- Muthen, Linda (1999): Discussion on Intraclass correlations. Online: http://www.statmodel.com/discussion/messages/12/18.html
+
+
+
+
+
+
+
+
+## Regressionsgleichung
+
+Schauen wir an dieser Stelle noch einmal auf die Regressionsgleichung.
+
+So kennen wir die einfache OLS Regression.
+
+<p class=math> 
+$y_i=a+bx_i+e_i$
+</p>
+
+Wir könnten aber es genau so auch folgendermaßen notieren, ohne dass sich irgendetwas ändert:
+
+<p class=math> 
+$y_i=\beta_{0}+\beta_1x_i+e_ij$
+</p>
+
+Das verdeutlicht aber, dass der Intercept $\beta_0$ dabei genau so ein Regressionskoeffizient ist wie die b-Koeffizienten. 
+
+Und wenn man es ganz genau nehmen wöllte, könnte man auch schreiben:
+
+<p class=math> 
+$y_i=\beta_{0}x_0+\beta_1x_i+e_ij$
+</p>
+
+Jetzt werden Sie sagen, aber wir haben ja gar keine Variable $x_0$.
+
+Naja, nicht ganz. Nur: Diese Variable stammt nicht aus den Daten und genau genommen ist es keine Variable, sondern eine Konstante, die Sie in die Regressionsgleichung mit aufnehmnem:
+
+$x_0$ ist für alle Befragten konstant 1, also: $x_0 = 1$. Warum: weil der Intercept geht für alle Befragten mit gleichem Wert in die Rgeressionsgleichung ein.
+
+<p class=math> 
+$y_i=\beta_{0}1+\beta_1x_i+e_ij$
+</p>
+
+Dann können wir die Gleichung aber gleich so schreiben...
+
+<p class=math> 
+$y_i=\beta_{0}+\beta_1x_i+e_ij$
+</p>
+
+
+
+wurde das Grundmodell der Mehrebenenregression, bei der 
+
+<p class=math> 
+$y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + r_{ij}$
+</p>
+
+mit 
+
+<p class=math> 
+$\beta_{0j} = \gamma_{00} + u_{0j}$
+</p>
+
+
+
+
+
+<p class=math> 
+<font color=blue>$y_{ij}$</font>
+$=$
+<font color=red>$\beta_0j+\beta_1x_ij$</font>
+$+~...~\beta_nx_n~+~$
+<font color=darkorange>$e$</font>
+</p>
+
+
+
+

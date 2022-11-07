@@ -2,6 +2,7 @@
 [dD]aten/
 .quarto/
 
+
 *.html
 
 ![dD]ocs/*.html

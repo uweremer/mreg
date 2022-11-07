@@ -1,0 +1,223 @@
+---
+title: "Formeln"
+author: "Dr. Uwe Remer"
+date: "Juli 2022"
+output:
+  beamer_presentation:
+subtitle: Videoserie Mehrebenenregression
+---
+
+```{r setup, include=FALSE}
+# Figure size in inches
+w = 5
+h = 2.5
+s = 2.8
+    
+knitr::opts_chunk$set(eval=TRUE, echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.width=w, fig.height=h, fig.align='center')
+save <-  T
+save_fig <- function(filename, save = TRUE){
+  if(save==TRUE){
+    ggsave(paste0("./Grafiken/", filename), 
+         width = w, height = h,
+         #scale = s,       
+         unit = "in")
+  }
+  else{
+    message("Saving skipped...")
+  }
+}
+```
+
+```{css, eval=F}
+/* CSS Stil für Formeln unter Scatterplots */
+P.math {
+    text-align: center;
+    font-size: 1.8vw;
+}
+```
+
+# Video 2
+
+## 1  
+
+<p class=math> 
+$\hat{y}=a+bx$
+</p>
+
+## 2
+
+<p class=math> 
+$\hat{y}=\beta_0+\beta_1x_1$
+</p>
+
+## 3
+
+<p class=math> 
+$\hat{y}_i=\beta_0+\beta_1x_{1i}$
+</p>
+
+## 4
+
+<p class=math> 
+$\hat{y}_i=\beta_0$
+</p>
+
+## 5
+
+<p class=math> 
+$\hat{y}_{ij} = \beta_{0j}$
+</p>
+
+## 6
+
+<p class=math> 
+$y_{ij} = \beta_{0j} + r_{ij}$
+</p>
+## 7
+
+<p class=math> 
+$y_{ij} = \beta_{0j} + r_{ij}$
+
+mit 
+
+$\beta_{0j} = \gamma_{00} + u_{0j}$
+</p>
+
+
+## 8
+
+$$s^2=\frac{\sum\nolimits _{i=1}^{n}{(x_i-\bar{x})^2}}{n-1}$$
+
+## 9 a
+
+<p class=math> 
+$Anteil~Varianz~auf~L2 = \frac{Varianz~L2}{Gesamtvarianz}$
+</p>
+
+## 9 b
+
+<p class=math> 
+$Anteil~Var.~L2 = \frac{Varianz~L2}{Gesamtvarianz} = \frac{Gesamtvarianz - Varianz~L1}{Gesamtvarianz}$
+</p>
+
+
+## 9 c
+
+<p class=math> 
+$Anteil~Var.~L2 = \frac{Varianz~L2}{Gesamtvarianz} = \frac{5.67-4.28}{5.67} \approx 0.24$
+</p>
+
+## 10
+
+<p class=math> 
+$ICC = \rho=\frac{\sigma^2_{L2}}{\sigma^2_{L1}+\sigma^2_{L2}}$
+</p>
+
+## 11
+
+<p class=math> 
+$\hat{y}_{ij}=\beta_0j$
+<font color=red>$1$</font>
+$+\beta_1x_{ij}$
+</p>
+
+
+# Video 4
+
+## 1
+
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + u_{0j}$
+</p>
+</div>
+
+## 2
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + u_{0j}$
+</p>
+</div>
+
+## 3
+
+$R^2_{L1}=1-\frac{s^2_{L1_{Modell}}}{s^2_{L1_{Nullmodell}}}$  
+
+
+$R^2_{L2}=1-\frac{s^2_{L2_{Modell}}}{s^2_{L2_{Nullmodell}}}$  
+
+## 4
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} + \beta_{1}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}$
+</p>
+</div>
+ 
+ 
+# Video 5
+
+## 1
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} +$
+<font color=blue>$\beta_{1}$</font>
+$x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}$
+</p>
+</div>
+
+## 2
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} +$ 
+<font color=blue>$\beta_{1}$</font><font color=red>$_{j}$</font>
+$x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}$
+</p>
+und jetzt zusätzlich
+<p class=math_left>
+<font color=red>$\beta_{1j} = \gamma_{10} + u_{1j}$</font>
+</p>
+</div>
+
+## 3
+
+<div class=border>
+<p class=math_left> 
+$y_{ij} = \beta_{0j} +$ 
+<font color=blue>$\beta_{1}$</font><font color=red>$_{j}$</font>
+$x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}$
+</p>
+mit 
+<p class=math_left> 
+$\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}$
+</p>
+und jetzt zusätzlich
+<p class=math_left>
+$\beta_{1j} = \gamma_{10} +$<font color=red>$\gamma_{11j}$</font>$+ u_{1j}$
+</p>
+</div>

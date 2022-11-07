@@ -1,0 +1,24 @@
+---
+title: "Untitled"
+author: "Dr. Uwe Remer"
+date: "2022-09-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+#Vorbereitung
+source("./RScript_mreg5.R")
+library(texreg)
+```
+
+
+```{r, results='asis'}
+# Der eigentliche Tabellenaufruf
+htmlreg(list(mreg3,mreg4))
+#texreg(list(mreg3,mreg4))
+```

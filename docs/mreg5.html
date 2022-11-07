@@ -427,10 +427,10 @@ Scaled residuals:
    Min     1Q Median     3Q    Max 
 -4.167 -0.657  0.009  0.647  5.398 
 
-Random effects:
+<font color="red">Random effects:</font>
  Groups   Name        Variance Std.Dev. Corr
  cntry    (Intercept) 0.13072  0.3616       
-          bildung     0.00237  0.0487   0.38
+          <font color="red">bildung     0.00237</font>  0.0487   0.38
  Residual             2.77720  1.6665       
 Number of obs: 39998, groups:  cntry, 25
 
@@ -687,7 +687,7 @@ responsivitaet         0.842420     0.011419 39979.720725   73.77
 zufr_wirtschaft        0.313085     0.004389 39829.107658   71.34
 soz_vertrauen          0.210532     0.004992 39979.245989   42.18
 korruption            -0.011385     0.005362    23.222371   -2.12
-bildung:korruption    -0.002205     0.000704    23.364165   -3.13
+<font color="red">bildung:korruption    -0.002205</font>     0.000704    23.364165   -3.13
                               Pr(&gt;|t|)    
 (Intercept)        &lt;0.0000000000000002 ***
 bildung                         0.1227    
@@ -695,7 +695,7 @@ responsivitaet     &lt;0.0000000000000002 ***
 zufr_wirtschaft    &lt;0.0000000000000002 ***
 soz_vertrauen      &lt;0.0000000000000002 ***
 korruption                      0.0446 *  
-bildung:korruption              0.0046 ** 
+<font color="red">bildung:korruption              0.0046 **</font> 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -709,7 +709,7 @@ korruption  -0.929 -0.264  0.022  0.038  0.030
 bldng:krrpt -0.258 -0.926  0.016  0.003 -0.012  0.280</code></pre>
 </div>
 </div>
-<p>Wir sehen bei den fixed Effects nun einen signifikanten Interaktionseffekt von <span class="math inline">\(-0.002\)</span>. Das bedeutet, das mit Zunahme der Korruption um einen Skalenpunkt verändert sich der Effekt von Bildung um den Faktor <span class="math inline">\(-0.002\)</span>. Je höher die Korruption ist, desto negativer wird der Effekt von Bildung. Und umgekehrt: je weniger Korruption in einem Land herrscht, desto positiver wird der Effekt von Bildung auf politisches Vertrauen.</p>
+<p>Wir sehen bei den fixed Effects nun einen signifikanten <font color="red">Interaktionseffekt</font> von <span class="math inline">\(-0.002\)</span>. Das bedeutet, das mit Zunahme der Korruption um einen Skalenpunkt verändert sich der Effekt von Bildung um den Faktor <span class="math inline">\(-0.002\)</span>. Je höher die Korruption ist, desto negativer wird der Effekt von Bildung. Und umgekehrt: je weniger Korruption in einem Land herrscht, desto positiver wird der Effekt von Bildung auf politisches Vertrauen.</p>
 <p>Da es sich bei Interaktionseffekten um bedingte Effekte handelt, dürfen wir auch den Haupteffekt von Bildung nur in Abhängigkeit der Korruptionsvariable interpretieren - der Haupteffekt von Bildung ist der Effekt den man beobachtet, wenn die Interaktionsvariable den Wert <span class="math inline">\(0\)</span> hat. Also: in einem ein Land, das keine Korruption hat, bzw. das sehr sauber ist, hat Bildung keinen signifikanten Effekt auf politisches Vertrauen.</p>
 <p>Man kann auch sagen: in Ländern mit hoher Korruption sorgt hohe Bildung dafür, dass man den politischen Eliten weniger Vertraut. In Ländern mit geringer/keiner Korruption hat Bildung keinen Effekt auf politisches Vertrauen.</p>
 </section>
