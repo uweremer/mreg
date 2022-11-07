@@ -226,6 +226,8 @@ Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernzi
 -   die variierenden Intercepts und variierende Slopes grafisch darzustellen.
 -   Cross-Level Interaktionen mit Effekt-Plots grafisch darzustellen.
 
+<img src="https://vg01.met.vgwort.de/na/7e98b141752044efa43b57b083e63e73" width="1" height="1" alt="">
+
 ```{r, echo=F, eval=F}
 library("knitr")
 knitr::purl("Mreg6.Rmd",

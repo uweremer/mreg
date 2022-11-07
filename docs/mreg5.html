@@ -360,27 +360,27 @@ DIV.border {
 <p>Dieses Modell ist die Formel unseres Varying Intercept Modells:</p>
 <div class="border">
 <p class="math_left">
-<span class="math inline">\(y_{ij} = \beta_{0j} +\)</span> <font color="blue"><span class="math inline">\(\beta_{1}\)</span></font> <span class="math inline">\(x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}\)</span>
-</p>
-mit
+</p><p><span class="math inline">\(y_{ij} = \beta_{0j} +\)</span> <font color="blue"><span class="math inline">\(\beta_{1}\)</span></font> <span class="math inline">\(x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}\)</span></p>
+<p></p>
+<p>mit</p>
 <p class="math_left">
-<span class="math inline">\(\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}\)</span>
-</p>
+</p><p><span class="math inline">\(\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}\)</span></p>
+<p></p>
 </div>
 <p>Wenn wir jetzt den Slope <font color="blue"><span class="math inline">\(\beta_{1}\)</span></font> variieren lassen wollen, ergänzen wir zunächst einen Index <font color="red"><span class="math inline">\(j\)</span></font>, also <font color="blue"><span class="math inline">\(\beta_{1}\)</span></font><font color="red"><span class="math inline">\(_{j}\)</span></font>.</p>
 <p>Außerdem müssen wir eine Regressionsgleichung für diesen variierenden Slope ergänzen.</p>
 <div class="border">
 <p class="math_left">
-<span class="math inline">\(y_{ij} = \beta_{0j} +\)</span> <font color="blue"><span class="math inline">\(\beta_{1}\)</span></font><font color="red"><span class="math inline">\(_{j}\)</span></font> <span class="math inline">\(x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}\)</span>
-</p>
-mit
+</p><p><span class="math inline">\(y_{ij} = \beta_{0j} +\)</span> <font color="blue"><span class="math inline">\(\beta_{1}\)</span></font><font color="red"><span class="math inline">\(_{j}\)</span></font> <span class="math inline">\(x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}\)</span></p>
+<p></p>
+<p>mit</p>
 <p class="math_left">
-<span class="math inline">\(\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}\)</span>
-</p>
-und jetzt zusätzlich
+</p><p><span class="math inline">\(\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}\)</span></p>
+<p></p>
+<p>und jetzt zusätzlich</p>
 <p class="math_left">
-<font color="red"><span class="math inline">\(\beta_{1j} = \gamma_{10} + u_{1j}\)</span></font>
-</p>
+</p><p><font color="red"><span class="math inline">\(\beta_{1j} = \gamma_{10} + u_{1j}\)</span></font></p>
+<p></p>
 </div>
 <p>Sie erkennen: die Form ist analog zur Gleichung des variierenden Intercepts. <span class="math inline">\(\gamma_{10}\)</span> ist der Ebene 2 Intercept, also der durchschnittliche Effekt - der fixed Effect - für den Ebene 1 Bildungseffekt <span class="math inline">\(\beta_{1j}\)</span>.</p>
 <p>Und das Residuum <span class="math inline">\(u_{1j}\)</span> enthält die Varianz, also die Streuung der länderspezifischen Bildungseffekte um den Wert <span class="math inline">\(\gamma_{10}\)</span>.</p>
@@ -413,6 +413,7 @@ und jetzt zusätzlich
 <p>Jetzt konvergiert das Modell und wir rufen wir die Ergebnisse auf:</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mreg3)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
@@ -449,6 +450,8 @@ responsivitaet  ***
 zufr_wirtschaft ***
 soz_vertrauen   ***
 korruption         
+
+
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -459,7 +462,6 @@ responsivtt -0.017 -0.076
 zfr_wrtschf -0.034 -0.006 -0.241              
 soz_vertran -0.031 -0.047 -0.140 -0.230       
 korruption  -0.921 -0.013  0.018  0.038  0.035</code></pre>
-</div>
 </div>
 <p>Wir sehen nun bei den Random Effects, dass eine neue Zeile hinzugekommen ist: der <font color="red">Random Effect für Bildung.</font> Dessen Varianz liegt bei <font color="red"><span class="math inline">\(0.002\)</span></font>. Was nun außerdem hinzugekommen ist, ist diese letzte Spalte. Sie berichtet, wie stark der Random Slope für Bildung mit dem Random Intercept korreliert. Wir sehen also, daas in Ländern mit im Schnitt höherem politischen Vertrauen der Effekt von Bildung im höher ist als in Ländern mit niedrigem politischem Vertrauen.</p>
 <p>Der Beitrag des Random Effect für Bildung an der Gesamtvarianz ist mit einer Varianz von nur <span class="math inline">\(0.002\)</span> recht gering. Bevor wir das Modell also inhaltlich interpretieren, müssen wir prüfen, ob dieser variierende Slope tatsächlich gerechtfertigt ist. Oder anders ausgedrückt: Ist die Annahme eines zwischen den Ländern variierenden Regressionskoeffizienten für Bildung überhaupt empirisch haltbar?</p>
@@ -477,10 +479,10 @@ korruption  -0.921 -0.013  0.018  0.038  0.035</code></pre>
 <p><code>lmer()</code> nutzt dabei als Voreinstellung automatisch den sogenannten <em>REML</em>-Schätzer (<strong>Re</strong>stricted <strong>M</strong>aximum <strong>L</strong>ikelihood).</p>
 <p>Der <code>lmer()</code> Befehl ergänzt also implizit <code>REML=TRUE</code>:</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Nicht ausführen</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>mreg <span class="ot">&lt;-</span> <span class="fu">lmer</span>(y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> x <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> grp), </span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">data =</span> df, </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">REML =</span> <span class="cn">TRUE</span>)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Nicht ausführen</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>mreg <span class="ot">&lt;-</span> <span class="fu">lmer</span>(y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> x <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> grp), </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">data =</span> df, </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">REML =</span> <span class="cn">TRUE</span>)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Wenn man <code>REML=FALSE</code> angibt, wird statt des REML-Schätzers der einfache ML-Schätzer genutzt.</p>
 <p>Der ML-Schätzer wählt dabei diejenigen Werte für die Modellparameter, bei denen die Wahrscheinlichkeit (Likelihood) am größten ist, die Werte der Daten zu beobachten. Wähle das Modell, beim dem <span class="math inline">\(p(Daten|Modell)\)</span> am größten ist.</p>
@@ -494,8 +496,8 @@ korruption  -0.921 -0.013  0.018  0.038  0.035</code></pre>
 <p>Die Modelle <code>mreg1</code> und <code>mreg2</code> sind zwei Modelle, die sich nur hinsichtlich der fixed Effects unterscheiden. Aber wir hatten sie mit dem REML-Schätzer gefittet, da dieser ja die default Einstellung ist.</p>
 <p>Was passiert, wenn wir mit diesen Modellen die Anova rechnen?</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Per default werden die Modelle mit ML refittet:</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mreg1, mreg2)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Per default werden die Modelle mit ML refittet:</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mreg1, mreg2)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Data: ess
 Models:
@@ -507,14 +509,14 @@ mreg2    8 154578 154647 -77281   154562  4.71  1       0.03 *
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#anova(mreg1, mreg2, refit=T)</span></span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#anova(mreg1, mreg2, refit=T)</span></span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Die Anova schätzt automatisch beide Modelle erneut mit dem ML Schätzer. So können wir also direkt die Anova interpretieren:</p>
 <p>Modell 2 ist also signifikant besser an die Daten angepasst als Modell 1.</p>
 <p>Und was ist mit dem Vergleich von <code>mreg2</code> und <code>mreg3</code>? Hier unterscheiden sich die random Effects, die fixed Effects sind aber identisch spezifiziert. Wir müssen also beide Modelle mit dem REML-Schätzer vergleichen.</p>
 <p>Auch hier würde die Anova mit dem ML-Schätzer refitten. Dann dürften wir die Anova aber nicht interpretieren. Wir müssen der Anova also sagen, dass sie nicht refitten soll: das geschieht mit dem Argument <code>refit=FALSE</code>:</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mreg2, mreg3, <span class="at">refit=</span>F)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mreg2, mreg3, <span class="at">refit=</span>F)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Data: ess
 Models:
@@ -535,7 +537,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <p>Interessant ist nun aber, wie stark sich die Effekte zwischen den Länder unterscheiden. Denn: wir haben ja einen variierenden Effekt, dessen Varianz bei <span class="math inline">\(0.002\)</span> liegt!</p>
 <p>Mit der Funktion <code>ranef()</code> können wir uns Ausgeben lassen, wie stark die Länder vom durchschnittliche Bildungseffekt, dem fixed Effect <span class="math inline">\(\gamma_{10}\)</span> abweichen:</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ranef</span>(mreg3)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ranef</span>(mreg3)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$cntry
    (Intercept)  bildung
@@ -571,11 +573,11 @@ with conditional variances for "cntry" </code></pre>
 <p>Tatsächlich reichen diese Abweichungen von <span class="math inline">\(-0.075\)</span> bis <span class="math inline">\(0.077\)</span>.</p>
 <p>Um das anschaulicher zu machen, addieren wir den fixed Effect für Bildung.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>re_bildung <span class="ot">&lt;-</span> <span class="fu">ranef</span>(mreg3)<span class="sc">$</span>cntry[,<span class="dv">2</span>]</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(re_bildung) <span class="ot">&lt;-</span> <span class="fu">row.names</span>(<span class="fu">ranef</span>(mreg3)<span class="sc">$</span>cntry)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#re_bildung+fixef(mreg2)[2]</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(re_bildung<span class="sc">+</span><span class="fu">fixef</span>(mreg2)[<span class="dv">2</span>])</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>re_bildung <span class="ot">&lt;-</span> <span class="fu">ranef</span>(mreg3)<span class="sc">$</span>cntry[,<span class="dv">2</span>]</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(re_bildung) <span class="ot">&lt;-</span> <span class="fu">row.names</span>(<span class="fu">ranef</span>(mreg3)<span class="sc">$</span>cntry)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#re_bildung+fixef(mreg2)[2]</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(re_bildung<span class="sc">+</span><span class="fu">fixef</span>(mreg2)[<span class="dv">2</span>])</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       PL        CY        BG        SI        CH        AT        CZ        LT 
 -0.100462 -0.098543 -0.088252 -0.072407 -0.065380 -0.065079 -0.063930 -0.051539 
@@ -604,16 +606,16 @@ with conditional variances for "cntry" </code></pre>
 <p>Wir ergänzen nun in der Regressionsgleichung diesen Ebene 2 Prädiktor für den variierenden Slope von Bildung:</p>
 <div class="border">
 <p class="math_left">
-<span class="math inline">\(y_{ij} = \beta_{0j} + \beta_{1j}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}\)</span>
-</p>
-mit
+</p><p><span class="math inline">\(y_{ij} = \beta_{0j} + \beta_{1j}x_{1ij} + \beta_{2}x_{2ij} + \beta_{3}x_{3ij} + \beta_{4}x_{4ij} + r_{ij}\)</span></p>
+<p></p>
+<p>mit</p>
 <p class="math_left">
-<span class="math inline">\(\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}\)</span>
-</p>
-und jetzt zusätzlich
+</p><p><span class="math inline">\(\beta_{0j} = \gamma_{00} + \gamma_{01j} + u_{0j}\)</span></p>
+<p></p>
+<p>und jetzt zusätzlich</p>
 <p class="math_left">
-<span class="math inline">\(\beta_{1j} = \gamma_{10} +\)</span> <font color="red"><span class="math inline">\(\gamma_{11j}\)</span></font> <span class="math inline">\(+u_{1j}\)</span>
-</p>
+</p><p><span class="math inline">\(\beta_{1j} = \gamma_{10} +\)</span> <font color="red"><span class="math inline">\(\gamma_{11j}\)</span></font> <span class="math inline">\(+u_{1j}\)</span></p>
+<p></p>
 </div>
 <p><font color="red"><span class="math inline">\(\gamma_{11j}\)</span></font> ist dabei der Regressionskoeffizient der Variable <code>korruption</code>, also der Einfluss der Variable <code>korruption</code> auf den variierende Slope der Variable Bildung <span class="math inline">\(\beta_{1j}\)</span>.</p>
 <p>Wenn <span class="math inline">\(\gamma_{11j}\)</span> tatsächlich einen Erklärungsbeitrag für die Variation des random Effects der Variable Bildung hat, dann müsste auch die Residualvarianz <span class="math inline">\(u_{1j}\)</span> geringer werden.</p>
@@ -621,17 +623,17 @@ und jetzt zusätzlich
 <p>Wir schätzen also unser neues Modell, und für die Cross-Level Interaktion müssen wir nur einen ganz regulären Interaktionseffekt in der Formel spezifizieren. R weiß dann von ganz alleine, dass die eine Variable auf Ebene 1 ist und die andere Variable auf Ebene 2.</p>
 <p>Wir schätzen das Modell.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>mreg4 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(pol_vertrauen <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> bildung <span class="sc">+</span> </span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                responsivitaet <span class="sc">+</span> zufr_wirtschaft <span class="sc">+</span> soz_vertrauen <span class="sc">+</span> </span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                korruption <span class="sc">+</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                bildung<span class="sc">:</span>korruption <span class="sc">+</span> </span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>                (<span class="dv">1</span> <span class="sc">+</span> bildung <span class="sc">|</span> cntry),  </span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">data=</span>ess)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>mreg4 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(pol_vertrauen <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> bildung <span class="sc">+</span> </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                responsivitaet <span class="sc">+</span> zufr_wirtschaft <span class="sc">+</span> soz_vertrauen <span class="sc">+</span> </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                korruption <span class="sc">+</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                bildung<span class="sc">:</span>korruption <span class="sc">+</span> </span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                (<span class="dv">1</span> <span class="sc">+</span> bildung <span class="sc">|</span> cntry),  </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">data=</span>ess)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Dann schauen wir mit der Anova, ob das Modell signifikant besser an die Daten angepasst ist als das vorige. Da sich die fixierten Effekte verändert haben, müssen wir die ML-basierte Anova nutzen.</p>
 <p>Wir schauen zuerst auf die Anova, da Wenn das nicht der Fall ist, würden wir gar nicht erst das Modell inhaltlich interpretieren, sondern würden das Modell ohne Cross-Level Interaktion als das letztlich am besten passende Mehrebenenmodell berichten und interpretieren. In dem Fall würde alsi Korruption nicht den Effekt von Bildung moderieren.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mreg3, mreg4, <span class="at">refit=</span>T)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mreg3, mreg4, <span class="at">refit=</span>T)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Data: ess
 Models:
@@ -646,7 +648,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
 <p>Aber wir sehen, das Modell ist signifikant besser. Also ist dieses Modell dasjenige, was am Ende am besten an die Daten angepasst ist und welches Interpretiert wird.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(mreg4)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>performance<span class="sc">::</span><span class="fu">r2</span>(mreg4)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># R2 for Mixed Models
 
@@ -657,7 +659,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <p>Und das konditionale <span class="math inline">\(R^2\)</span> liegt bei <span class="math inline">\(0.471\)</span>.</p>
 <p>Das das Modell tatsächlich besser zu den Daten passt, können wir auch die Ergebnisse interpretieren:</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mreg4)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mreg4)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
@@ -687,7 +689,7 @@ responsivitaet         0.842420     0.011419 39979.720725   73.77
 zufr_wirtschaft        0.313085     0.004389 39829.107658   71.34
 soz_vertrauen          0.210532     0.004992 39979.245989   42.18
 korruption            -0.011385     0.005362    23.222371   -2.12
-<font color="red">bildung:korruption    -0.002205</font>     0.000704    23.364165   -3.13
+bildung:korruption    -0.002205     0.000704    23.364165   -3.13
                               Pr(&gt;|t|)    
 (Intercept)        &lt;0.0000000000000002 ***
 bildung                         0.1227    
@@ -695,7 +697,7 @@ responsivitaet     &lt;0.0000000000000002 ***
 zufr_wirtschaft    &lt;0.0000000000000002 ***
 soz_vertrauen      &lt;0.0000000000000002 ***
 korruption                      0.0446 *  
-<font color="red">bildung:korruption              0.0046 **</font> 
+bildung:korruption              0.0046 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -709,7 +711,7 @@ korruption  -0.929 -0.264  0.022  0.038  0.030
 bldng:krrpt -0.258 -0.926  0.016  0.003 -0.012  0.280</code></pre>
 </div>
 </div>
-<p>Wir sehen bei den fixed Effects nun einen signifikanten <font color="red">Interaktionseffekt</font> von <span class="math inline">\(-0.002\)</span>. Das bedeutet, das mit Zunahme der Korruption um einen Skalenpunkt verändert sich der Effekt von Bildung um den Faktor <span class="math inline">\(-0.002\)</span>. Je höher die Korruption ist, desto negativer wird der Effekt von Bildung. Und umgekehrt: je weniger Korruption in einem Land herrscht, desto positiver wird der Effekt von Bildung auf politisches Vertrauen.</p>
+<p>Wir sehen bei den fixed Effects nun einen signifikanten Interaktionseffekt von <span class="math inline">\(-0.002\)</span>. Das bedeutet, das mit Zunahme der Korruption um einen Skalenpunkt verändert sich der Effekt von Bildung um den Faktor <span class="math inline">\(-0.002\)</span>. Je höher die Korruption ist, desto negativer wird der Effekt von Bildung. Und umgekehrt: je weniger Korruption in einem Land herrscht, desto positiver wird der Effekt von Bildung auf politisches Vertrauen.</p>
 <p>Da es sich bei Interaktionseffekten um bedingte Effekte handelt, dürfen wir auch den Haupteffekt von Bildung nur in Abhängigkeit der Korruptionsvariable interpretieren - der Haupteffekt von Bildung ist der Effekt den man beobachtet, wenn die Interaktionsvariable den Wert <span class="math inline">\(0\)</span> hat. Also: in einem ein Land, das keine Korruption hat, bzw. das sehr sauber ist, hat Bildung keinen signifikanten Effekt auf politisches Vertrauen.</p>
 <p>Man kann auch sagen: in Ländern mit hoher Korruption sorgt hohe Bildung dafür, dass man den politischen Eliten weniger Vertraut. In Ländern mit geringer/keiner Korruption hat Bildung keinen Effekt auf politisches Vertrauen.</p>
 </section>
@@ -734,6 +736,7 @@ bldng:krrpt -0.258 -0.926  0.016  0.003 -0.012  0.280</code></pre>
 <li>Sie können Modelle mit variierenden Slopes und Cross Level Interaktionen in R umsetzen können.</li>
 <li>Sie können verschiedene empirische Modelle miteinander vergleichen und entscheiden, welche Modellvariante die passende ist.</li>
 </ul>
+<p><img src="https://vg01.met.vgwort.de/na/818f3f61a1a04478a9250a8cedc99f6e" width="1" height="1" alt=""></p>
 <div class="cell" data-layout-align="center">
 
 </div>
@@ -892,7 +895,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
-    <div class="nav-footer-left">© 2022, Uwe Remer<img src="https://vg01.met.vgwort.de/na/818f3f61a1a04478a9250a8cedc99f6e" width="1" height="1" alt=""></div>   
+    <div class="nav-footer-left">© 2022, Uwe Remer</div>   
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item">

@@ -359,12 +359,11 @@ Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernzi
 # Literatur
 
 -   Breyer, Bianka (2015): Social Trust Scale (ESS). In: Zusammenstellung sozialwissenschaftlicher Items und Skalen (ZIS). DOI: <https://doi.org/10.6102/zis235>
-
 -   Jiang, Anli; Zhang, Tony Huiquan (2021): Political Trust in East and Southeast Asia: The Joint Effects of Education, Corruption Perception, and Urbanization. In: International Journal of Public Opinion Research 33(4): 911-926. DOI: <https://doi.org/10.1093/ijpor/edab008>
-
 -   Van der Meer, Tom; Hakhverdian, Armen (2017): Political trust as the evaluation of process and performance: A cross-national study of 42 European countries. In: Political Studies 65(1): 81-102. DOI: <https://doi.org/10.1177/0032321715607514>
-
 -   Rosenberg, Morris (1956): Misanthropy and Political Ideology. In: American Sociological Review, 216: 690-695. DOI: <https://doi.org/10.1177/002200275700100403>
+
+<img src="https://vg08.met.vgwort.de/na/14eee6fdc2674f2da509250f6dca2caf" width="1" height="1" alt="">
 
 ```{r, echo=F, eval=F}
 library("knitr")

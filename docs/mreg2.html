@@ -346,14 +346,14 @@ DIV.border {
 <p>Menschen teilen einen gemeinsamen sozialen Kontext innerhalb von Gruppen. Gleichzeitig unterscheiden diese Kontexte sich aber zwischen den Gruppen. Menschen unterliegen also unterschiedlichen sozialen Kontexten. Mit den Konzepten des methodologischen Individualismus und dem Makro-Mikro-Makro-Schema, das besser bekannt ist als die Coleman’sche Badewanne, wird analytisch klar, dass die Erklärung sozialer Phänomene immer alle Ebenen berücksichtigen muss.</p>
 </blockquote>
 <p>Dieses Argument möchte ich Ihnen anhand der Daten des ESS verdeutlichen.</p>
-<p>Unser durchgängiges Beispiel in der Videoserie ist das Thema Politikverdrossenheit. Was in den Medien oder Alltagssprachlich als Politikverdrossenheit bezeichnet wird, wird in der Forschung mit dem Konzept „Political Support“ untersucht. Eine Komponente davon ist das politische Vertrauen der Bürger. Das ist unsere abhängige Variable.</p>
+<p>Unser durchgängiges Beispiel in der Videoserie ist das Thema Politikverdrossenheit. Was in den Medien oder Alltagssprachlich als Politikverdrossenheit bezeichnet wird, wird in der Forschung mit dem Konzept „Political Support” untersucht. Eine Komponente davon ist das politische Vertrauen der Bürger. Das ist unsere abhängige Variable.</p>
 <p>Wer mehr inhaltlich darüber wissen möchte, für den gibt es am Ende des Videos noch Literaturhinweise. Also: Schauen wir uns das politische Vertrauen in Europa an:</p>
 <div class="cell" data-layout-align="center">
 
 </div>
 <p>Es handelt sich um einen Mittelwert-Index aus drei Items.</p>
 <blockquote class="blockquote">
-<p>„Bitte […] sagen Sie mir zu jeder öffentlichen Einrichtung oder Personengruppe, die ich Ihnen nenne, wie sehr Sie persönlich jeder einzelnen davon vertrauen. […] 0 bedeutet, dass Sie dieser Einrichtung oder Personengruppe überhaupt nicht vertrauen, und 10 bedeutet, dass Sie ihr voll und ganz vertrauen.“ - den Parteien - dem Bundestag (bzw. dem jeweiligen Parlament im Land) - den Politikern</p>
+<p>„Bitte […] sagen Sie mir zu jeder öffentlichen Einrichtung oder Personengruppe, die ich Ihnen nenne, wie sehr Sie persönlich jeder einzelnen davon vertrauen. […] 0 bedeutet, dass Sie dieser Einrichtung oder Personengruppe überhaupt nicht vertrauen, und 10 bedeutet, dass Sie ihr voll und ganz vertrauen.” - den Parteien - dem Bundestag (bzw. dem jeweiligen Parlament im Land) - den Politikern</p>
 </blockquote>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -452,34 +452,34 @@ DIV.border {
 <p>Das Nullmodell ist ein Mehrebenenmodell, bei dem noch <em>keine</em> unabhängigen Variablen mit ins Modell aufgenommen werden. Es ist ein Random Intercept Modell ohne Prädiktoren.</p>
 <p>Das hier erkennen Sie bestimmt:</p>
 <p class="math">
-<span class="math inline">\(\hat{y}=a+bx\)</span>
-</p>
+</p><p><span class="math inline">\(\hat{y}=a+bx\)</span></p>
+<p></p>
 <p>Es ist die klassische Regressiongleichung.</p>
 <p>Der Vorhersagewert <span class="math inline">\(\hat{y}\)</span> ergibt sich aus einer Regressionsgeraden, welche die Y-Achse an einem bestimmten Punkt schneidet. Das ist der Intercept <span class="math inline">\(a\)</span>. Und der Regressionskoeffizient <span class="math inline">\(b\)</span> sagt uns, um welchen Wert die Regressionsgerade steigt, wenn die unabhänige Variable <span class="math inline">\(x\)</span> um einen bestimmten Wert zunimmt. Dieser Steigungsparameter <span class="math inline">\(b\)</span> wird im englischen Slope genannt.</p>
 <p>Auch dier Mehrebenenregression basiert auf dieser klassischen Gleichung. Allerdings werden alle Regressionsparamter, also der Intercept und die Slopes einfach mit <span class="math inline">\(\beta\)</span> bezeichnet und durchgezählt. <span class="math inline">\(\beta_0\)</span> ist der Intercept, <span class="math inline">\(\beta_1\)</span> die erste unabhänige Variable, <span class="math inline">\(\beta_2\)</span> die zweite, usw..</p>
 <p class="math">
-<span class="math inline">\(\hat{y}=\beta_0+\beta_1x_1\)</span>
-</p>
+</p><p><span class="math inline">\(\hat{y}=\beta_0+\beta_1x_1\)</span></p>
+<p></p>
 <p>Weil das einfache OLS Modell nur eine Ebene hat, verzichtet man häufig auf einen Index. Vollständig würde die Gleichung aber lauten:</p>
 <p class="math">
-<span class="math inline">\(\hat{y}_i=\beta_0+\beta_1x_{1i}\)</span>
-</p>
+</p><p><span class="math inline">\(\hat{y}_i=\beta_0+\beta_1x_{1i}\)</span></p>
+<p></p>
 <p>Der Vorhersagewert und der Wert der x-Variable sind Befragtenspezifisch, daher Index <span class="math inline">\(i\)</span>.</p>
 <p>Auch im klassischen OLS Modell könnten wir ein Nullmodel, also ein Modell ohne unabhängige Variablen schätzen.</p>
 <p class="math">
-<span class="math inline">\(\hat{y}_i=\beta_0\)</span>
-</p>
+</p><p><span class="math inline">\(\hat{y}_i=\beta_0\)</span></p>
+<p></p>
 <p>Der Vorhersagewert wäre für alle Befragten einfach der Intercept, also eine Gerade, die parallel zur x-Achse verläuft und dem Mittelwert der abhängigen Variable entspricht.</p>
 <p>Das Nullmodell einer Mehrebenenregression wird Formel folgendermaßen ausgedrückt:</p>
 <p class="math">
-<span class="math inline">\(\hat{y}_{ij} = \beta_{0j}\)</span>
-</p>
+</p><p><span class="math inline">\(\hat{y}_{ij} = \beta_{0j}\)</span></p>
+<p></p>
 <p>Neu ist, dass der Vorhersagewert und der Intercept zusätzlich den Index <span class="math inline">\(j\)</span> haben. Für den Vorhersagewert <span class="math inline">\(\hat{y}\)</span> heißt das, nur das es sich um den Wert des Befrgaten <span class="math inline">\(i\)</span> in Land <span class="math inline">\(j\)</span> handelt. Für den Intercept <span class="math inline">\(\beta_{0}\)</span> heißt es, dass es sich um einen länderspezifischen Mittelwert handelt.</p>
 <p>Im Nullmodell ergibt sich also der Vorhersagewert <span class="math inline">\(\hat{y}_{ij}\)</span> einzig aus einem länderspezifischen Intercept <span class="math inline">\(\beta_{0j}\)</span>.</p>
 <p>Wir könnten die Formel auch etwas ausführlicher schreiben:</p>
 <p class="math">
-<span class="math inline">\(y_{ij} = \beta_{0j} + r_{ij}\)</span>
-</p>
+</p><p><span class="math inline">\(y_{ij} = \beta_{0j} + r_{ij}\)</span></p>
+<p></p>
 <p>Statt dem Vorhersagewert <span class="math inline">\(\hat{y}\)</span> haben wir nun den beobachteten Wert <span class="math inline">\(y\)</span> auf der linken Seite. Damit die Gleichung trotzdem aufgeht, ergänzen wir rechts noch die Fehlerterm, bzw. die Residuen <span class="math inline">\(r_{ij}\)</span>.</p>
 <p>Der beobachtete Wert <span class="math inline">\(y_{ij}\)</span> für Befragten <span class="math inline">\(i\)</span> in Land <span class="math inline">\(j\)</span> ergibt sich demnach aus dem Intercept <span class="math inline">\(\beta_{0j}\)</span> für Land <span class="math inline">\(j\)</span> und einem Fehlerterm oder Residuum <span class="math inline">\(r_{ij}\)</span> für den jeweiligen Befragten <span class="math inline">\(i\)</span> in Land <span class="math inline">\(j\)</span>.</p>
 <p>Der länderspezifische Intercept <span class="math inline">\(\beta_{0j}\)</span> macht nichts anderes, als dass er die Varianz zwischen den Ländern aus den Daten heraus rechnet.</p>
@@ -487,12 +487,12 @@ DIV.border {
 <p>Da der Intercept <span class="math inline">\(\beta_{0j}\)</span> aber länderspezifisch ist (das sehen wir im Index <span class="math inline">\(j\)</span>), müssen wir auch das im Modell berücksichtigen. Das heißt das Nullmodell ergänzen wir noch um eine zweite Zeile, die angibt, wie sich der variierende Intercept zusammensetzt. Oder anders ausgedrückt: Wir müssen noch ein Modell für die Ebene 2 formulieren:</p>
 <div class="border">
 <p class="math_left">
-<span class="math inline">\(y_{ij} = \beta_{0j} + r_{ij}\)</span>
-</p>
-mit
+</p><p><span class="math inline">\(y_{ij} = \beta_{0j} + r_{ij}\)</span></p>
+<p></p>
+<p>mit</p>
 <p class="math_left">
-<span class="math inline">\(\beta_{0j} = \gamma_{00} + u_{0j}\)</span>
-</p>
+</p><p><span class="math inline">\(\beta_{0j} = \gamma_{00} + u_{0j}\)</span></p>
+<p></p>
 </div>
 <p>Die zweite Zeile sagt nun: Der Ebene 1 Intercept <span class="math inline">\(\beta_{0j}\)</span> für Land <span class="math inline">\(j\)</span> ergibt sich aus einem Ebene 2 Intercept <span class="math inline">\(\gamma_{00}\)</span> (Gamma Null Null) und einem Ebene 2 Residuum <span class="math inline">\(u_{0j}\)</span>.</p>
 <p><span class="math inline">\(\gamma_{00}\)</span> ist dabei der Grand Mean, also der Mittelwert der Ländermittelwerte. Wie jeder Intercept ist das eine Konstante. Da <span class="math inline">\(\gamma_{00}\)</span> nicht variiert, hat es keinen Index <span class="math inline">\(j\)</span>.</p>
@@ -581,38 +581,36 @@ mit
 </ul>
 <p>Dass der Intercept mit einer <code>1</code> angegeben wird, kommt daher, dass die Regressionsgleichung eigentlich so aussieht:</p>
 <p class="math">
-<span class="math inline">\(\hat{y}_{ij}=\beta_0j\)</span> <font color="red"><span class="math inline">\(1\)</span></font> <span class="math inline">\(+\beta_1x_{ij}\)</span>
-</p>
+</p><p><span class="math inline">\(\hat{y}_{ij}=\beta_0j\)</span> <font color="red"><span class="math inline">\(1\)</span></font> <span class="math inline">\(+\beta_1x_{ij}\)</span></p>
+<p></p>
 <p>Der Intercept wird nämlich für jeden Befragten mal 1 genommen, was man aber in der Formle nicht ausschreiben muss.</p>
 <p>Das Regressionsobjekt haben wir unter dem Namen <code>mreg.0</code> gespeichert.</p>
 <p>Das können wir nun aufrufen oder direkt mit der Funktion <code>summary()</code> anzeigen lassen:</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mreg<span class="fl">.0</span>)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
-lmerModLmerTest]
-Formula: pol_vertrauen ~ 1 + (1 | cntry)
-   Data: ess
-
-REML criterion at convergence: 196954.6
-
-Scaled residuals: 
-    Min      1Q  Median      3Q     Max 
--2.7457 -0.7566  0.0255  0.7034  3.8140 
-
-<font color="red">Random effects:</font>
- Groups   Name        <font color="red">Variance</font> Std.Dev.
- cntry    (Intercept) <font color="red">1.053</font>    1.026   
- Residual             <font color="red">4.471</font>    2.115   
-Number of obs: 45391, groups:  cntry, 27
-
-<font color="blue">Fixed effects:</font>
-            <font color="blue">Estimate</font> Std. Error      df t value Pr(&gt;|t|)    
-<font color="blue">(Intercept)   3.8413</font>     0.1978 25.9987   19.42   &lt;2e-16 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
-</div>
+<pre><code>## Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+## lmerModLmerTest]
+## Formula: pol_vertrauen ~ 1 + (1 | cntry)
+##    Data: ess
+## 
+## REML criterion at convergence: 196954.6
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -2.7457 -0.7566  0.0255  0.7034  3.8140 
+## 
+## <font color="red">Random effects:</font>
+##  Groups   Name        <font color="red">Variance</font> Std.Dev.
+##  cntry    (Intercept) <font color="red">1.053</font>    1.026   
+##  Residual             <font color="red">4.471</font>    2.115   
+## Number of obs: 45391, groups:  cntry, 27
+## 
+## <font color="blue">Fixed effects:</font>
+##             <font color="blue">Estimate</font> Std. Error      df t value Pr(&gt;|t|)    
+## <font color="blue">(Intercept)   3.8413</font>     0.1978 25.9987   19.42   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <p>Viele Informationen in diesem Output sind an dieser Stelle nicht wichtig. Für uns sind folgende Quanitites of Interest relevant:</p>
 <p>Unten bei den <font color="blue">Fixed Effects</font> in blau hervorgehoben, sehen wir den durchschnittlichen Wert der variienden Intercepts, also den Grand Mean <span class="math inline">\(\gamma_{00}\)</span>. Dieser liegt bei <span class="math inline">\(3.8\)</span>.</p>
 <p>Aber: der Intercept darf ja variierenden! Und wie groß diese Varianz ist, sehen wir oben bei den <font color="red">Random Effects</font>, hier in rot hervorgehoben. Hier finden wir die Varianzkomponenten des Modells. Also: das was variieren darf, und was noch nicht systematisch im Modell erklärt wird. Daher auch die Bezeichnung <em>Random</em> Effects.</p>
@@ -622,8 +620,8 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <p><span class="math inline">\(\frac{1.05}{1.05 + 4.47}= 0.19\)</span></p>
 <p>Um das nicht von Hand erledigen zu müssen, gibt es im Paket <a href="https://cran.r-project.org/web/packages/performance/index.html"><code>performance</code></a> die Funktion <code>icc()</code>, die man auf das Nullmodell anwendet:</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(performance)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">icc</span>(mreg<span class="fl">.0</span>)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(performance)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">icc</span>(mreg<span class="fl">.0</span>)</span></code><button title="In die Zwischenablage kopieren" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># Intraclass Correlation Coefficient
 
@@ -674,6 +672,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <li>van Ham, Caroline; Thomassen, Jaques. J.; Aarts, Kees; Andeweg, Rudy B. (Hrsg.)(2017): Myth and reality of the legitimacy crisis: Explaining trends and cross-national differences in established democracies. Oxford University Press. <a href="https://doi.org/10.1093/oso/9780198793717.001.0001" class="uri">https://doi.org/10.1093/oso/9780198793717.001.0001</a></li>
 <li>Arzheimer, Kai (2002): Politikverdrossenheit. Bedeutung, Verwendung und empirische Relevanz eines politikwissenschaftlichen Begriffes. Wiesbaden: Westdeutscher Verlag. Volltext: <a href="https://www.kai-arzheimer.com/politikverdrossenheit.pdf" class="uri">https://www.kai-arzheimer.com/politikverdrossenheit.pdf</a></li>
 </ul>
+<p><img src="https://vg08.met.vgwort.de/na/7e8f143ff45147f8a2e3b3e90b30a4db" width="1" height="1" alt=""></p>
 <div class="cell" data-layout-align="center">
 
 </div>
@@ -832,7 +831,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
-    <div class="nav-footer-left">© 2022, Uwe Remer<img src="https://vg08.met.vgwort.de/na/7e8f143ff45147f8a2e3b3e90b30a4db" width="1" height="1" alt=""></div>   
+    <div class="nav-footer-left">© 2022, Uwe Remer</div>   
     <div class="nav-footer-right">
       <ul class="footer-items list-unstyled">
     <li class="nav-item">

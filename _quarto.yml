@@ -1,6 +1,9 @@
 project:
   type: website
   output-dir: docs
+  render:
+    - "*.qmd"
+    - "!Draft/"
 
 website:
   title: "Mehrebenenregression mit R"

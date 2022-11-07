@@ -363,6 +363,8 @@ Haben Sie alles mitgenommen? Fragen Sie sich selbst, ob Sie die folgenden Lernzi
 
 -   Nakagawa, S.; Schielzeth, H. (2013): A general and simple method for obtaining R2 from generalized linear mixed-effects models. Methods in Ecology and Evolution, 4(2), 133--142. DOI: <https://doi.org/10.1111/j.2041-210x.2012.00261.x>
 
+<img src="https://vg08.met.vgwort.de/na/6671fcafb6f8454eae70c465213a0d82" width="1" height="1" alt="">
+
 ```{r, echo=F, eval=F}
 library("knitr")
 knitr::purl("Mreg4.Rmd",
