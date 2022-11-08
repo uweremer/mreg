@@ -12,12 +12,12 @@ website:
   twitter-card:
     title: "Mehrebenenregression mit R"
     description: "6-teilige Videoreihe zum Einstieg in die Mehrebenenregression mit R"
-    image: ./Grafiken/varianten.png
+    image: https://uweremer.github.io/mreg//Grafiken/varianten.png
     creator: "@uweremerbollow"
   open-graph:
     title: "Mehrebenenregression mit R"
     description: "6-teilige Videoreihe zum Einstieg in die Mehrebenenregression mit R"
-    image: ./Grafiken/varianten.png
+    image: https://uweremer.github.io/mreg/Grafiken/varianten.png
     locale: de_DE
     site-name: "Mehrebenenregression mit R"
   navbar:
